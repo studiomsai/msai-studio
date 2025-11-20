@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import Image from 'next/image'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -20,6 +21,12 @@ export default function Dashboard() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [authMsg, setAuthMsg] = useState('')
 
+  // Helper function defined BEFORE usage to satisfy Linter
+  async function fetchCredits(userId) {
+    const { data } = await supabase.from('profiles').select('credits').eq('id', userId).single()
+    if(data) setCredits(data.credits)
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -33,11 +40,6 @@ export default function Dashboard() {
 
     return () => subscription.unsubscribe()
   }, [])
-
-  async function fetchCredits(userId) {
-    const { data } = await supabase.from('profiles').select('credits').eq('id', userId).single()
-    if(data) setCredits(data.credits)
-  }
 
   async function handleEmailAuth(e) {
     e.preventDefault()
@@ -80,9 +82,12 @@ export default function Dashboard() {
       } else {
         setStatus('Generation Request Sent!')
         setResult(data)
-        fetchCredits(session.user.id) 
+        if(session?.user?.id) fetchCredits(session.user.id) 
       }
-    } catch (e) { setStatus("System Error") }
+    } catch (error) { 
+      console.error(error)
+      setStatus("System Error") 
+    }
     setLoading(false)
   }
 
@@ -114,7 +119,8 @@ export default function Dashboard() {
           </div>
 
           <button onClick={handleGoogleLogin} className="w-full border border-slate-300 p-3 rounded flex items-center justify-center gap-3 font-medium hover:bg-slate-50">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5"/>
+            {/* Fixed Image Tag with Alt */}
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" className="w-5 h-5"/>
             Continue with Google
           </button>
 
