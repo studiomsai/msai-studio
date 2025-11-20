@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase Client (Frontend)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -15,7 +14,12 @@ export default function Dashboard() {
   const [status, setStatus] = useState('')
   const [result, setResult] = useState(null)
   
-  // Check if user is logged in when page loads
+  // Login State
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [authMsg, setAuthMsg] = useState('')
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -35,12 +39,26 @@ export default function Dashboard() {
     if(data) setCredits(data.credits)
   }
 
-  async function handleLogin() {
+  async function handleEmailAuth(e) {
+    e.preventDefault()
+    setLoading(true)
+    setAuthMsg('')
+    
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) setAuthMsg(error.message)
+      else setAuthMsg("Success! You are signed up. You can now log in.")
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) setAuthMsg(error.message)
+    }
+    setLoading(false)
+  }
+
+  async function handleGoogleLogin() {
     await supabase.auth.signInWithOAuth({ 
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`
-      }
+      options: { redirectTo: `${window.location.origin}/dashboard` }
     })
   }
 
@@ -48,62 +66,71 @@ export default function Dashboard() {
     setLoading(true)
     setStatus('Initializing secure run...')
     setResult(null)
-    
-    // For this demo, we use a default prompt. 
-    // In the final version, we will add input fields for each app.
-    const inputs = { prompt: "A futuristic fashion photoshoot, 8k resolution, photorealistic" }
+    const inputs = { prompt: "A futuristic fashion photoshoot, 8k resolution" }
 
     try {
       const res = await fetch('/api/run-fal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: session.user.id,
-          appId: appId,
-          inputs: inputs
-        })
+        body: JSON.stringify({ userId: session.user.id, appId, inputs })
       })
-
       const data = await res.json()
-
       if(data.error) {
-        alert("Error: " + data.error)
-        setStatus('Failed.')
+        setStatus('Failed: ' + data.error)
       } else {
         setStatus('Generation Request Sent!')
         setResult(data)
-        // Refresh credits to show the deduction
         fetchCredits(session.user.id) 
       }
-    } catch (e) {
-      alert("System Error")
-    }
+    } catch (e) { setStatus("System Error") }
     setLoading(false)
   }
 
-  // --- VIEW 1: NOT LOGGED IN ---
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 pt-20">
-        <div className="bg-white p-10 rounded-xl shadow-xl text-center max-w-md mx-4">
-          <h2 className="text-3xl font-bold mb-4">Welcome to MSAI</h2>
-          <p className="mb-8 text-slate-500">Creating an account is free and without obligation.</p>
-          <button 
-            onClick={handleLogin} 
-            className="w-full bg-white border border-slate-300 p-4 rounded-lg hover:bg-slate-50 flex items-center justify-center gap-3 font-medium transition hover:shadow-md"
-          >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6"/>
-            Sign up with Google
+        <div className="bg-white p-10 rounded-xl shadow-xl text-center max-w-md w-full mx-4">
+          <h2 className="text-3xl font-bold mb-2">Welcome to MSAI</h2>
+          <p className="mb-8 text-slate-500">{isSignUp ? 'Create an account' : 'Sign in to continue'}</p>
+          
+          {authMsg && <div className="bg-blue-50 text-blue-600 p-3 mb-4 rounded text-sm">{authMsg}</div>}
+
+          <form onSubmit={handleEmailAuth} className="space-y-4 text-left">
+            <div>
+              <label className="text-xs font-bold uppercase text-slate-500">Email</label>
+              <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="w-full border p-3 rounded mt-1" placeholder="you@example.com" />
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase text-slate-500">Password</label>
+              <input type="password" required value={password} onChange={e=>setPassword(e.target.value)} className="w-full border p-3 rounded mt-1" placeholder="••••••••" />
+            </div>
+            <button disabled={loading} className="w-full bg-slate-900 text-white p-3 rounded font-bold hover:bg-slate-800">
+              {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Login')}
+            </button>
+          </form>
+
+          <div className="my-6 border-t relative">
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-slate-400">OR</span>
+          </div>
+
+          <button onClick={handleGoogleLogin} className="w-full border border-slate-300 p-3 rounded flex items-center justify-center gap-3 font-medium hover:bg-slate-50">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5"/>
+            Continue with Google
           </button>
+
+          <p className="mt-6 text-sm text-slate-500">
+            {isSignUp ? 'Already have an account?' : 'No account yet?'} 
+            <button onClick={()=>setIsSignUp(!isSignUp)} className="text-blue-600 font-bold ml-2 underline">
+              {isSignUp ? 'Login' : 'Sign Up'}
+            </button>
+          </p>
         </div>
       </div>
     )
   }
 
-  // --- VIEW 2: LOGGED IN DASHBOARD ---
   return (
     <div className="max-w-6xl mx-auto pt-32 px-5 pb-20 min-h-screen">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-slate-200 pb-6">
         <div>
             <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
@@ -116,14 +143,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* App Grid */}
       <div className="grid md:grid-cols-3 gap-8 mb-12">
         {[ 
           {id: 'mood', name: 'Your Mood Today', cost: 20, icon: '😊', desc: 'Selfie to Animation'},
           {id: 'photo', name: 'Pro Photoshoot', cost: 15, icon: '📸', desc: 'AI Fashion Photography'},
           {id: 'story', name: 'Story to Video', cost: 32, icon: '🎬', desc: 'Script to Movie'}
         ].map(app => (
-          <div key={app.id} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg hover:shadow-2xl transition duration-300">
+          <div key={app.id} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg">
             <div className="text-4xl mb-4">{app.icon}</div>
             <h3 className="font-bold text-2xl mb-2">{app.name}</h3>
             <p className="text-slate-500 mb-6">{app.desc}</p>
@@ -141,20 +167,20 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Results Area */}
       {status && (
-        <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 animate-in fade-in">
+        <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
           <h3 className="font-bold text-lg mb-2">Status: <span className="text-blue-600">{status}</span></h3>
           {result && (
-            <div className="mt-4">
-                <p className="text-green-600 font-medium">Success! The job has been sent to the AI Engine.</p>
-                <div className="bg-slate-900 text-slate-200 p-4 rounded mt-2 text-xs overflow-auto font-mono">
-                    {JSON.stringify(result, null, 2)}
-                </div>
+            <div className="bg-slate-900 text-slate-200 p-4 rounded mt-2 text-xs overflow-auto font-mono">
+                {JSON.stringify(result, null, 2)}
             </div>
           )}
         </div>
       )}
+      
+      <div className="text-center mt-20">
+        <button onClick={() => supabase.auth.signOut()} className="text-slate-400 hover:text-slate-600 text-sm underline">Sign Out</button>
+      </div>
     </div>
   )
 }
