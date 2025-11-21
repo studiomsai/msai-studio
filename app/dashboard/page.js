@@ -1,8 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-// FIX: Import specific tools instead of "everything"
-import { storage, subscribe } from '@fal-ai/client'
+// FIX: Import the main 'fal' object
+import { fal } from '@fal-ai/client'
+
+// FIX: Configure the proxy correctly on the fal object
+fal.config({
+  proxyUrl: '/api/fal/proxy',
+})
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -53,7 +58,7 @@ export default function Dashboard() {
       }
       if (result.error) setAuthMsg(result.error.message)
       else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
-    } catch (error) {
+    } catch (err) {
       setAuthMsg("An unexpected error occurred.")
     }
     setLoading(false)
@@ -103,14 +108,14 @@ export default function Dashboard() {
     try {
       let imageUrl = null
       if (selectedFile) {
-          // FIX: Use direct named import 'storage'
-          imageUrl = await storage.upload(selectedFile)
+          // FIX: Access storage via fal object
+          imageUrl = await fal.storage.upload(selectedFile)
       }
 
       setStatus('Queued. Waiting for AI...')
 
-      // FIX: Use direct named import 'subscribe'
-      const result = await subscribe('workflows/Mc-Mark/your-mood-today-video', {
+      // FIX: Access subscribe via fal object
+      const result = await fal.subscribe('workflows/Mc-Mark/your-mood-today-video', {
         input: {
           prompt: "make me smile",
           upload_image: imageUrl
