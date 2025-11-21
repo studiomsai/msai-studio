@@ -21,7 +21,7 @@ export default function Dashboard() {
   // Results
   const [finalImage, setFinalImage] = useState(null)
   const [finalVideo, setFinalVideo] = useState(null)
-  const [rawDebug, setRawDebug] = useState(null) // To see what FAL sends if it fails
+  const [rawDebug, setRawDebug] = useState(null)
   
   const [selectedFile, setSelectedFile] = useState(null)
   const [email, setEmail] = useState('')
@@ -90,16 +90,14 @@ export default function Dashboard() {
   }
 
   // --- UNIVERSAL MEDIA FINDER ---
-  // Scans any object/string for urls ending in media extensions
   const extractMedia = (obj) => {
     const json = JSON.stringify(obj)
     const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
     const matches = json.match(urlRegex) || []
     
     matches.forEach(url => {
-        const clean = url.replace(/\\/g, '') // Remove escape slashes
-        // Ignore FAL internal icons/assets if any
-        if (clean.includes('avatar') || clean.includes('icon')) return
+        const clean = url.replace(/\\/g, '')
+        if (clean.includes('avatar') || clean.includes('icon') || clean.includes('profile')) return
 
         if (clean.match(/\.(mp4|webm)/i)) {
             setFinalVideo(clean)
@@ -133,9 +131,10 @@ export default function Dashboard() {
 
       setStatus('Streaming workflow...')
 
-      const stream = await fal.stream("workflows/Mc-Mark/your-mood-today-video", {
+      // UPDATED: Use V2 Workflow ID and exact input key
+      const stream = await fal.stream("workflows/Mc-Mark/your-mood-today-v2", {
         input: {
-          upload_image: imageUrl
+          upload_your_portrait: imageUrl
         }
       });
 
@@ -144,24 +143,28 @@ export default function Dashboard() {
             const lastLog = event.logs[event.logs.length - 1].message
             setStatus(`AI: ${lastLog}`)
         }
-        // Scan every event for media
         extractMedia(event)
       }
 
       const result = await stream.done()
-      
-      // Scan the final result for media
       extractMedia(result)
       
-      // Save raw result for debugging if nothing found
-      setRawDebug(result)
+      // Check if we found anything
+      if (!finalImage && !finalVideo) {
+          // Double check raw result string for hidden urls
+          const directCheck = JSON.stringify(result)
+          if (!directCheck.includes('.mp4') && !directCheck.includes('.png')) {
+             setRawDebug(result)
+          }
+      }
 
       setStatus('Done!')
       
     } catch (error) {
       console.error(error)
       setStatus(`Error: ${error.message}`)
-      refundCredits(cost)
+      // Only refund if we didn't get a result
+      if (!finalImage && !finalVideo) refundCredits(cost)
     }
     
     setLoading(false)
@@ -261,10 +264,10 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Debugging: If nothing found, show EXACTLY what FAL returned */}
+            {/* Debugging */}
             {!finalImage && !finalVideo && rawDebug && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
-                    <p className="font-bold text-sm">Debug Data (Copy this if it fails):</p>
+                    <p className="font-bold text-sm">Debug Data (Copy this if empty):</p>
                     <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
                         {JSON.stringify(rawDebug, null, 2)}
                     </pre>
