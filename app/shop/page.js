@@ -40,7 +40,7 @@ export default function Shop() {
           <div className="text-5xl font-bold mb-2">100</div>
           <div className="text-slate-400 mb-6">Credits</div>
           <div className="text-2xl font-bold mb-8">$9.00</div>
-          <a href={getLink("https://buy.stripe.com/cNi6oJ2sB1Fp5ITfzggYU02")} className="block w-full bg-slate-900 text-white py-3 rounded-full hover:bg-blue-600 transition">Buy Now</a>
+          <a href={getLink("https://buy.stripe.com/test_fZu7sNaZ74RB0oz86OgYU00")} className="block w-full bg-slate-900 text-white py-3 rounded-full hover:bg-blue-600 transition">Buy Now</a>
         </div>
 
         {/* Medium Pack */}
