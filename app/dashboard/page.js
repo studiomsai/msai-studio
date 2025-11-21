@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { fal } from '@fal-ai/client'
 
-// Configure the proxy
 fal.config({
   proxyUrl: '/api/fal/proxy',
 })
@@ -19,9 +18,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
   
-  // We store the final result here
+  // Results
   const [finalImage, setFinalImage] = useState(null)
   const [finalVideo, setFinalVideo] = useState(null)
+  const [rawDebug, setRawDebug] = useState(null) // To see what FAL sends if it fails
   
   const [selectedFile, setSelectedFile] = useState(null)
   const [email, setEmail] = useState('')
@@ -89,7 +89,26 @@ export default function Dashboard() {
     setStatus('Run failed. Credits refunded.')
   }
 
-  // --- THE FAL STREAMING LOGIC ---
+  // --- UNIVERSAL MEDIA FINDER ---
+  // Scans any object/string for urls ending in media extensions
+  const extractMedia = (obj) => {
+    const json = JSON.stringify(obj)
+    const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
+    const matches = json.match(urlRegex) || []
+    
+    matches.forEach(url => {
+        const clean = url.replace(/\\/g, '') // Remove escape slashes
+        // Ignore FAL internal icons/assets if any
+        if (clean.includes('avatar') || clean.includes('icon')) return
+
+        if (clean.match(/\.(mp4|webm)/i)) {
+            setFinalVideo(clean)
+        } else {
+            setFinalImage(clean)
+        }
+    })
+  }
+
   async function handleRunApp(appId) {
     if (!selectedFile && appId === 'mood') {
         alert("Please select an image first!")
@@ -104,48 +123,38 @@ export default function Dashboard() {
     setStatus('Uploading Image...')
     setFinalImage(null)
     setFinalVideo(null)
+    setRawDebug(null)
 
     try {
       let imageUrl = null
       if (selectedFile) {
-          // Use FAL storage to upload
           imageUrl = await fal.storage.upload(selectedFile)
       }
 
       setStatus('Streaming workflow...')
 
-      // USE EXACT SNIPPET METHOD
       const stream = await fal.stream("workflows/Mc-Mark/your-mood-today-video", {
         input: {
-          upload_image: imageUrl // Just the image, as per your snippet
+          upload_image: imageUrl
         }
       });
 
-      // Listen to every event
       for await (const event of stream) {
-        // Update status logs if available
         if (event.logs && event.logs.length > 0) {
             const lastLog = event.logs[event.logs.length - 1].message
             setStatus(`AI: ${lastLog}`)
         }
-
-        // CHECK FOR IMAGES
-        if (event.images && event.images.length > 0) {
-            setFinalImage(event.images[0].url)
-        }
-        
-        // CHECK FOR VIDEO
-        if (event.video) {
-            setFinalVideo(event.video.url)
-        }
+        // Scan every event for media
+        extractMedia(event)
       }
 
-      // Final result check
       const result = await stream.done()
       
-      // Double check result if we missed it in the stream
-      if (result.images && result.images.length > 0) setFinalImage(result.images[0].url)
-      if (result.video) setFinalVideo(result.video.url)
+      // Scan the final result for media
+      extractMedia(result)
+      
+      // Save raw result for debugging if nothing found
+      setRawDebug(result)
 
       setStatus('Done!')
       
@@ -228,7 +237,7 @@ export default function Dashboard() {
       </div>
 
       {/* RESULT AREA */}
-      {(status || finalImage || finalVideo) && (
+      {(status || finalImage || finalVideo || rawDebug) && (
         <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-12">
           <h3 className="font-bold text-lg mb-2">
             Status: <span className={loading ? "text-blue-600 animate-pulse" : "text-green-600"}>{status}</span>
@@ -249,6 +258,16 @@ export default function Dashboard() {
                     <h4 className="font-bold mb-2 text-slate-700">Your Mood Animation</h4>
                     <video controls src={finalVideo} className="w-full rounded-lg shadow-md"></video>
                     <a href={finalVideo} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
+                </div>
+            )}
+
+            {/* Debugging: If nothing found, show EXACTLY what FAL returned */}
+            {!finalImage && !finalVideo && rawDebug && (
+                <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
+                    <p className="font-bold text-sm">Debug Data (Copy this if it fails):</p>
+                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
+                        {JSON.stringify(rawDebug, null, 2)}
+                    </pre>
                 </div>
             )}
           </div>
