@@ -17,8 +17,22 @@ export async function GET(request) {
       }
     })
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    // 1. Get Raw Text first (Prevents the JSON crash)
+    const rawText = await response.text()
+
+    // 2. Try to parse it as JSON
+    try {
+        const data = JSON.parse(rawText)
+        return NextResponse.json(data)
+    } catch (jsonError) {
+        // 3. If not JSON, return the raw text so we can see what happened
+        console.log("Non-JSON response from FAL:", rawText)
+        return NextResponse.json({ 
+            status: 'UNKNOWN', 
+            raw_content: rawText,
+            debug_note: "FAL returned non-JSON data" 
+        })
+    }
 
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
