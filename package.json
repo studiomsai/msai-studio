@@ -8,12 +8,13 @@
     "start": "next start",
     "lint": "eslint"
   },
-"dependencies": {
+  "dependencies": {
+    "@fal-ai/client": "^1.0.4",
+    "@fal-ai/server-proxy": "^1.1.1",
+    "@supabase/supabase-js": "^2.46.1",
     "next": "15.0.3",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
-    "@supabase/supabase-js": "^2.46.1",
-    "@fal-ai/client": "^1.0.4",
     "stripe": "^17.3.1"
   },
   "devDependencies": {
