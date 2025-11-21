@@ -1,13 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-// FIX: Import the main 'fal' object
 import { fal } from '@fal-ai/client'
 
-// FIX: Configure the proxy correctly on the fal object
 fal.config({
   proxyUrl: '/api/fal/proxy',
 })
+
+export const dynamic = 'force-dynamic'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
   const [mediaResult, setMediaResult] = useState(null)
+  const [runLogs, setRunLogs] = useState([]) // NEW: Store logs to find hidden URLs
   
   const [selectedFile, setSelectedFile] = useState(null)
   
@@ -58,7 +59,7 @@ export default function Dashboard() {
       }
       if (result.error) setAuthMsg(result.error.message)
       else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
-    } catch (err) {
+    } catch (error) {
       setAuthMsg("An unexpected error occurred.")
     }
     setLoading(false)
@@ -104,17 +105,16 @@ export default function Dashboard() {
     setLoading(true)
     setStatus('Uploading Image...')
     setMediaResult(null)
+    setRunLogs([]) // Clear previous logs
 
     try {
       let imageUrl = null
       if (selectedFile) {
-          // FIX: Access storage via fal object
           imageUrl = await fal.storage.upload(selectedFile)
       }
 
       setStatus('Queued. Waiting for AI...')
 
-      // FIX: Access subscribe via fal object
       const result = await fal.subscribe('workflows/Mc-Mark/your-mood-today-video', {
         input: {
           prompt: "make me smile",
@@ -124,9 +124,12 @@ export default function Dashboard() {
         onQueueUpdate: (update) => {
           if (update.status === 'IN_PROGRESS') {
              if (update.logs && update.logs.length > 0) {
-                 setStatus(`AI Working...`)
+                 // Save logs to state
+                 setRunLogs(prev => [...prev, ...update.logs])
+                 const lastLog = update.logs[update.logs.length - 1]
+                 setStatus(`AI: ${lastLog.message}`)
              } else {
-                 setStatus('AI is generating video (approx 1-2 mins)...')
+                 setStatus('AI is generating video...')
              }
           }
         }
@@ -145,36 +148,34 @@ export default function Dashboard() {
   }
 
   const renderResults = (data) => {
-    if (!data) return null;
+    // Combine the result object AND the logs into one giant string to search
+    const combinedSource = JSON.stringify(data) + JSON.stringify(runLogs)
     
     let images = []
     let videoUrl = null
 
-    if (data.images) images = data.images
-    if (data.video) videoUrl = data.video.url || data.video
-    
-    if (!videoUrl && data.outputs) {
-        Object.values(data.outputs).forEach(val => {
-            if (val.images) images = val.images
-            if (val.video) videoUrl = val.video.url
-        })
+    // 1. Direct object checks (The nice way)
+    if (data && data.images) images = data.images
+    if (data && data.video) videoUrl = data.video.url || data.video
+
+    // 2. Regex Search (The aggressive way - scans logs too)
+    if (!videoUrl) {
+        // Look for any URL ending in mp4
+        const videoMatch = combinedSource.match(/https?:\/\/[^"'\s]+\.mp4/i)
+        if (videoMatch) videoUrl = videoMatch[0]
     }
     
-    if (!videoUrl && data.output) {
-        if (data.output.images) images = data.output.images
-        if (data.output.video) videoUrl = data.output.video.url
+    if (images.length === 0) {
+        // Look for any URL ending in png/jpg
+        const imageRegex = /https?:\/\/[^"'\s]+\.(?:png|jpg|jpeg|webp)/gi
+        const matches = combinedSource.match(imageRegex) || []
+        // Remove duplicates
+        images = [...new Set(matches)]
+        // Filter out the uploaded image if possible (usually input images have different domain or path)
     }
 
-    if(!videoUrl && !images.length) {
-        const str = JSON.stringify(data)
-        const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
-        const matches = str.match(urlRegex) || []
-        matches.forEach(url => {
-            const clean = url.replace(/\\/g, '')
-            if(clean.includes('.mp4')) videoUrl = clean
-            else images.push({url: clean})
-        })
-    }
+    // If we found nothing, show the debug info
+    if (!data && runLogs.length === 0) return null
 
     return (
         <div className="grid gap-6 mt-4">
@@ -203,9 +204,14 @@ export default function Dashboard() {
 
             {images.length === 0 && !videoUrl && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700">
-                    <p className="font-bold">Completed.</p>
-                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-96">
+                    <p className="font-bold">Parsing...</p>
+                    <p className="text-xs mb-2">We could not extract the media automatically. Please check the raw data below for links starting with 'https':</p>
+                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64">
                         {JSON.stringify(data, null, 2)}
+                    </pre>
+                    <p className="text-xs mt-4 font-bold">Logs:</p>
+                    <pre className="bg-slate-800 text-slate-300 p-4 rounded text-xs overflow-auto max-h-64">
+                        {JSON.stringify(runLogs, null, 2)}
                     </pre>
                 </div>
             )}
