@@ -64,22 +64,30 @@ export default function Dashboard() {
     })
   }
 
-  const fileToBase64 = (file) => {
+  const compressImage = (file) => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = () => resolve(reader.result)
-      reader.onerror = error => reject(error)
+      const img = new Image()
+      img.src = URL.createObjectURL(file)
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX_WIDTH = 1536
+        const scale = MAX_WIDTH / img.width
+        canvas.width = scale < 1 ? MAX_WIDTH : img.width
+        canvas.height = scale < 1 ? img.height * scale : img.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        const base64 = canvas.toDataURL('image/jpeg', 0.8)
+        resolve(base64)
+      }
+      img.onerror = (e) => reject(e)
     })
   }
 
-  // --- UPDATED POLLING LOGIC ---
   async function pollStatus(statusUrl) {
     setStatus('AI is generating... (This takes about 30s)')
     
     const interval = setInterval(async () => {
       try {
-        // 1. Check the Status
         const res = await fetch(`/api/poll?url=${encodeURIComponent(statusUrl)}`)
         const data = await res.json()
 
@@ -87,14 +95,12 @@ export default function Dashboard() {
           clearInterval(interval)
           setStatus('Finalizing...')
           
-          // 2. FETCH THE ACTUAL RESULT DATA
-          // The status object points to a response_url where the images live
           if (data.response_url) {
              const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
              const finalData = await finalRes.json()
-             setMediaResult(finalData) // Store the REAL data
+             setMediaResult(finalData) 
           } else {
-             setMediaResult(data) // Fallback
+             setMediaResult(data) 
           }
 
           setLoading(false)
@@ -128,10 +134,12 @@ export default function Dashboard() {
           setLoading(false)
           return
         }
-        setStatus('Uploading image...')
-        const base64Image = await fileToBase64(selectedFile)
+        setStatus('Compressing image...')
+        const base64Image = await compressImage(selectedFile)
         
+        // ADDED PROMPT BACK HERE TO FIX 422 ERROR
         inputs = {
+          prompt: "make me smile", 
           upload_image: base64Image
         }
       } else {
@@ -146,6 +154,10 @@ export default function Dashboard() {
         body: JSON.stringify({ userId: session.user.id, appId, inputs })
       })
 
+      if (res.status === 413) {
+        throw new Error("Image is too large even after compression.")
+      }
+
       const data = await res.json()
 
       if (data.error) {
@@ -158,22 +170,18 @@ export default function Dashboard() {
       }
 
     } catch (e) {
-      setStatus("System Error")
-      console.error(e)
+      setStatus("Error: " + e.message)
       setLoading(false)
     }
   }
 
-  // --- AGGRESSIVE PARSER ---
   const renderResults = (data) => {
     if (!data) return null;
     
-    const images = []
-    let video = null
+    let images = []
+    let videoUrl = null
 
     const jsonString = JSON.stringify(data)
-    
-    // Find all media URLs in the final response
     const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
     
     const matches = jsonString.match(urlRegex) || []
@@ -182,7 +190,7 @@ export default function Dashboard() {
     uniqueUrls.forEach(url => {
         const cleanUrl = url.replace(/\\/g, '') 
         if (cleanUrl.match(/\.(mp4|webm)/i)) {
-            if (!video) video = cleanUrl
+            if (!videoUrl) videoUrl = cleanUrl
         } else {
             images.push(cleanUrl)
         }
@@ -205,15 +213,15 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {video && (
+            {videoUrl && (
                 <div>
                     <h4 className="font-bold mb-2 text-slate-700">Video Result</h4>
-                    <video controls src={video} className="w-full rounded-lg shadow-md"></video>
-                    <a href={video} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
+                    <video controls src={videoUrl} className="w-full rounded-lg shadow-md"></video>
+                    <a href={videoUrl} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
                 </div>
             )}
 
-            {images.length === 0 && !video && (
+            {images.length === 0 && !videoUrl && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700">
                     <p className="font-bold">Could not auto-detect media.</p>
                     <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-96">
