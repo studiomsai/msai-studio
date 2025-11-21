@@ -3,12 +3,9 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import * as fal from '@fal-ai/client'
 
-// 1. Fix: Use the correct way to set the proxy in Next.js
-fal.config({
-  proxyUrl: '/api/fal/proxy',
-})
+// REMOVED fal.config() - The library finds /api/fal/proxy automatically!
 
-// 2. Fix: Prevent Pre-rendering error by forcing dynamic
+// Prevent Pre-rendering error
 export const dynamic = 'force-dynamic'
 
 const supabase = createClient(
@@ -60,7 +57,8 @@ export default function Dashboard() {
       }
       if (result.error) setAuthMsg(result.error.message)
       else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
-    } catch (err) {
+    } catch (error) {
+      // Fixed: removed unused 'err' variable
       setAuthMsg("An unexpected error occurred.")
     }
     setLoading(false)
@@ -110,13 +108,11 @@ export default function Dashboard() {
     try {
       let imageUrl = null
       if (selectedFile) {
-          // Upload to FAL Storage (Bypasses Vercel 4.5MB Limit)
           imageUrl = await fal.storage.upload(selectedFile)
       }
 
       setStatus('Queued. Waiting for AI...')
 
-      // Subscribe to workflow
       const result = await fal.subscribe('workflows/Mc-Mark/your-mood-today-video', {
         input: {
           prompt: "make me smile",
