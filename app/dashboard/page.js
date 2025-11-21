@@ -87,12 +87,12 @@ export default function Dashboard() {
 
   // --- UPDATED POLLING URL ---
   async function pollStatus(statusUrl) {
-    setStatus('AI is generating... (This takes about 30s)')
+    setStatus('AI is generating... (This takes about 5 minutes)')
     
     const interval = setInterval(async () => {
       try {
         // Pointing to the NEW folder name: status-check
-        const res = await fetch(`/api/status-check?url=${encodeURIComponent(statusUrl)}`)
+        const res = await fetch(`/api/poll?url=${encodeURIComponent(statusUrl)}`)
         const data = await res.json()
 
         if (data.status === 'COMPLETED') {
