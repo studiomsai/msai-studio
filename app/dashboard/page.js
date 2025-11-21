@@ -3,10 +3,13 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import * as fal from '@fal-ai/client'
 
-// Configure FAL to use our new proxy
+// 1. Fix: Use the correct way to set the proxy in Next.js
 fal.config({
   proxyUrl: '/api/fal/proxy',
 })
+
+// 2. Fix: Prevent Pre-rendering error by forcing dynamic
+export const dynamic = 'force-dynamic'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -70,24 +73,18 @@ export default function Dashboard() {
     })
   }
 
-  // --- DEDUCT CREDITS BEFORE RUNNING ---
   async function deductCredits(cost) {
     if (!session?.user?.id) return false
-    
-    // Check Balance
     const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
     if (!profile || profile.credits < cost) {
         setStatus('Not enough credits.')
         return false
     }
-
-    // Deduct
     await supabase.from('profiles').update({ credits: profile.credits - cost }).eq('id', session.user.id)
     fetchCredits(session.user.id)
     return true
   }
 
-  // --- REFUND ON ERROR ---
   async function refundCredits(cost) {
     if (!session?.user?.id) return
     const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
@@ -96,14 +93,12 @@ export default function Dashboard() {
     setStatus('Run failed. Credits refunded.')
   }
 
-  // --- THE OFFICIAL FAL CLIENT RUNNER ---
   async function handleRunApp(appId) {
     if (!selectedFile && appId === 'mood') {
         alert("Please select an image first!")
         return
     }
 
-    // 1. Handle Payment
     const cost = 20
     const paid = await deductCredits(cost)
     if (!paid) return
@@ -113,26 +108,24 @@ export default function Dashboard() {
     setMediaResult(null)
 
     try {
-      // 2. Upload to FAL Storage (Bypasses Vercel 4.5MB Limit!)
       let imageUrl = null
       if (selectedFile) {
+          // Upload to FAL Storage (Bypasses Vercel 4.5MB Limit)
           imageUrl = await fal.storage.upload(selectedFile)
       }
 
       setStatus('Queued. Waiting for AI...')
 
-      // 3. Subscribe to the Workflow
-      // This handles polling, logs, and results automatically
+      // Subscribe to workflow
       const result = await fal.subscribe('workflows/Mc-Mark/your-mood-today-video', {
         input: {
-          prompt: "make me smile", // Required by your workflow
+          prompt: "make me smile",
           upload_image: imageUrl
         },
         logs: true,
         onQueueUpdate: (update) => {
           if (update.status === 'IN_PROGRESS') {
              if (update.logs && update.logs.length > 0) {
-                 // Show the last log message to keep user entertained
                  setStatus(`AI Working...`)
              } else {
                  setStatus('AI is generating video (approx 1-2 mins)...')
@@ -153,24 +146,27 @@ export default function Dashboard() {
     setLoading(false)
   }
 
-  // --- RESULT RENDERER ---
   const renderResults = (data) => {
     if (!data) return null;
     
     let images = []
     let videoUrl = null
 
-    // Check typical FAL locations
     if (data.images) images = data.images
     if (data.video) videoUrl = data.video.url || data.video
     
-    // Check your specific workflow structure
+    if (!videoUrl && data.outputs) {
+        Object.values(data.outputs).forEach(val => {
+            if (val.images) images = val.images
+            if (val.video) videoUrl = val.video.url
+        })
+    }
+    
     if (!videoUrl && data.output) {
         if (data.output.images) images = data.output.images
         if (data.output.video) videoUrl = data.output.video.url
     }
 
-    // Deep scan for any missed URLs
     if(!videoUrl && !images.length) {
         const str = JSON.stringify(data)
         const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
