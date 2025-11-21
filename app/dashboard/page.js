@@ -14,10 +14,8 @@ export default function Dashboard() {
   const [status, setStatus] = useState('')
   const [mediaResult, setMediaResult] = useState(null)
   
-  // App Inputs
   const [selectedFile, setSelectedFile] = useState(null)
   
-  // Login Inputs
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -40,34 +38,24 @@ export default function Dashboard() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // --- FIXED LOGIN LOGIC ---
   async function handleEmailAuth(e) {
     e.preventDefault()
     setLoading(true)
     setAuthMsg('')
-    
     try {
       let result
-      // We call the functions directly instead of assigning them to variables
       if (isSignUp) {
         result = await supabase.auth.signUp({ email, password })
       } else {
         result = await supabase.auth.signInWithPassword({ email, password })
       }
-
-      if (result.error) {
-        setAuthMsg(result.error.message)
-      } else if (isSignUp) {
-        setAuthMsg("Success! Account created. You can log in.")
-      }
+      if (result.error) setAuthMsg(result.error.message)
+      else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
     } catch (err) {
       setAuthMsg("An unexpected error occurred.")
-      console.error(err)
     }
-    
     setLoading(false)
   }
-  // -------------------------
 
   async function handleGoogleLogin() {
     await supabase.auth.signInWithOAuth({ 
@@ -85,13 +73,11 @@ export default function Dashboard() {
     })
   }
 
-  // --- UPDATED POLLING URL ---
   async function pollStatus(statusUrl) {
-    setStatus('AI is generating... (This takes about 5 minutes)')
+    setStatus('AI is generating... (This takes about 30s)')
     
     const interval = setInterval(async () => {
       try {
-        // Pointing to the NEW folder name: status-check
         const res = await fetch(`/api/poll?url=${encodeURIComponent(statusUrl)}`)
         const data = await res.json()
 
@@ -99,6 +85,7 @@ export default function Dashboard() {
           clearInterval(interval)
           setLoading(false)
           setStatus('Done!')
+          // Pass the result to the renderer
           setMediaResult(data) 
           if(session?.user?.id) fetchCredits(session.user.id)
 
@@ -132,8 +119,8 @@ export default function Dashboard() {
         setStatus('Uploading image...')
         const base64Image = await fileToBase64(selectedFile)
         
+        // Matches your Python Snippet exactly
         inputs = {
-          prompt: "make me smile",
           upload_image: base64Image
         }
       } else {
@@ -166,32 +153,36 @@ export default function Dashboard() {
     }
   }
 
+  // --- SPECIFIC PARSER FOR YOUR WORKFLOW ---
   const renderResults = (data) => {
     if (!data) return null;
     
     let images = []
-    let video = null
+    let videoUrl = null
 
-    if (data.outputs && data.outputs.length > 0) {
-        data.outputs.forEach(out => {
-            if (out.images) images.push(...out.images)
-            if (out.video) video = out.video
-        })
+    // 1. Check for the specific "output" object from your logs
+    if (data.output) {
+        if (data.output.images) images = data.output.images
+        if (data.output.video) videoUrl = data.output.video.url
+    } 
+    // 2. Fallback checks (in case it's not nested)
+    else {
+        if (data.images) images = data.images
+        if (data.video) videoUrl = data.video.url || data.video
     }
-    
-    if (images.length === 0 && !video) {
-        const jsonString = JSON.stringify(data)
-        const urlRegex = /"url":"(https:\/\/[^"]+)"/g
-        let match
-        while ((match = urlRegex.exec(jsonString)) !== null) {
-            const url = match[1]
-            if (url.match(/\.(jpeg|jpg|gif|png)$/i)) images.push({ url })
-            if (url.match(/\.(mp4|webm)$/i)) video = { url }
+
+    // 3. Deep Log Scan (If the result is buried in the logs array)
+    if (!videoUrl && data.logs) {
+        const outputLog = data.logs.find(l => l.type === 'output' || (l.output && l.output.video))
+        if (outputLog && outputLog.output) {
+             if (outputLog.output.images) images = outputLog.output.images
+             if (outputLog.output.video) videoUrl = outputLog.output.video.url
         }
     }
 
     return (
         <div className="grid gap-6 mt-4">
+            {/* Display Images */}
             {images.length > 0 && (
                 <div>
                     <h4 className="font-bold mb-2 text-slate-700">Your Mood Frame</h4>
@@ -207,17 +198,23 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {video && (
+            {/* Display Video */}
+            {videoUrl && (
                 <div>
                     <h4 className="font-bold mb-2 text-slate-700">Your Mood Animation</h4>
-                    <video controls src={video.url} className="w-full rounded-lg shadow-md"></video>
-                    <a href={video.url} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
+                    <video controls src={videoUrl} className="w-full rounded-lg shadow-md"></video>
+                    <a href={videoUrl} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
                 </div>
             )}
 
-            {images.length === 0 && !video && (
+            {/* Fallback Debugger if we still missed it */}
+            {images.length === 0 && !videoUrl && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700">
-                    Workflow Completed. <a href={data.response_url} target="_blank" className="underline ml-2">View Raw Data</a>
+                    <p className="font-bold">Parsing...</p>
+                    <p className="text-xs">If media does not appear, check raw data:</p>
+                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
+                        {JSON.stringify(data, null, 2)}
+                    </pre>
                 </div>
             )}
         </div>
@@ -288,7 +285,7 @@ export default function Dashboard() {
                 disabled={loading || credits < 20}
                 className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition"
             >
-                {loading ? 'Processing...' : 'Run App'}
+                {loading ? 'Running...' : 'Run App'}
             </button>
         </div>
       </div>
