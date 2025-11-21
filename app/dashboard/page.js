@@ -83,36 +83,45 @@ export default function Dashboard() {
     })
   }
 
+  // --- ROBUST POLLING LOGIC ---
   async function pollStatus(statusUrl) {
     setStatus('AI is generating... (This takes about 30s)')
     
     const interval = setInterval(async () => {
       try {
+        // 1. Get the Status Update (Contains Logs)
         const res = await fetch(`/api/poll?url=${encodeURIComponent(statusUrl)}`)
-        const data = await res.json()
+        const statusData = await res.json()
 
-        if (data.status === 'COMPLETED') {
+        if (statusData.status === 'COMPLETED') {
           clearInterval(interval)
           setStatus('Finalizing...')
           
-          if (data.response_url) {
-             const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
-             const finalData = await finalRes.json()
-             setMediaResult(finalData) 
-          } else {
-             setMediaResult(data) 
+          let finalPayload = { ...statusData } // Start with status data (Logs)
+
+          // 2. Try to get the Result Data (Merge if successful)
+          if (statusData.response_url) {
+             try {
+                 const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(statusData.response_url)}`)
+                 const finalData = await finalRes.json()
+                 // Merge them so we don't lose the logs!
+                 finalPayload = { ...finalPayload, ...finalData }
+             } catch (err) {
+                 console.warn("Could not fetch response_url, using logs instead.")
+             }
           }
 
+          setMediaResult(finalPayload) 
           setLoading(false)
           setStatus('Done!')
           if(session?.user?.id) fetchCredits(session.user.id)
 
-        } else if (data.status === 'FAILED' || data.error) {
+        } else if (statusData.status === 'FAILED' || statusData.error) {
           clearInterval(interval)
           setLoading(false)
           setStatus('Generation Failed. Credits refunded.')
         } else {
-          setStatus(`AI Processing: ${data.status}...`)
+          setStatus(`AI Processing: ${statusData.status}...`)
         }
       } catch (e) {
         console.error("Polling error", e)
@@ -137,9 +146,8 @@ export default function Dashboard() {
         setStatus('Compressing image...')
         const base64Image = await compressImage(selectedFile)
         
-        // ADDED PROMPT BACK HERE TO FIX 422 ERROR
         inputs = {
-          prompt: "make me smile", 
+          prompt: "make me smile",
           upload_image: base64Image
         }
       } else {
@@ -154,10 +162,7 @@ export default function Dashboard() {
         body: JSON.stringify({ userId: session.user.id, appId, inputs })
       })
 
-      if (res.status === 413) {
-        throw new Error("Image is too large even after compression.")
-      }
-
+      if (res.status === 413) throw new Error("Image too large.")
       const data = await res.json()
 
       if (data.error) {
@@ -175,26 +180,40 @@ export default function Dashboard() {
     }
   }
 
+  // --- DEEP PARSER ---
   const renderResults = (data) => {
     if (!data) return null;
     
-    let images = []
+    const images = []
     let videoUrl = null
 
+    // Stringify the WHOLE object (Status + Logs + Result)
     const jsonString = JSON.stringify(data)
+    
+    // Regex to find media links
     const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
     
     const matches = jsonString.match(urlRegex) || []
     const uniqueUrls = [...new Set(matches)]
     
     uniqueUrls.forEach(url => {
-        const cleanUrl = url.replace(/\\/g, '') 
+        const cleanUrl = url.replace(/\\/g, '') // Remove escape slashes
+        // Filter out FAL internal system assets (optional, but keeps it clean)
+        if(!cleanUrl.includes('fal.media')) return; 
+
         if (cleanUrl.match(/\.(mp4|webm)/i)) {
-            if (!videoUrl) videoUrl = cleanUrl
+            // Grab the last video found (usually the final result)
+            videoUrl = cleanUrl
         } else {
             images.push(cleanUrl)
         }
     })
+
+    // Specific check for V3B/FAL media if regex missed standard extensions
+    if (!videoUrl) {
+        const outputMatch = jsonString.match(/"video":\s*{\s*"url":\s*"(https:\/\/[^"]+)"/);
+        if(outputMatch) videoUrl = outputMatch[1];
+    }
 
     return (
         <div className="grid gap-6 mt-4">
