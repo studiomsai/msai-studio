@@ -73,20 +73,32 @@ export default function Dashboard() {
     })
   }
 
+  // --- UPDATED POLLING LOGIC ---
   async function pollStatus(statusUrl) {
     setStatus('AI is generating... (This takes about 30s)')
     
     const interval = setInterval(async () => {
       try {
+        // 1. Check the Status
         const res = await fetch(`/api/poll?url=${encodeURIComponent(statusUrl)}`)
         const data = await res.json()
 
         if (data.status === 'COMPLETED') {
           clearInterval(interval)
+          setStatus('Finalizing...')
+          
+          // 2. FETCH THE ACTUAL RESULT DATA
+          // The status object points to a response_url where the images live
+          if (data.response_url) {
+             const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
+             const finalData = await finalRes.json()
+             setMediaResult(finalData) // Store the REAL data
+          } else {
+             setMediaResult(data) // Fallback
+          }
+
           setLoading(false)
           setStatus('Done!')
-          // Pass the result to the renderer
-          setMediaResult(data) 
           if(session?.user?.id) fetchCredits(session.user.id)
 
         } else if (data.status === 'FAILED' || data.error) {
@@ -119,7 +131,6 @@ export default function Dashboard() {
         setStatus('Uploading image...')
         const base64Image = await fileToBase64(selectedFile)
         
-        // Matches your Python Snippet exactly
         inputs = {
           upload_image: base64Image
         }
@@ -153,66 +164,59 @@ export default function Dashboard() {
     }
   }
 
-  // --- SPECIFIC PARSER FOR YOUR WORKFLOW ---
+  // --- AGGRESSIVE PARSER ---
   const renderResults = (data) => {
     if (!data) return null;
     
-    let images = []
-    let videoUrl = null
+    const images = []
+    let video = null
 
-    // 1. Check for the specific "output" object from your logs
-    if (data.output) {
-        if (data.output.images) images = data.output.images
-        if (data.output.video) videoUrl = data.output.video.url
-    } 
-    // 2. Fallback checks (in case it's not nested)
-    else {
-        if (data.images) images = data.images
-        if (data.video) videoUrl = data.video.url || data.video
-    }
-
-    // 3. Deep Log Scan (If the result is buried in the logs array)
-    if (!videoUrl && data.logs) {
-        const outputLog = data.logs.find(l => l.type === 'output' || (l.output && l.output.video))
-        if (outputLog && outputLog.output) {
-             if (outputLog.output.images) images = outputLog.output.images
-             if (outputLog.output.video) videoUrl = outputLog.output.video.url
+    const jsonString = JSON.stringify(data)
+    
+    // Find all media URLs in the final response
+    const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
+    
+    const matches = jsonString.match(urlRegex) || []
+    const uniqueUrls = [...new Set(matches)]
+    
+    uniqueUrls.forEach(url => {
+        const cleanUrl = url.replace(/\\/g, '') 
+        if (cleanUrl.match(/\.(mp4|webm)/i)) {
+            if (!video) video = cleanUrl
+        } else {
+            images.push(cleanUrl)
         }
-    }
+    })
 
     return (
         <div className="grid gap-6 mt-4">
-            {/* Display Images */}
             {images.length > 0 && (
                 <div>
-                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Frame</h4>
+                    <h4 className="font-bold mb-2 text-slate-700">Images Found</h4>
                     <div className="grid grid-cols-2 gap-4">
-                        {images.map((img, i) => (
+                        {images.map((url, i) => (
                             <div key={i}>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={img.url} className="w-full rounded-lg shadow-md" alt="AI Result" />
-                                <a href={img.url} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download Image</a>
+                                <img src={url} className="w-full rounded-lg shadow-md" alt="AI Result" />
+                                <a href={url} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download Image</a>
                             </div>
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* Display Video */}
-            {videoUrl && (
+            {video && (
                 <div>
-                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Animation</h4>
-                    <video controls src={videoUrl} className="w-full rounded-lg shadow-md"></video>
-                    <a href={videoUrl} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
+                    <h4 className="font-bold mb-2 text-slate-700">Video Result</h4>
+                    <video controls src={video} className="w-full rounded-lg shadow-md"></video>
+                    <a href={video} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
                 </div>
             )}
 
-            {/* Fallback Debugger if we still missed it */}
-            {images.length === 0 && !videoUrl && (
+            {images.length === 0 && !video && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700">
-                    <p className="font-bold">Parsing...</p>
-                    <p className="text-xs">If media does not appear, check raw data:</p>
-                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
+                    <p className="font-bold">Could not auto-detect media.</p>
+                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-96">
                         {JSON.stringify(data, null, 2)}
                     </pre>
                 </div>
