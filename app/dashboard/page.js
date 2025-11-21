@@ -40,20 +40,34 @@ export default function Dashboard() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // --- FIXED LOGIN LOGIC ---
   async function handleEmailAuth(e) {
     e.preventDefault()
     setLoading(true)
     setAuthMsg('')
+    
     try {
-      const action = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword
-      const { error } = await action({ email, password })
-      if (error) setAuthMsg(error.message)
-      else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
-    } catch (err) { 
-      setAuthMsg("Error: " + err.message) 
+      let result
+      // We call the functions directly instead of assigning them to variables
+      if (isSignUp) {
+        result = await supabase.auth.signUp({ email, password })
+      } else {
+        result = await supabase.auth.signInWithPassword({ email, password })
+      }
+
+      if (result.error) {
+        setAuthMsg(result.error.message)
+      } else if (isSignUp) {
+        setAuthMsg("Success! Account created. You can log in.")
+      }
+    } catch (err) {
+      setAuthMsg("An unexpected error occurred.")
+      console.error(err)
     }
+    
     setLoading(false)
   }
+  // -------------------------
 
   async function handleGoogleLogin() {
     await supabase.auth.signInWithOAuth({ 
@@ -71,12 +85,14 @@ export default function Dashboard() {
     })
   }
 
+  // --- UPDATED POLLING URL ---
   async function pollStatus(statusUrl) {
     setStatus('AI is generating... (This takes about 30s)')
     
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/check-status?url=${encodeURIComponent(statusUrl)}`)
+        // Pointing to the NEW folder name: status-check
+        const res = await fetch(`/api/status-check?url=${encodeURIComponent(statusUrl)}`)
         const data = await res.json()
 
         if (data.status === 'COMPLETED') {
@@ -272,7 +288,7 @@ export default function Dashboard() {
                 disabled={loading || credits < 20}
                 className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition"
             >
-                {loading ? 'Running...' : 'Run App'}
+                {loading ? 'Processing...' : 'Run App'}
             </button>
         </div>
       </div>
