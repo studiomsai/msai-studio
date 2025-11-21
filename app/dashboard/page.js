@@ -40,16 +40,33 @@ export default function Dashboard() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // --- THE FIXED FUNCTION ---
   async function handleEmailAuth(e) {
     e.preventDefault()
     setLoading(true)
     setAuthMsg('')
-    const action = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword
-    const { error } = await action({ email, password })
-    if (error) setAuthMsg(error.message)
-    else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
+    
+    try {
+      let result;
+      if (isSignUp) {
+        result = await supabase.auth.signUp({ email, password })
+      } else {
+        result = await supabase.auth.signInWithPassword({ email, password })
+      }
+
+      if (result.error) {
+        setAuthMsg(result.error.message)
+      } else if (isSignUp) {
+        setAuthMsg("Success! Account created. You can log in.")
+      }
+    } catch (err) {
+      setAuthMsg("An unexpected error occurred.")
+      console.error(err)
+    }
+    
     setLoading(false)
   }
+  // --------------------------
 
   async function handleGoogleLogin() {
     await supabase.auth.signInWithOAuth({ 
@@ -58,7 +75,6 @@ export default function Dashboard() {
     })
   }
 
-  // Helper: Convert File to Base64 for FAL
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -189,7 +205,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Status / Result Area */}
       {status && (
         <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-12">
           <h3 className="font-bold text-lg mb-2">Status: <span className="text-blue-600">{status}</span></h3>
@@ -199,7 +214,6 @@ export default function Dashboard() {
                 <pre className="bg-slate-900 text-slate-200 p-4 rounded mt-2 text-xs overflow-auto max-h-64">
                     {JSON.stringify(result, null, 2)}
                 </pre>
-                {/* Fixed the quote error here by removing single quotes */}
                 <p className="text-sm mt-2 text-slate-500">Check the response_url above to see the result when ready.</p>
             </div>
           )}
