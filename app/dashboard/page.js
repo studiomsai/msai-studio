@@ -1,13 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { fal } from '@fal-ai/client'
 
-fal.config({
-  proxyUrl: '/api/fal/proxy',
-})
-
-export const dynamic = 'force-dynamic'
+// We are not using the library anymore to avoid "black box" issues
+// We use standard fetch to have full control.
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -20,7 +16,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
   const [mediaResult, setMediaResult] = useState(null)
-  const [runLogs, setRunLogs] = useState([])
   
   const [selectedFile, setSelectedFile] = useState(null)
   
@@ -60,7 +55,6 @@ export default function Dashboard() {
       if (result.error) setAuthMsg(result.error.message)
       else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
     } catch (error) {
-      console.error(error) // Used the variable to satisfy linter
       setAuthMsg("An unexpected error occurred.")
     }
     setLoading(false)
@@ -73,24 +67,78 @@ export default function Dashboard() {
     })
   }
 
-  async function deductCredits(cost) {
-    if (!session?.user?.id) return false
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
-    if (!profile || profile.credits < cost) {
-        setStatus('Not enough credits.')
-        return false
-    }
-    await supabase.from('profiles').update({ credits: profile.credits - cost }).eq('id', session.user.id)
-    fetchCredits(session.user.id)
-    return true
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.src = URL.createObjectURL(file)
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX_WIDTH = 1536
+        const scale = MAX_WIDTH / img.width
+        canvas.width = scale < 1 ? MAX_WIDTH : img.width
+        canvas.height = scale < 1 ? img.height * scale : img.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        const base64 = canvas.toDataURL('image/jpeg', 0.8)
+        resolve(base64)
+      }
+      img.onerror = (e) => reject(e)
+    })
   }
 
-  async function refundCredits(cost) {
-    if (!session?.user?.id) return
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
-    await supabase.from('profiles').update({ credits: profile.credits + cost }).eq('id', session.user.id)
-    fetchCredits(session.user.id)
-    setStatus('Run failed. Credits refunded.')
+  // --- MANUAL POLLING WITH LOG EXTRACTION ---
+  async function pollStatus(statusUrl) {
+    setStatus('AI is generating... (This takes about 30s)')
+    
+    // Add ?logs=1 to ensure we get the logs where the video is hidden
+    const pollUrl = statusUrl.includes('?') ? `${statusUrl}&logs=1` : `${statusUrl}?logs=1`
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/poll?url=${encodeURIComponent(pollUrl)}`)
+        const data = await res.json()
+
+        // Look for the specific output log you shared
+        // Pattern: { "type": "output", "output": { "images": [...], "video": {...} } }
+        if (data.logs && data.logs.length > 0) {
+            // Find the special output log
+            const outputLog = data.logs.find(l => l.message && l.message.includes('"type": "output"'))
+            if (outputLog) {
+                try {
+                    // The message is a stringified JSON, so we parse it
+                    const parsedLog = JSON.parse(outputLog.message)
+                    if (parsedLog.output) {
+                        setMediaResult(parsedLog.output) // Found it!
+                        clearInterval(interval)
+                        setLoading(false)
+                        setStatus('Done!')
+                        if(session?.user?.id) fetchCredits(session.user.id)
+                        return
+                    }
+                } catch (e) { console.error("Log parse error", e) }
+            }
+        }
+
+        if (data.status === 'COMPLETED') {
+          clearInterval(interval)
+          setLoading(false)
+          setStatus('Done!')
+          
+          // If we didn't find it in logs, use the main data as fallback
+          if (!mediaResult) setMediaResult(data)
+          if(session?.user?.id) fetchCredits(session.user.id)
+
+        } else if (data.status === 'FAILED') {
+          clearInterval(interval)
+          setLoading(false)
+          setStatus('Generation Failed.')
+        } else {
+          setStatus(`AI Processing: ${data.status}...`)
+        }
+      } catch (e) {
+        console.error("Polling error", e)
+      }
+    }, 2000)
   }
 
   async function handleRunApp(appId) {
@@ -99,78 +147,77 @@ export default function Dashboard() {
         return
     }
 
-    const cost = 20
-    const paid = await deductCredits(cost)
-    if (!paid) return
-
     setLoading(true)
-    setStatus('Uploading Image...')
+    setStatus('Compressing & Sending...')
     setMediaResult(null)
-    setRunLogs([]) 
 
     try {
-      let imageUrl = null
-      if (selectedFile) {
-          imageUrl = await fal.storage.upload(selectedFile)
-      }
+      let inputs = {}
 
-      setStatus('Queued. Waiting for AI...')
-
-      const result = await fal.subscribe('workflows/Mc-Mark/your-mood-today-video', {
-        input: {
+      if (appId === 'mood') {
+        // Manual compression to fix 413 error without library
+        const base64Image = await compressImage(selectedFile)
+        
+        inputs = {
           prompt: "make me smile",
-          upload_image: imageUrl
-        },
-        logs: true,
-        onQueueUpdate: (update) => {
-          if (update.status === 'IN_PROGRESS') {
-             if (update.logs && update.logs.length > 0) {
-                 setRunLogs(prev => [...prev, ...update.logs])
-                 const lastLog = update.logs[update.logs.length - 1]
-                 setStatus(`AI: ${lastLog.message}`)
-             } else {
-                 setStatus('AI is generating video...')
-             }
-          }
+          upload_image: base64Image
         }
+      } else {
+        inputs = { prompt: "A futuristic masterpiece" }
+      }
+      
+      const res = await fetch('/api/run-fal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.user.id, appId, inputs })
       })
 
-      setStatus('Done!')
-      setMediaResult(result)
-      
-    } catch (error) {
-      console.error(error)
-      setStatus(`Error: ${error.message}`)
-      refundCredits(cost)
+      if (res.status === 413) throw new Error("Image too large.")
+      const data = await res.json()
+
+      if (data.error) {
+        setStatus('Error: ' + data.error)
+        setLoading(false)
+        fetchCredits(session.user.id)
+      } else {
+        setStatus('Job Queued.')
+        pollStatus(data.data.status_url)
+      }
+
+    } catch (e) {
+      setStatus("Error: " + e.message)
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
 
   const renderResults = (data) => {
-    // Combine result + logs into one string for searching
-    const combinedSource = JSON.stringify(data) + JSON.stringify(runLogs)
+    if (!data) return null;
     
+    // 1. Normalize the data structure
+    // Sometimes data is the 'output' object directly, sometimes it's the whole response
+    const root = data.output || data;
+
     let images = []
     let videoUrl = null
 
-    // 1. Direct object checks
-    if (data && data.images) images = data.images
-    if (data && data.video) videoUrl = data.video.url || data.video
+    if (root.images) images = root.images
+    if (root.video) videoUrl = root.video.url || root.video
 
-    // 2. Regex Search
-    if (!videoUrl) {
-        const videoMatch = combinedSource.match(/https?:\/\/[^"'\s]+\.mp4/i)
-        if (videoMatch) videoUrl = videoMatch[0]
+    // 2. Deep Search (The "Nuclear" Regex)
+    // If the nice parsing failed, we convert EVERYTHING to text and hunt for links
+    if (!videoUrl && images.length === 0) {
+        const jsonString = JSON.stringify(data)
+        const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
+        const matches = jsonString.match(urlRegex) || []
+        
+        matches.forEach(url => {
+            const clean = url.replace(/\\/g, '')
+            if (clean.match(/\.(mp4|webm)/i)) videoUrl = clean
+            else images.push({ url: clean }) // Normalize as object
+        })
+        // Remove duplicates
+        images = [...new Set(images.map(i => i.url))].map(url => ({ url }))
     }
-    
-    if (images.length === 0) {
-        const imageRegex = /https?:\/\/[^"'\s]+\.(?:png|jpg|jpeg|webp)/gi
-        const matches = combinedSource.match(imageRegex) || []
-        images = [...new Set(matches)]
-    }
-
-    if (!data && runLogs.length === 0) return null
 
     return (
         <div className="grid gap-6 mt-4">
@@ -181,8 +228,8 @@ export default function Dashboard() {
                         {images.map((img, i) => (
                             <div key={i}>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={img.url || img} className="w-full rounded-lg shadow-md" alt="AI Result" />
-                                <a href={img.url || img} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download</a>
+                                <img src={img.url} className="w-full rounded-lg shadow-md" alt="AI Result" />
+                                <a href={img.url} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download</a>
                             </div>
                         ))}
                     </div>
@@ -199,15 +246,10 @@ export default function Dashboard() {
 
             {images.length === 0 && !videoUrl && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700">
-                    <p className="font-bold">Parsing...</p>
-                    {/* FIXED QUOTES BELOW */}
-                    <p className="text-xs mb-2">We could not extract the media automatically. Please check the raw data below for links starting with https:</p>
-                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64">
+                    <p className="font-bold">Completed.</p>
+                    <p className="text-xs">Check raw data:</p>
+                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-96">
                         {JSON.stringify(data, null, 2)}
-                    </pre>
-                    <p className="text-xs mt-4 font-bold">Logs:</p>
-                    <pre className="bg-slate-800 text-slate-300 p-4 rounded text-xs overflow-auto max-h-64">
-                        {JSON.stringify(runLogs, null, 2)}
                     </pre>
                 </div>
             )}
