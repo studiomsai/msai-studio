@@ -15,7 +15,7 @@ export default function Dashboard() {
   const [result, setResult] = useState(null)
   
   // App Inputs
-  const [selectedFile, setSelectedFile] = useState(null) // For images
+  const [selectedFile, setSelectedFile] = useState(null)
   
   // Login Inputs
   const [email, setEmail] = useState('')
@@ -76,7 +76,6 @@ export default function Dashboard() {
     try {
       let inputs = {}
 
-      // === APP 1: YOUR MOOD TODAY LOGIC ===
       if (appId === 'mood') {
         if (!selectedFile) {
           alert("Please select an image first!")
@@ -86,13 +85,11 @@ export default function Dashboard() {
         setStatus('Uploading image...')
         const base64Image = await fileToBase64(selectedFile)
         
-        // Inputs matching your FAL Workflow
         inputs = {
-          prompt: "make me smile", // Default prompt or add a text box if you want
+          prompt: "make me smile",
           upload_image: base64Image
         }
       } 
-      // === OTHER APPS (Placeholders) ===
       else {
         inputs = { prompt: "A futuristic masterpiece" }
       }
@@ -109,7 +106,6 @@ export default function Dashboard() {
 
       if (data.error) {
         setStatus('Error: ' + data.error)
-        // Refund happened on backend, so refresh credits to show they returned
         fetchCredits(session.user.id)
       } else {
         setStatus('Success! Job sent to AI.')
@@ -124,7 +120,6 @@ export default function Dashboard() {
     setLoading(false)
   }
 
-  // --- LOGIN SCREEN ---
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 pt-20">
@@ -140,6 +135,7 @@ export default function Dashboard() {
           </form>
           <div className="my-6 border-t relative"><span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-slate-400">OR</span></div>
           <button onClick={handleGoogleLogin} className="w-full border border-slate-300 p-3 rounded flex items-center justify-center gap-3 font-medium hover:bg-slate-50">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5"/>
             Continue with Google
           </button>
           <p className="mt-6 text-sm text-slate-500">
@@ -150,7 +146,6 @@ export default function Dashboard() {
     )
   }
 
-  // --- DASHBOARD SCREEN ---
   return (
     <div className="max-w-6xl mx-auto pt-32 px-5 pb-20 min-h-screen">
       <div className="flex justify-between items-end mb-12 border-b border-slate-200 pb-6">
@@ -172,7 +167,6 @@ export default function Dashboard() {
             </div>
         </div>
         
-        {/* File Input Area */}
         <div className="mb-6">
             <label className="block text-sm font-bold mb-2 text-slate-700">Upload Portrait</label>
             <input 
@@ -205,13 +199,13 @@ export default function Dashboard() {
                 <pre className="bg-slate-900 text-slate-200 p-4 rounded mt-2 text-xs overflow-auto max-h-64">
                     {JSON.stringify(result, null, 2)}
                 </pre>
-                <p className="text-sm mt-2 text-slate-500">Check the 'response_url' above to see the result when ready.</p>
+                {/* Fixed the quote error here by removing single quotes */}
+                <p className="text-sm mt-2 text-slate-500">Check the response_url above to see the result when ready.</p>
             </div>
           )}
         </div>
       )}
 
-      {/* Placeholders for other apps */}
       <div className="grid md:grid-cols-2 gap-8 opacity-50">
         <div className="bg-white p-6 rounded-xl border">
             <h3 className="font-bold text-xl">Pro Photoshoot</h3>
