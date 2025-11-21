@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import Image from 'next/image'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -103,13 +102,27 @@ export default function Dashboard() {
           <form onSubmit={handleEmailAuth} className="space-y-4 text-left">
             <div>
               <label className="text-xs font-bold uppercase text-slate-500">Email</label>
-              <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="w-full border p-3 rounded mt-1" placeholder="you@example.com" />
+              <input 
+                type="email" 
+                required 
+                value={email} 
+                onChange={e=>setEmail(e.target.value)} 
+                className="w-full border p-3 rounded mt-1 text-slate-900 bg-white" 
+                placeholder="you@example.com" 
+              />
             </div>
             <div>
               <label className="text-xs font-bold uppercase text-slate-500">Password</label>
-              <input type="password" required value={password} onChange={e=>setPassword(e.target.value)} className="w-full border p-3 rounded mt-1" placeholder="••••••••" />
+              <input 
+                type="password" 
+                required 
+                value={password} 
+                onChange={e=>setPassword(e.target.value)} 
+                className="w-full border p-3 rounded mt-1 text-slate-900 bg-white" 
+                placeholder="••••••••" 
+              />
             </div>
-            <button disabled={loading} className="w-full bg-slate-900 text-white p-3 rounded font-bold hover:bg-slate-800">
+            <button disabled={loading} className="w-full bg-slate-900 text-white p-3 rounded font-bold hover:bg-slate-800 transition">
               {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Login')}
             </button>
           </form>
@@ -118,8 +131,7 @@ export default function Dashboard() {
             <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-slate-400">OR</span>
           </div>
 
-          <button onClick={handleGoogleLogin} className="w-full border border-slate-300 p-3 rounded flex items-center justify-center gap-3 font-medium hover:bg-slate-50">
-            {/* Fixed Image Tag with Alt */}
+          <button onClick={handleGoogleLogin} className="w-full border border-slate-300 p-3 rounded flex items-center justify-center gap-3 font-medium hover:bg-slate-50 transition">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" className="w-5 h-5"/>
             Continue with Google
           </button>
@@ -155,7 +167,7 @@ export default function Dashboard() {
           {id: 'photo', name: 'Pro Photoshoot', cost: 15, icon: '📸', desc: 'AI Fashion Photography'},
           {id: 'story', name: 'Story to Video', cost: 32, icon: '🎬', desc: 'Script to Movie'}
         ].map(app => (
-          <div key={app.id} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg">
+          <div key={app.id} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg hover:shadow-2xl transition duration-300">
             <div className="text-4xl mb-4">{app.icon}</div>
             <h3 className="font-bold text-2xl mb-2">{app.name}</h3>
             <p className="text-slate-500 mb-6">{app.desc}</p>
@@ -177,8 +189,11 @@ export default function Dashboard() {
         <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
           <h3 className="font-bold text-lg mb-2">Status: <span className="text-blue-600">{status}</span></h3>
           {result && (
-            <div className="bg-slate-900 text-slate-200 p-4 rounded mt-2 text-xs overflow-auto font-mono">
-                {JSON.stringify(result, null, 2)}
+            <div className="mt-4">
+                <p className="text-green-600 font-medium mb-2">Success! Result:</p>
+                <div className="bg-slate-900 text-slate-200 p-4 rounded text-xs overflow-auto font-mono max-h-64">
+                    {JSON.stringify(result, null, 2)}
+                </div>
             </div>
           )}
         </div>
