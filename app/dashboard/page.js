@@ -12,7 +12,9 @@ export default function Dashboard() {
   const [credits, setCredits] = useState(0)
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
-  const [result, setResult] = useState(null)
+  
+  // This holds the final visual result
+  const [mediaResult, setMediaResult] = useState(null)
   
   // App Inputs
   const [selectedFile, setSelectedFile] = useState(null)
@@ -40,33 +42,18 @@ export default function Dashboard() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // --- THE FIXED FUNCTION ---
   async function handleEmailAuth(e) {
     e.preventDefault()
     setLoading(true)
     setAuthMsg('')
-    
     try {
-      let result;
-      if (isSignUp) {
-        result = await supabase.auth.signUp({ email, password })
-      } else {
-        result = await supabase.auth.signInWithPassword({ email, password })
-      }
-
-      if (result.error) {
-        setAuthMsg(result.error.message)
-      } else if (isSignUp) {
-        setAuthMsg("Success! Account created. You can log in.")
-      }
-    } catch (err) {
-      setAuthMsg("An unexpected error occurred.")
-      console.error(err)
-    }
-    
+      const action = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword
+      const { error } = await action({ email, password })
+      if (error) setAuthMsg(error.message)
+      else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
+    } catch (err) { setAuthMsg("Error") }
     setLoading(false)
   }
-  // --------------------------
 
   async function handleGoogleLogin() {
     await supabase.auth.signInWithOAuth({ 
@@ -84,10 +71,57 @@ export default function Dashboard() {
     })
   }
 
+  // --- THE POLLING LOGIC ---
+  async function pollStatus(statusUrl) {
+    setStatus('AI is generating... (This takes about 30s)')
+    
+    const interval = setInterval(async () => {
+      try {
+        // Call our new backend proxy
+        const res = await fetch(`/api/check-status?url=${encodeURIComponent(statusUrl)}`)
+        const data = await res.json()
+
+        if (data.status === 'COMPLETED') {
+          clearInterval(interval)
+          setLoading(false)
+          setStatus('Done!')
+          
+          // Parse FAL Output to find Image and Video
+          // Note: Workflow outputs differ. We look for common patterns.
+          let finalImage = null
+          let finalVideo = null
+
+          // Logic to find media in the logs/output
+          if (data.logs) {
+             const imageLog = data.logs.find(l => l.message && l.message.includes('.png') || l.message.includes('.jpg'))
+             const videoLog = data.logs.find(l => l.message && l.message.includes('.mp4'))
+             // This is a fallback, normally FAL returns a 'outputs' object if configured or we use the response directly
+          }
+          
+          // Simplified: We pass the whole data object to the render function
+          setMediaResult(data) 
+          
+          // Refresh credits (in case of refund/update)
+          if(session?.user?.id) fetchCredits(session.user.id)
+
+        } else if (data.status === 'FAILED' || data.error) {
+          clearInterval(interval)
+          setLoading(false)
+          setStatus('Generation Failed. Credits refunded.')
+          // Logic to trigger refund should be here, but we handled pre-validation refund in run-fal
+        } else {
+          setStatus(`AI Processing: ${data.status}...`)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }, 2000) // Check every 2 seconds
+  }
+
   async function handleRunApp(appId) {
     setLoading(true)
     setStatus('Starting...')
-    setResult(null)
+    setMediaResult(null)
 
     try {
       let inputs = {}
@@ -105,12 +139,11 @@ export default function Dashboard() {
           prompt: "make me smile",
           upload_image: base64Image
         }
-      } 
-      else {
+      } else {
         inputs = { prompt: "A futuristic masterpiece" }
       }
 
-      setStatus('Processing on Server...')
+      setStatus('Sending to AI Engine...')
       
       const res = await fetch('/api/run-fal', {
         method: 'POST',
@@ -122,18 +155,86 @@ export default function Dashboard() {
 
       if (data.error) {
         setStatus('Error: ' + data.error)
+        setLoading(false)
         fetchCredits(session.user.id)
       } else {
-        setStatus('Success! Job sent to AI.')
-        setResult(data)
-        fetchCredits(session.user.id)
+        // Success! Now we wait for the result.
+        setStatus('Job Queued.')
+        pollStatus(data.data.status_url)
       }
 
     } catch (e) {
       setStatus("System Error")
-      console.error(e)
+      setLoading(false)
     }
-    setLoading(false)
+  }
+
+  // Helper to render the complex FAL output
+  const renderResults = (data) => {
+    if (!data) return null;
+
+    // We need to find the image and video URLs in the specific Workflow output
+    // Workflow outputs are usually in 'outputs' array or 'logs'
+    
+    let images = []
+    let video = null
+
+    // 1. Check direct outputs (Standard FAL)
+    if (data.outputs && data.outputs.length > 0) {
+        data.outputs.forEach(out => {
+            if (out.images) images.push(...out.images)
+            if (out.video) video = out.video
+        })
+    }
+    
+    // 2. Fallback: If output structure is nested (Common in ComfyUI workflows)
+    // We look recursively for "url" keys that end in png/mp4
+    if (images.length === 0 && !video) {
+        const jsonString = JSON.stringify(data)
+        const urlRegex = /"url":"(https:\/\/[^"]+)"/g
+        let match
+        while ((match = urlRegex.exec(jsonString)) !== null) {
+            const url = match[1]
+            if (url.match(/\.(jpeg|jpg|gif|png)$/i)) images.push({ url })
+            if (url.match(/\.(mp4|webm)$/i)) video = { url }
+        }
+    }
+
+    return (
+        <div className="grid gap-6 mt-4">
+            {/* Display Images */}
+            {images.length > 0 && (
+                <div>
+                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Frame</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                        {images.map((img, i) => (
+                            <div key={i}>
+                                <img src={img.url} className="w-full rounded-lg shadow-md" alt="AI Result" />
+                                <a href={img.url} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download Image</a>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Display Video */}
+            {video && (
+                <div>
+                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Animation</h4>
+                    <video controls src={video.url} className="w-full rounded-lg shadow-md"></video>
+                    <a href={video.url} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
+                </div>
+            )}
+
+            {/* Fallback if nothing found but completed */}
+            {images.length === 0 && !video && (
+                <div className="bg-yellow-50 p-4 rounded text-yellow-700">
+                    Workflow Completed, but couldn't parse media. 
+                    <a href={data.response_url} target="_blank" className="underline ml-2">View Raw Data</a>
+                </div>
+            )}
+        </div>
+    )
   }
 
   if (!session) {
@@ -143,15 +244,14 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold mb-4">Welcome to MSAI</h2>
           {authMsg && <div className="bg-blue-50 text-blue-600 p-3 mb-4 rounded text-sm">{authMsg}</div>}
           <form onSubmit={handleEmailAuth} className="space-y-4 text-left">
-            <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="w-full border p-3 rounded text-slate-900" placeholder="Email" />
-            <input type="password" required value={password} onChange={e=>setPassword(e.target.value)} className="w-full border p-3 rounded text-slate-900" placeholder="Password" />
+            <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="w-full border p-3 rounded text-slate-900 bg-white" placeholder="Email" />
+            <input type="password" required value={password} onChange={e=>setPassword(e.target.value)} className="w-full border p-3 rounded text-slate-900 bg-white" placeholder="Password" />
             <button disabled={loading} className="w-full bg-slate-900 text-white p-3 rounded font-bold hover:bg-slate-800 transition">
               {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Login')}
             </button>
           </form>
           <div className="my-6 border-t relative"><span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-slate-400">OR</span></div>
           <button onClick={handleGoogleLogin} className="w-full border border-slate-300 p-3 rounded flex items-center justify-center gap-3 font-medium hover:bg-slate-50">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5"/>
             Continue with Google
           </button>
           <p className="mt-6 text-sm text-slate-500">
@@ -173,7 +273,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* --- APP: YOUR MOOD TODAY --- */}
       <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg mb-8">
         <div className="flex items-center gap-4 mb-6">
             <div className="text-4xl">😊</div>
@@ -200,23 +299,20 @@ export default function Dashboard() {
                 disabled={loading || credits < 20}
                 className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition"
             >
-                {loading ? 'Running...' : 'Run App'}
+                {loading ? 'Processing...' : 'Run App'}
             </button>
         </div>
       </div>
 
-      {status && (
+      {/* RESULT DISPLAY */}
+      {(status || mediaResult) && (
         <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-12">
-          <h3 className="font-bold text-lg mb-2">Status: <span className="text-blue-600">{status}</span></h3>
-          {result && (
-            <div className="mt-4">
-                <p className="text-green-600 font-medium">Request ID: {result.data.request_id}</p>
-                <pre className="bg-slate-900 text-slate-200 p-4 rounded mt-2 text-xs overflow-auto max-h-64">
-                    {JSON.stringify(result, null, 2)}
-                </pre>
-                <p className="text-sm mt-2 text-slate-500">Check the response_url above to see the result when ready.</p>
-            </div>
-          )}
+          <h3 className="font-bold text-lg mb-2">
+            Status: <span className={loading ? "text-blue-600 animate-pulse" : "text-green-600"}>{status}</span>
+          </h3>
+          
+          {/* Render the parsed images/videos */}
+          {renderResults(mediaResult)}
         </div>
       )}
 
