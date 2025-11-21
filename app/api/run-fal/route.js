@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Init Supabase Admin (Server-side)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -19,22 +18,16 @@ export async function POST(request) {
     const apps = {
       'mood': { 
         cost: 20, 
-        id: 'workflows/Mc-Mark/your-mood-today-video' // Your Real Workflow
+        id: 'workflows/Mc-Mark/your-mood-today-v2' // UPDATED TO V2
       },
-      'photo': { 
-        cost: 15, 
-        id: 'fal-ai/flux-lora' // Placeholder for now
-      },
-      'story': { 
-        cost: 32, 
-        id: 'fal-ai/fast-svd' // Placeholder for now
-      }
+      'photo': { cost: 15, id: 'fal-ai/flux-lora' },
+      'story': { cost: 32, id: 'fal-ai/fast-svd' }
     }
 
     const selectedApp = apps[appId]
     if (!selectedApp) return NextResponse.json({ error: 'Invalid App' }, { status: 400 })
     
-    cost = selectedApp.cost // Track cost for refunding
+    cost = selectedApp.cost
 
     // 2. Check & Deduct Credits
     const { data: profile } = await supabase.from('profiles').select('credits').eq('id', userId).single()
@@ -43,7 +36,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Not enough credits' }, { status: 402 })
     }
 
-    // Charge the user immediately
     await supabase.from('profiles').update({ credits: profile.credits - cost }).eq('id', userId)
 
     // 3. Call FAL.AI
@@ -58,27 +50,20 @@ export async function POST(request) {
     
     const falResult = await response.json()
 
-    // 4. CHECK FOR ERRORS (The Safety Net)
-    // If FAL says error, or if the status isn't 200
     if (!response.ok || falResult.error) {
       throw new Error(falResult.error || "AI Generation Failed")
     }
     
-    // Success!
     return NextResponse.json({ success: true, data: falResult })
 
   } catch (error) {
     console.error("Backend Error:", error)
-
-    // REFUND LOGIC
     if (userId && cost > 0) {
       const { data: refundProfile } = await supabase.from('profiles').select('credits').eq('id', userId).single()
       if (refundProfile) {
         await supabase.from('profiles').update({ credits: refundProfile.credits + cost }).eq('id', userId)
-        console.log(`Refunded ${cost} credits to ${userId}`)
       }
     }
-
-    return NextResponse.json({ error: error.message || "Something went wrong. Credits have been refunded." }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Something went wrong." }, { status: 500 })
   }
 }

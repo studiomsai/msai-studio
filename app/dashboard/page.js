@@ -1,12 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { fal } from '@fal-ai/client'
 
-fal.config({
-  proxyUrl: '/api/fal/proxy',
-})
-
+// No external FAL library imports - we use our own API
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -24,6 +20,7 @@ export default function Dashboard() {
   const [rawDebug, setRawDebug] = useState(null)
   
   const [selectedFile, setSelectedFile] = useState(null)
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -69,35 +66,41 @@ export default function Dashboard() {
     await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/dashboard` } })
   }
 
-  async function deductCredits(cost) {
-    if (!session?.user?.id) return false
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
-    if (!profile || profile.credits < cost) {
-        setStatus('Not enough credits.')
-        return false
-    }
-    await supabase.from('profiles').update({ credits: profile.credits - cost }).eq('id', session.user.id)
-    fetchCredits(session.user.id)
-    return true
+  // --- CLIENT SIDE IMAGE COMPRESSOR ---
+  // Reduces 5MB images to ~200KB so Vercel accepts them
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.src = URL.createObjectURL(file)
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        // Max dimension 1500px is plenty for AI
+        const MAX_WIDTH = 1500
+        const scale = MAX_WIDTH / img.width
+        canvas.width = scale < 1 ? MAX_WIDTH : img.width
+        canvas.height = scale < 1 ? img.height * scale : img.height
+        
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        
+        // Compress to JPEG at 70% quality
+        const base64 = canvas.toDataURL('image/jpeg', 0.7)
+        resolve(base64)
+      }
+      img.onerror = (e) => reject(e)
+    })
   }
 
-  async function refundCredits(cost) {
-    if (!session?.user?.id) return
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
-    await supabase.from('profiles').update({ credits: profile.credits + cost }).eq('id', session.user.id)
-    fetchCredits(session.user.id)
-    setStatus('Run failed. Credits refunded.')
-  }
-
-  // --- UNIVERSAL MEDIA FINDER ---
+  // --- UNIVERSAL MEDIA PARSER ---
   const extractMedia = (obj) => {
+    if (!obj) return
     const json = JSON.stringify(obj)
     const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
     const matches = json.match(urlRegex) || []
     
     matches.forEach(url => {
         const clean = url.replace(/\\/g, '')
-        if (clean.includes('avatar') || clean.includes('icon') || clean.includes('profile')) return
+        if (clean.includes('avatar') || clean.includes('icon')) return
 
         if (clean.match(/\.(mp4|webm)/i)) {
             setFinalVideo(clean)
@@ -107,67 +110,108 @@ export default function Dashboard() {
     })
   }
 
+  // --- MANUAL POLLING ---
+  async function pollStatus(statusUrl) {
+    setStatus('AI is generating... (This takes about 30s)')
+    
+    // Add logs=1 to get the hidden video links
+    const pollUrl = statusUrl.includes('?') ? `${statusUrl}&logs=1` : `${statusUrl}?logs=1`
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/poll?url=${encodeURIComponent(pollUrl)}`)
+        const data = await res.json()
+
+        // 1. Scan logs immediately
+        if (data.logs) extractMedia(data.logs)
+
+        if (data.status === 'COMPLETED') {
+          clearInterval(interval)
+          setStatus('Finalizing...')
+          
+          // 2. Scan the main result
+          extractMedia(data)
+          
+          // 3. If we missed it, try to fetch the response_url explicitly
+          if (data.response_url) {
+             try {
+                 const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
+                 const finalData = await finalRes.json()
+                 extractMedia(finalData)
+                 setRawDebug(finalData) // Save for debug just in case
+             } catch (e) { console.warn(e) }
+          } else {
+             setRawDebug(data)
+          }
+
+          setLoading(false)
+          setStatus('Done!')
+          if(session?.user?.id) fetchCredits(session.user.id)
+
+        } else if (data.status === 'FAILED') {
+          clearInterval(interval)
+          setLoading(false)
+          setStatus('Generation Failed. Credits refunded.')
+        }
+      } catch (e) {
+        console.error("Polling error", e)
+      }
+    }, 2000)
+  }
+
   async function handleRunApp(appId) {
     if (!selectedFile && appId === 'mood') {
         alert("Please select an image first!")
         return
     }
 
-    const cost = 20
-    const paid = await deductCredits(cost)
-    if (!paid) return
-
     setLoading(true)
-    setStatus('Uploading Image...')
+    setStatus('Compressing Image...')
     setFinalImage(null)
     setFinalVideo(null)
     setRawDebug(null)
 
     try {
-      let imageUrl = null
-      if (selectedFile) {
-          imageUrl = await fal.storage.upload(selectedFile)
-      }
+      let inputs = {}
 
-      setStatus('Streaming workflow...')
-
-      // UPDATED: Use V2 Workflow ID and exact input key
-      const stream = await fal.stream("workflows/Mc-Mark/your-mood-today-v2", {
-        input: {
-          upload_your_portrait: imageUrl
+      if (appId === 'mood') {
+        // 1. COMPRESS
+        const base64Image = await compressImage(selectedFile)
+        
+        inputs = {
+          // 2. ADD PROMPT (Fixes 422 Error)
+          prompt: "make me smile", 
+          upload_your_portrait: base64Image // (Matches your V2 workflow input)
         }
-      });
-
-      for await (const event of stream) {
-        if (event.logs && event.logs.length > 0) {
-            const lastLog = event.logs[event.logs.length - 1].message
-            setStatus(`AI: ${lastLog}`)
-        }
-        extractMedia(event)
+      } else {
+        inputs = { prompt: "A futuristic masterpiece" }
       }
 
-      const result = await stream.done()
-      extractMedia(result)
+      setStatus('Sending to AI...')
       
-      // Check if we found anything
-      if (!finalImage && !finalVideo) {
-          // Double check raw result string for hidden urls
-          const directCheck = JSON.stringify(result)
-          if (!directCheck.includes('.mp4') && !directCheck.includes('.png')) {
-             setRawDebug(result)
-          }
+      // 3. MANUAL API CALL (Bypasses Proxy 405 Error)
+      const res = await fetch('/api/run-fal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.user.id, appId, inputs })
+      })
+
+      if (res.status === 413) throw new Error("Image too large even after compression.")
+      const data = await res.json()
+
+      if (data.error) {
+        setStatus('Error: ' + data.error)
+        setLoading(false)
+        fetchCredits(session.user.id)
+      } else {
+        setStatus('Job Queued.')
+        pollStatus(data.data.status_url)
       }
 
-      setStatus('Done!')
-      
-    } catch (error) {
-      console.error(error)
-      setStatus(`Error: ${error.message}`)
-      // Only refund if we didn't get a result
-      if (!finalImage && !finalVideo) refundCredits(cost)
+    } catch (e) {
+      setStatus("Error: " + e.message)
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
 
   if (!session) {
@@ -267,7 +311,7 @@ export default function Dashboard() {
             {/* Debugging */}
             {!finalImage && !finalVideo && rawDebug && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
-                    <p className="font-bold text-sm">Debug Data (Copy this if empty):</p>
+                    <p className="font-bold text-sm">Debug Data:</p>
                     <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
                         {JSON.stringify(rawDebug, null, 2)}
                     </pre>
