@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
-// --- CONFIGURATION ---
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -15,6 +14,7 @@ const CREDIT_COST = 20;
 
 export default function Dashboard() {
   const router = useRouter();
+  
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,6 @@ export default function Dashboard() {
     return data.publicUrl;
   };
 
-  // --- CORE: POLLING LOGIC ---
   const checkStatus = async (reqId) => {
     try {
       const res = await fetch(`/api/poll?request_id=${reqId}`);
@@ -70,40 +69,41 @@ export default function Dashboard() {
       }
 
       if (json.status === 'COMPLETED') {
-        setStatus('FETCHING_RESULT');
         
-        if (json.response_url) {
+        // 1. CHECK FOR INLINE RESULTS FIRST (Avoids extra fetch)
+        let finalData = json;
+        
+        // Check if data is already here (sometimes FAL includes it)
+        const hasInlineData = json.video || json.images || json.data?.video || json.data?.images;
+        
+        if (!hasInlineData && json.response_url) {
+            setStatus('FETCHING_RESULT');
             const encodedUrl = encodeURIComponent(json.response_url);
             const resultRes = await fetch(`/api/poll?url=${encodedUrl}`);
             
-            // Handle non-200 safely
             if (!resultRes.ok) {
                 const errDetail = await resultRes.json();
                 throw new Error(errDetail.error || `Server Error ${resultRes.status}`);
             }
+            finalData = await resultRes.json();
+        } else if (!hasInlineData) {
+             throw new Error('Workflow finished without a response URL or inline data.');
+        }
+
+        // 2. EXTRACT MEDIA
+        // Supports multiple FAL output formats
+        const vid = finalData.video?.url || finalData.url || finalData.data?.video?.url;
+        const imgs = finalData.images || finalData.data?.images;
+
+        if (vid || (imgs && imgs.length > 0)) {
+            if (vid) setVideoUrl(vid);
+            if (imgs && imgs.length > 0) setImagesUrl(imgs[0].url);
             
-            const finalData = await resultRes.json();
-
-            // Check if we caught a non-JSON response in the proxy
-            if (finalData.status === 'COMPLETED_NON_JSON') {
-                console.error("Non-JSON Result:", finalData.raw_content);
-                throw new Error(`FAL returned invalid data: ${finalData.raw_content}`);
-            }
-
-            const vid = finalData.video?.url || finalData.url; 
-            const imgs = finalData.images;
-
-            if (vid || (imgs && imgs.length > 0)) {
-                if (vid) setVideoUrl(vid);
-                if (imgs) setImagesUrl(imgs[0].url);
-                setStatus('COMPLETED');
-                setLoading(false);
-                setCredits((prev) => Math.max(0, prev - CREDIT_COST));
-            } else {
-               throw new Error('Workflow finished but returned no media.');
-            }
+            setStatus('COMPLETED');
+            setLoading(false);
+            setCredits((prev) => Math.max(0, prev - CREDIT_COST));
         } else {
-            throw new Error('Workflow finished without a response URL.');
+           throw new Error('Workflow finished but returned no media.');
         }
 
       } else if (json.status === 'FAILED') {
@@ -116,11 +116,10 @@ export default function Dashboard() {
     } catch (err) {
       console.error(err);
       setError(err.message);
-      // Stop loading on hard error
-      if (err.message.includes("Upstream") || err.message.includes("FAL returned")) {
+      // Only stop if it's a permanent error, otherwise retry
+      if (err.message.includes("Upstream") || err.message.includes("Generation Failed")) {
           setLoading(false);
       } else {
-          // Retry temporary errors
           setTimeout(() => checkStatus(reqId), 5000);
       }
     }

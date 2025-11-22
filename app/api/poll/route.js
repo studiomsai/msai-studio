@@ -7,42 +7,43 @@ export async function GET(request) {
   const requestId = searchParams.get('request_id');
   const proxyUrl = searchParams.get('url');
 
-  // --- MODE A: PROXY URL (Fetching the Result) ---
+  // --- MODE A: PROXY URL (The Fix for 500 Errors) ---
   if (proxyUrl) {
     try {
-      console.log(`Proxying fetch to: ${proxyUrl}`);
-      
+      const targetUrl = new URL(proxyUrl);
+      const headers = { 'Accept': 'application/json' };
+
+      // CRITICAL FIX: Only send FAL_KEY if hitting the FAL API.
+      // If we send it to Google Storage/R2/S3 (where fal.media lives), it crashes with 500.
+      if (targetUrl.hostname.endsWith('fal.run') || targetUrl.hostname.endsWith('fal.ai')) {
+        headers['Authorization'] = `Key ${process.env.FAL_KEY}`;
+      } else {
+        console.log('External Storage URL detected. Stripping Auth headers.');
+      }
+
       const response = await fetch(proxyUrl, {
         method: 'GET',
-        headers: { 
-          'Authorization': `Key ${process.env.FAL_KEY}`,
-          'Accept': 'application/json'
-        }
+        headers: headers
       });
       
-      // 1. Get Raw Text first (Prevents JSON parse crashes)
-      const rawText = await response.text();
-
-      // 2. If Upstream failed, return the error text safely
+      // If it's a 500, it might be a text error from the cloud provider
       if (!response.ok) {
-        console.error(`Upstream Error (${response.status}):`, rawText);
+        const errText = await response.text();
         return NextResponse.json(
-          { error: `Upstream FAL Error ${response.status}: ${rawText}` }, 
-          { status: response.status } // Pass the real status (e.g. 404, 403), not 500
+          { error: `Upstream Error ${response.status}: ${errText}` }, 
+          { status: response.status }
         );
       }
       
-      // 3. Try to parse as JSON (Expected behavior)
+      // Try parsing JSON, else return text (in case it's a raw file)
+      const rawText = await response.text();
       try {
-        const data = JSON.parse(rawText);
-        return NextResponse.json(data);
+        return NextResponse.json(JSON.parse(rawText));
       } catch (e) {
-        // 4. If it's not JSON (e.g. it's the video file itself?), return details
-        console.warn("Upstream returned non-JSON:", rawText.substring(0, 100));
-        return NextResponse.json({ 
-            status: 'COMPLETED_NON_JSON', 
-            raw_content: rawText.substring(0, 500) // Send snippet for debugging
-        });
+        // It might be the raw video file itself? 
+        // In that case, we can't proxy the binary easily in Next.js API routes without streaming.
+        // But usually, the result is a JSON pointing to the video.
+        return NextResponse.json({ error: 'Received non-JSON response', raw: rawText.substring(0, 200) }, { status: 500 });
       }
 
     } catch (error) {
@@ -51,7 +52,7 @@ export async function GET(request) {
     }
   }
 
-  // --- MODE B: CHECK STATUS ---
+  // --- MODE B: CHECK STATUS (Standard Polling) ---
   if (requestId) {
     try {
       const WORKFLOW_ID = 'workflows/Mc-Mark/your-mood-today-v2';
@@ -64,26 +65,25 @@ export async function GET(request) {
         }
       });
 
-      // Fallback
       if (!response.ok) {
+         // Fallback to global
          const globalUrl = `https://queue.fal.run/requests/${requestId}/status`;
          response = await fetch(globalUrl, {
             headers: { 'Authorization': `Key ${process.env.FAL_KEY}`, 'Accept': 'application/json' }
          });
       }
 
-      // Handle 404 (Not Ready) -> IN_QUEUE
       if (response.status === 404) {
         return NextResponse.json({ status: 'IN_QUEUE', logs: [] });
       }
 
-      const rawText = await response.text();
-      
       if (!response.ok) {
-        return NextResponse.json({ status: 'FAILED', error: rawText }, { status: 200 });
+        const errText = await response.text();
+        return NextResponse.json({ status: 'FAILED', error: errText }, { status: 200 });
       }
 
-      return NextResponse.json(JSON.parse(rawText));
+      const data = await response.json();
+      return NextResponse.json(data);
 
     } catch (error) {
       return NextResponse.json({ status: 'FAILED', error: error.message });
