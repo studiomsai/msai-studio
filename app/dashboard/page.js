@@ -82,41 +82,58 @@ export default function Dashboard() {
     return publicData.publicUrl;
   };
 
-  // --- CORE: POLLING LOGIC (FIXED) ---
-  // We now accept the full 'statusUrl' from the backend instead of guessing it
+  // --- CORE: POLLING LOGIC (SMART FRONTEND) ---
   const checkStatus = async (statusUrl) => {
     try {
-      // We encode the URL to send it safely as a query parameter
+      // 1. Call our "Pass-Through" Proxy to get the Status
       const encodedUrl = encodeURIComponent(statusUrl);
       const res = await fetch(`/api/poll?url=${encodedUrl}`);
-      const json = await res.json();
-
-      if (!res.ok) throw new Error(json.error || 'Polling failed');
-
-      // Update Logs
-      if (json.logs) {
-        const newLogs = json.logs.map(l => l.message).filter(Boolean);
-        setLogs(newLogs);
+      
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Polling Error: ${errText}`);
       }
 
-      if (json.status === 'COMPLETED') {
-        // Success! Extract Video URL
-        const finalUrl = json.data?.video?.url || json.data?.images?.[0]?.url || json.data?.url;
-        
-        if (!finalUrl) throw new Error('Job finished but no video URL found');
+      const json = await res.json();
 
-        setVideoUrl(finalUrl);
-        setStatus('COMPLETED');
-        setLoading(false);
+      // Update Logs (FAL standard log format)
+      if (json.logs) {
+        const newLogs = json.logs.map(l => l.message).filter(Boolean);
+        if (newLogs.length > 0) setLogs(newLogs);
+      }
+
+      // 2. Handle Status
+      if (json.status === 'COMPLETED') {
         
-        // Visually update credits
-        setCredits((prev) => Math.max(0, prev - CREDIT_COST));
+        // SUCCESS! Now we need to find where the actual data is.
+        // FAL V2 usually puts the final result URL in 'json.response_url'
+        let finalJson = json;
+
+        if (json.response_url) {
+            // We must fetch this new URL to get the actual video/image
+            const responseUrlEncoded = encodeURIComponent(json.response_url);
+            const finalRes = await fetch(`/api/poll?url=${responseUrlEncoded}`);
+            finalJson = await finalRes.json();
+        }
+
+        // Extract the video or image URL from the final JSON
+        const video = finalJson.video?.url || finalJson.images?.[0]?.url || finalJson.url;
+
+        if (video) {
+            setVideoUrl(video);
+            setStatus('COMPLETED');
+            setLoading(false);
+            // Visual credit update
+            setCredits((prev) => Math.max(0, prev - CREDIT_COST));
+        } else {
+            throw new Error('Job completed but no video URL found in result.');
+        }
 
       } else if (json.status === 'FAILED') {
         setError(`Generation Failed: ${json.error || 'Unknown error'}`);
         setLoading(false);
       } else {
-        // Still running -> Check again in 4 seconds using SAME URL
+        // Still running (IN_QUEUE / IN_PROGRESS) -> Poll again in 4 seconds
         setStatus(json.status);
         setTimeout(() => checkStatus(statusUrl), 4000);
       }
@@ -149,7 +166,7 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           upload_your_portrait: imageUrl,
-          user_id: userId // Send ID for credit deduction
+          user_id: userId 
         }),
       });
 
@@ -157,7 +174,7 @@ export default function Dashboard() {
 
       if (!data.success) throw new Error(data.error || 'Failed to start job');
       
-      // 3. Start Polling using the SPECIFIC URL returned by FAL
+      // 3. Start Polling using the URL returned by the backend
       if (!data.status_url) throw new Error('Backend did not return a status URL');
       
       checkStatus(data.status_url);
