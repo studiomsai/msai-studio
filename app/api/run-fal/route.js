@@ -14,11 +14,11 @@ export async function POST(request) {
     const { appId, inputs } = body
     userId = body.userId
 
-    // 1. Define Real App Configs
+    // 1. V2 WORKFLOW CONFIGURATION
     const apps = {
       'mood': { 
         cost: 20, 
-        id: 'workflows/Mc-Mark/your-mood-today-v2' // UPDATED TO V2
+        id: 'workflows/Mc-Mark/your-mood-today-v2' 
       },
       'photo': { cost: 15, id: 'fal-ai/flux-lora' },
       'story': { cost: 32, id: 'fal-ai/fast-svd' }
@@ -29,16 +29,14 @@ export async function POST(request) {
     
     cost = selectedApp.cost
 
-    // 2. Check & Deduct Credits
+    // 2. Deduct Credits
     const { data: profile } = await supabase.from('profiles').select('credits').eq('id', userId).single()
-    
     if (!profile || profile.credits < cost) {
       return NextResponse.json({ error: 'Not enough credits' }, { status: 402 })
     }
-
     await supabase.from('profiles').update({ credits: profile.credits - cost }).eq('id', userId)
 
-    // 3. Call FAL.AI
+    // 3. Send to FAL (Server-to-Server)
     const response = await fetch(`https://queue.fal.run/${selectedApp.id}`, {
       method: 'POST',
       headers: {
@@ -50,6 +48,7 @@ export async function POST(request) {
     
     const falResult = await response.json()
 
+    // 4. Error Handling
     if (!response.ok || falResult.error) {
       throw new Error(falResult.error || "AI Generation Failed")
     }
@@ -58,6 +57,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error("Backend Error:", error)
+    // Refund on failure
     if (userId && cost > 0) {
       const { data: refundProfile } = await supabase.from('profiles').select('credits').eq('id', userId).single()
       if (refundProfile) {
