@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
-// No external libraries - pure manual fetch to bypass Proxy 405 errors
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -62,29 +61,21 @@ export default function Dashboard() {
   }
 
   async function handleGoogleLogin() {
-    await supabase.auth.signInWithOAuth({ 
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` }
-    })
+    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/dashboard` } })
   }
 
-  // --- 1. CLIENT SIDE COMPRESSOR (Fixes 413 Payload Error) ---
   const compressImage = (file) => {
     return new Promise((resolve, reject) => {
       const img = new Image()
       img.src = URL.createObjectURL(file)
       img.onload = () => {
         const canvas = document.createElement('canvas')
-        // 1500px is plenty for FAL
         const MAX_WIDTH = 1500
         const scale = MAX_WIDTH / img.width
         canvas.width = scale < 1 ? MAX_WIDTH : img.width
         canvas.height = scale < 1 ? img.height * scale : img.height
-        
         const ctx = canvas.getContext('2d')
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        
-        // JPEG 0.7 quality reduces 5MB -> ~200KB
         const base64 = canvas.toDataURL('image/jpeg', 0.7)
         resolve(base64)
       }
@@ -92,7 +83,6 @@ export default function Dashboard() {
     })
   }
 
-  // --- 2. UNIVERSAL PARSER (Fixes Empty Result) ---
   const extractMedia = (obj) => {
     if (!obj) return
     const json = JSON.stringify(obj)
@@ -111,35 +101,46 @@ export default function Dashboard() {
     })
   }
 
-  // --- 3. MANUAL POLLING (Fixes 405 Proxy Error) ---
+  // --- MANUAL POLLING WITH EXPLICIT LOG FETCH ---
   async function pollStatus(statusUrl) {
     setStatus('AI is generating... (This takes about 30s)')
     
-    // Add logs=1 to force FAL to reveal the video link in the logs
-    const pollUrl = statusUrl.includes('?') ? `${statusUrl}&logs=1` : `${statusUrl}?logs=1`
+    // 1. Remove the bad ?logs=1 param (Fixes 500 Error)
+    const pollUrl = statusUrl
 
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/poll?url=${encodeURIComponent(pollUrl)}`)
         const data = await res.json()
 
-        // Immediate scan
-        extractMedia(data)
-
         if (data.status === 'COMPLETED') {
           clearInterval(interval)
           setStatus('Finalizing...')
           
-          // Deep scan response_url if available
+          // 2. Fetch the RESULT
           if (data.response_url) {
              try {
                  const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
                  const finalData = await finalRes.json()
                  extractMedia(finalData)
-                 setRawDebug(finalData) 
+                 // If we found media in result, great. If not, we check logs below.
              } catch (e) { console.warn(e) }
-          } else {
-             setRawDebug(data)
+          }
+
+          // 3. Fetch the LOGS (Explicitly)
+          // Construct logs URL: replace '/status' with '/logs'
+          if (statusUrl.includes('/status')) {
+              const logsUrl = statusUrl.replace('/status', '/logs')
+              try {
+                  const logsRes = await fetch(`/api/poll?url=${encodeURIComponent(logsUrl)}`)
+                  const logsData = await logsRes.json()
+                  
+                  // logsData is usually an array of log objects
+                  extractMedia(logsData)
+                  
+                  // Save logs as debug if everything else failed
+                  if (!finalImage && !finalVideo) setRawDebug(logsData)
+              } catch (e) { console.warn("Log fetch failed", e) }
           }
 
           setLoading(false)
@@ -174,11 +175,8 @@ export default function Dashboard() {
 
       if (appId === 'mood') {
         const base64Image = await compressImage(selectedFile)
-        
         inputs = {
-          // Fixes 422 Error (Validation)
           prompt: "make me smile", 
-          // Fixes Workflow Input
           upload_your_portrait: base64Image 
         }
       } else {
@@ -187,14 +185,13 @@ export default function Dashboard() {
 
       setStatus('Sending to AI...')
       
-      // Uses our custom Server Route (No Proxy)
       const res = await fetch('/api/run-fal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: session.user.id, appId, inputs })
       })
 
-      if (res.status === 413) throw new Error("Image too large even after compression.")
+      if (res.status === 413) throw new Error("Image too large.")
       const data = await res.json()
 
       if (data.error) {
@@ -306,7 +303,6 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Debugging: Only show if we failed to find media */}
             {!finalImage && !finalVideo && rawDebug && (
                 <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
                     <p className="font-bold text-sm">Debug Data:</p>
