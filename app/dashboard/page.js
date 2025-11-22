@@ -1,321 +1,140 @@
-'use client'
-import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
+'use client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+import { useState } from 'react';
 
 export default function Dashboard() {
-  const [session, setSession] = useState(null)
-  const [credits, setCredits] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState('')
-  const [mediaResult, setMediaResult] = useState(null)
-  
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [authMsg, setAuthMsg] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('IDLE'); 
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [error, setError] = useState('');
+  const [logs, setLogs] = useState([]);
 
-  async function fetchCredits(userId) {
-    const { data } = await supabase.from('profiles').select('credits').eq('id', userId).single()
-    if(data) setCredits(data.credits)
-  }
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if(session) fetchCredits(session.user.id)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      if(session) fetchCredits(session.user.id)
-    })
-    return () => subscription.unsubscribe()
-  }, [])
-
-  async function handleEmailAuth(e) {
-    e.preventDefault()
-    setLoading(true)
-    setAuthMsg('')
+  // --- 1. Polling Logic ---
+  const checkStatus = async (requestId) => {
     try {
-      let result
-      if (isSignUp) {
-        result = await supabase.auth.signUp({ email, password })
-      } else {
-        result = await supabase.auth.signInWithPassword({ email, password })
+      // Call our proxy endpoint
+      const res = await fetch(`/api/poll?request_id=${requestId}`);
+      const json = await res.json();
+
+      if (!res.ok) throw new Error(json.error || 'Polling failed');
+
+      // Update logs if the backend sends them
+      if (json.logs) {
+        const newLogs = json.logs.map(l => l.message).filter(Boolean);
+        setLogs(newLogs);
       }
-      if (result.error) setAuthMsg(result.error.message)
-      else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
+
+      if (json.status === 'COMPLETED') {
+        // JOB DONE: Extract video URL
+        // Note: Depending on the specific FAL workflow, the video might be in 
+        // json.data.video.url OR json.data.images[0].url.
+        // We check both to be safe.
+        const finalUrl = json.data.video?.url || json.data.images?.[0]?.url || json.data.url;
+        
+        if (!finalUrl) {
+          console.log('Full Result Data:', json.data); // Debugging if URL is missing
+          throw new Error('Job completed but no video URL found in response');
+        }
+
+        setVideoUrl(finalUrl);
+        setStatus('COMPLETED');
+        setLoading(false);
+      } else if (json.status === 'FAILED') {
+        setError('AI Generation failed on FAL side.');
+        setLoading(false);
+      } else {
+        // JOB RUNNING: Update status and wait 5 seconds
+        setStatus(json.status); 
+        setTimeout(() => checkStatus(requestId), 5000);
+      }
     } catch (err) {
-      setAuthMsg("Error logging in.")
+      console.error(err);
+      setError(err.message);
+      setLoading(false);
     }
-    setLoading(false)
-  }
+  };
 
-  async function handleGoogleLogin() {
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/dashboard` } })
-  }
+  // --- 2. Trigger Logic ---
+  const handleGenerate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setVideoUrl(null);
+    setLogs([]);
+    setStatus('UPLOADING');
 
-  const compressImage = (file) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.src = URL.createObjectURL(file)
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX_WIDTH = 1500
-        const scale = MAX_WIDTH / img.width
-        canvas.width = scale < 1 ? MAX_WIDTH : img.width
-        canvas.height = scale < 1 ? img.height * scale : img.height
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        const base64 = canvas.toDataURL('image/jpeg', 0.7)
-        resolve(base64)
-      }
-      img.onerror = (e) => reject(e)
-    })
-  }
-
-  const extractMedia = (obj) => {
-    if (!obj) return
-    const json = JSON.stringify(obj)
-    const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
-    const matches = json.match(urlRegex) || []
-    
-    let v = null, i = []
-    matches.forEach(url => {
-        const clean = url.replace(/\\/g, '')
-        if (clean.includes('avatar') || clean.includes('icon')) return
-        if (clean.match(/\.(mp4|webm)/i)) v = clean
-        else i.push(clean)
-    })
-    
-    // Fallback: If we found nothing, check for specific FAL keys
-    if (!v && obj.video && obj.video.url) v = obj.video.url
-    if (i.length === 0 && obj.images && obj.images.length > 0) i = obj.images.map(img => img.url)
-
-    return { video: v, images: i }
-  }
-
-  async function pollStatus(statusUrl) {
-    setStatus('AI is generating... (This takes about 4-5 mins)')
-    
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/poll?url=${encodeURIComponent(statusUrl)}`)
-        const data = await res.json()
-
-        if (data.status === 'COMPLETED') {
-          clearInterval(interval)
-          setStatus('Finalizing...')
-          
-          let finalPayload = { ...data }
-
-          // FETCH RESPONSE URL (As per requested rollback)
-          if (data.response_url) {
-             try {
-                 const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
-                 const finalData = await finalRes.json()
-                 // Merge data
-                 finalPayload = { ...finalPayload, ...finalData }
-             } catch (e) { console.warn(e) }
-          }
-
-          setMediaResult(finalPayload)
-          setLoading(false)
-          setStatus('Done!')
-          if(session?.user?.id) fetchCredits(session.user.id)
-
-        } else if (data.status === 'FAILED') {
-          clearInterval(interval)
-          setLoading(false)
-          setStatus('Generation Failed.')
-          setMediaResult(data) // Show error details
-        }
-      } catch (e) {
-        console.error("Polling error", e)
-      }
-    }, 5000)
-  }
-
-  async function handleRunApp(appId) {
-    if (!selectedFile && appId === 'mood') {
-        alert("Please select an image first!")
-        return
-    }
-
-    setLoading(true)
-    setStatus('Compressing Image...')
-    setMediaResult(null)
+    // Replace this with your actual File Upload logic to get a public URL
+    // For testing, use a hardcoded valid image URL if you don't have one yet
+    const uploadedImageUrl = "https://storage.googleapis.com/falserverless/model_tests/portrait_input.jpg"; 
 
     try {
-      let inputs = {}
-
-      if (appId === 'mood') {
-        const base64Image = await compressImage(selectedFile)
-        inputs = {
-          // V2 INPUT
-          upload_your_portrait: base64Image
-        }
-      } else {
-        inputs = { prompt: "A futuristic masterpiece" }
-      }
-
-      setStatus('Sending to AI...')
-      
+      // Call your backend to start the job
       const res = await fetch('/api/run-fal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: session.user.id, appId, inputs })
-      })
+        body: JSON.stringify({
+          upload_your_portrait: uploadedImageUrl 
+        }),
+      });
 
-      if (res.status === 413) throw new Error("Image too large.")
-      const data = await res.json()
+      const data = await res.json();
 
-      if (data.error) {
-        setStatus('Error: ' + data.error)
-        setLoading(false)
-        fetchCredits(session.user.id)
-      } else {
-        setStatus('Job Queued.')
-        pollStatus(data.data.status_url)
+      // ERROR TRAP: This is where your previous error likely happened
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to reach backend');
+      }
+      if (!data.request_id) {
+        console.error("Backend Response:", data);
+        throw new Error("Backend did not return a request_id");
       }
 
-    } catch (e) {
-      setStatus("Error: " + e.message)
-      setLoading(false)
+      // Start Polling using the ID
+      setStatus('QUEUED');
+      checkStatus(data.request_id);
+
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
     }
-  }
-
-  const parsed = mediaResult ? extractMedia(mediaResult) : { video: null, images: [] }
-
-  if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100 pt-20">
-        <div className="bg-white p-10 rounded-xl shadow-xl text-center max-w-md w-full mx-4">
-          <h2 className="text-3xl font-bold mb-4">Welcome to MSAI</h2>
-          {authMsg && <div className="bg-blue-50 text-blue-600 p-3 mb-4 rounded text-sm">{authMsg}</div>}
-          <form onSubmit={handleEmailAuth} className="space-y-4 text-left">
-            <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="w-full border p-3 rounded text-slate-900 bg-white" placeholder="Email" />
-            <input type="password" required value={password} onChange={e=>setPassword(e.target.value)} className="w-full border p-3 rounded text-slate-900 bg-white" placeholder="Password" />
-            <button disabled={loading} className="w-full bg-slate-900 text-white p-3 rounded font-bold hover:bg-slate-800 transition">
-              {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Login')}
-            </button>
-          </form>
-          <div className="my-6 border-t relative"><span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-slate-400">OR</span></div>
-          <button onClick={handleGoogleLogin} className="w-full border border-slate-300 p-3 rounded flex items-center justify-center gap-3 font-medium hover:bg-slate-50">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5"/>
-            Continue with Google
-          </button>
-          <p className="mt-6 text-sm text-slate-500">
-            <button onClick={()=>setIsSignUp(!isSignUp)} className="text-blue-600 font-bold underline">{isSignUp ? 'Login' : 'Sign Up'}</button>
-          </p>
-        </div>
-      </div>
-    )
-  }
+  };
 
   return (
-    <div className="max-w-6xl mx-auto pt-32 px-5 pb-20 min-h-screen">
-      <div className="flex justify-between items-end mb-12 border-b border-slate-200 pb-6">
-        <h1 className="text-4xl font-bold">Dashboard</h1>
-        <div className="text-right">
-            <div className="text-sm text-slate-400 font-bold uppercase">Credits</div>
-            <div className="text-5xl font-bold text-blue-600">{credits}</div>
-            <a href="/shop" className="text-sm text-blue-500 hover:underline">+ Buy More</a>
-        </div>
-      </div>
+    <div className="p-10 max-w-2xl mx-auto text-center font-sans">
+      <h1 className="text-3xl font-bold mb-6">Your Mood Today (FAL V2)</h1>
 
-      <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg mb-8">
-        <div className="flex items-center gap-4 mb-6">
-            <div className="text-4xl">😊</div>
-            <div>
-                <h3 className="font-bold text-2xl">Your Mood Today</h3>
-                <p className="text-slate-500">Upload a selfie. Get a mood animation.</p>
-            </div>
-        </div>
-        
-        <div className="mb-6">
-            <label className="block text-sm font-bold mb-2 text-slate-700">Upload Portrait</label>
-            <input 
-                type="file" 
-                accept="image/*" 
-                onChange={(e) => setSelectedFile(e.target.files[0])}
-                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-        </div>
+      <button 
+        onClick={handleGenerate}
+        disabled={loading}
+        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+      >
+        {loading ? `Status: ${status}` : 'Generate Video'}
+      </button>
 
-        <div className="flex justify-between items-center">
-            <span className="font-bold text-blue-600">20 Credits</span>
-            <button 
-                onClick={() => handleRunApp('mood')} 
-                disabled={loading || credits < 20}
-                className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition"
-            >
-                {loading ? 'Processing...' : 'Run App'}
-            </button>
-        </div>
-      </div>
-
-      {/* RESULT AREA */}
-      {(status || mediaResult) && (
-        <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-12">
-          <h3 className="font-bold text-lg mb-2">
-            Status: <span className={loading ? "text-blue-600 animate-pulse" : "text-green-600"}>{status}</span>
-          </h3>
-          
-          {parsed.video && (
-             <div className="mb-4">
-                <h4 className="font-bold mb-2 text-slate-700">Video Result</h4>
-                <video controls src={parsed.video} className="w-full rounded-lg shadow-md"></video>
-                <a href={parsed.video} download className="text-blue-600 underline text-sm font-bold mt-2 inline-block">Download Video</a>
-             </div>
-          )}
-
-          {parsed.images.length > 0 && (
-             <div className="mb-4">
-                <h4 className="font-bold mb-2 text-slate-700">Image Result</h4>
-                <div className="grid grid-cols-2 gap-4">
-                    {parsed.images.map((img, i) => (
-                        <div key={i}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={img} className="w-full rounded-lg shadow-md" alt="Result" />
-                            <a href={img} download className="text-blue-600 underline text-sm font-bold mt-2 inline-block">Download Image</a>
-                        </div>
-                    ))}
-                </div>
-             </div>
-          )}
-
-          {/* Debug Fallback */}
-          {mediaResult && !parsed.video && parsed.images.length === 0 && (
-            <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
-                <p className="font-bold text-sm">Debug Data:</p>
-                <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
-                    {JSON.stringify(mediaResult, null, 2)}
-                </pre>
-            </div>
-          )}
+      {/* Status Logs */}
+      {loading && (
+        <div className="mt-4 p-4 bg-gray-100 rounded text-sm font-mono text-left h-32 overflow-y-auto border">
+          <p className="font-bold text-gray-700 sticky top-0 bg-gray-100">Logs:</p>
+          {logs.length === 0 && <p className="text-gray-400">Waiting for logs...</p>}
+          {logs.map((log, i) => (
+            <p key={i} className="text-gray-600 border-b border-gray-200 py-1">{log}</p>
+          ))}
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-8 opacity-50">
-        <div className="bg-white p-6 rounded-xl border">
-            <h3 className="font-bold text-xl">Pro Photoshoot</h3>
-            <p>Coming soon...</p>
+      {/* Error Message */}
+      {error && (
+        <div className="mt-4 p-4 bg-red-50 text-red-600 border border-red-200 rounded">
+          Error: {error}
         </div>
-        <div className="bg-white p-6 rounded-xl border">
-            <h3 className="font-bold text-xl">Story to Video</h3>
-            <p>Coming soon...</p>
-        </div>
-      </div>
+      )}
 
-      <div className="text-center mt-20">
-        <button onClick={() => supabase.auth.signOut()} className="text-slate-400 underline">Sign Out</button>
-      </div>
+      {/* Video Result */}
+      {videoUrl && (
+        <div className="mt-8 animate-in fade-in duration-700">
+          <h3 className="text-xl font-bold text-green-600 mb-2">Your Video is Ready!</h3>
+          <video src={videoUrl} controls autoPlay loop className="w-full rounded-lg shadow-2xl border border-gray-200" />
+        </div>
+      )}
     </div>
-  )
+  );
 }
