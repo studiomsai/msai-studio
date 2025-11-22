@@ -1,68 +1,40 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
-  let userId, cost = 0;
-
   try {
-    const body = await request.json()
-    const { appId, inputs } = body
-    userId = body.userId
-
-    // 1. WORKFLOW CONFIGURATION (V2)
-    const apps = {
-      'mood': { 
-        cost: 20, 
-        id: 'workflows/Mc-Mark/your-mood-today-v2' // The V2 ID
-      },
-      'photo': { cost: 15, id: 'fal-ai/flux-lora' },
-      'story': { cost: 32, id: 'fal-ai/fast-svd' }
-    }
-
-    const selectedApp = apps[appId]
-    if (!selectedApp) return NextResponse.json({ error: 'Invalid App' }, { status: 400 })
+    // 1. Parse Input
+    const body = await request.json();
     
-    cost = selectedApp.cost
+    // 2. (Optional) Verify Credits here via Supabase before running...
 
-    // 2. Deduct Credits
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', userId).single()
-    if (!profile || profile.credits < cost) {
-      return NextResponse.json({ error: 'Not enough credits' }, { status: 402 })
-    }
-    await supabase.from('profiles').update({ credits: profile.credits - cost }).eq('id', userId)
-
-    // 3. Send to FAL
-    const response = await fetch(`https://queue.fal.run/${selectedApp.id}`, {
+    // 3. Send to FAL Queue
+    // Note: Use queue.fal.run for async jobs
+    const response = await fetch(`https://queue.fal.run/workflows/Mc-Mark/your-mood-today-v2`, {
       method: 'POST',
       headers: {
         'Authorization': `Key ${process.env.FAL_KEY}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify(inputs)
-    })
-    
-    const falResult = await response.json()
+      body: JSON.stringify(body), // Pass the frontend inputs (image_url, etc.)
+    });
 
-    if (!response.ok || falResult.error) {
-      throw new Error(falResult.error || "AI Generation Failed")
+    if (!response.ok) {
+      const errorText = await response.text();
+      return NextResponse.json({ error: `FAL Error: ${errorText}` }, { status: response.status });
     }
-    
-    return NextResponse.json({ success: true, data: falResult })
+
+    const data = await response.json();
+
+    // 4. Return the Request ID to the frontend
+    return NextResponse.json({ 
+      success: true, 
+      request_id: data.request_id 
+    });
 
   } catch (error) {
-    console.error("Backend Error:", error)
-    // Refund
-    if (userId && cost > 0) {
-      const { data: refundProfile } = await supabase.from('profiles').select('credits').eq('id', userId).single()
-      if (refundProfile) {
-        await supabase.from('profiles').update({ credits: refundProfile.credits + cost }).eq('id', userId)
-      }
-    }
-    return NextResponse.json({ error: error.message || "Something went wrong." }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
