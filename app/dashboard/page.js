@@ -16,7 +16,7 @@ const CREDIT_COST = 20;
 export default function Dashboard() {
   const router = useRouter();
   
-  // State
+  // --- STATE ---
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -26,24 +26,21 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   
   // User State
-  const [credits, setCredits] = useState(null); // Start null to show loading state
+  const [credits, setCredits] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  // 1. Fetch User & Credits on Load
+  // --- 1. LOAD USER & CREDITS ---
   useEffect(() => {
     const getUserData = async () => {
-      // Get Logged In User
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        // If not logged in, redirect to login (optional protection)
         router.push('/login'); 
         return;
       }
 
       setUserId(user.id);
 
-      // Fetch Credits from 'profiles' table
       const { data, error } = await supabase
         .from('profiles')
         .select('credits')
@@ -58,7 +55,7 @@ export default function Dashboard() {
     getUserData();
   }, [router]);
 
-  // --- Helper: Handle File Selection ---
+  // --- HELPER: FILE SELECTION ---
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -69,10 +66,10 @@ export default function Dashboard() {
     }
   };
 
-  // --- Helper: Upload to Supabase ---
+  // --- HELPER: UPLOAD IMAGE ---
   const uploadImage = async (fileToUpload) => {
     const fileName = `${Date.now()}-${fileToUpload.name}`;
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(fileName, fileToUpload);
 
@@ -85,36 +82,43 @@ export default function Dashboard() {
     return publicData.publicUrl;
   };
 
-  // --- Core: Polling Logic ---
-  const checkStatus = async (requestId) => {
+  // --- CORE: POLLING LOGIC (FIXED) ---
+  // We now accept the full 'statusUrl' from the backend instead of guessing it
+  const checkStatus = async (statusUrl) => {
     try {
-      const res = await fetch(`/api/poll?request_id=${requestId}`);
+      // We encode the URL to send it safely as a query parameter
+      const encodedUrl = encodeURIComponent(statusUrl);
+      const res = await fetch(`/api/poll?url=${encodedUrl}`);
       const json = await res.json();
 
       if (!res.ok) throw new Error(json.error || 'Polling failed');
 
+      // Update Logs
       if (json.logs) {
         const newLogs = json.logs.map(l => l.message).filter(Boolean);
         setLogs(newLogs);
       }
 
       if (json.status === 'COMPLETED') {
-        const finalUrl = json.data.video?.url || json.data.images?.[0]?.url || json.data.url;
-        if (!finalUrl) throw new Error('No video URL in response');
+        // Success! Extract Video URL
+        const finalUrl = json.data?.video?.url || json.data?.images?.[0]?.url || json.data?.url;
+        
+        if (!finalUrl) throw new Error('Job finished but no video URL found');
 
         setVideoUrl(finalUrl);
         setStatus('COMPLETED');
         setLoading(false);
         
-        // Visually deduct credits (The backend already did the real deduction)
+        // Visually update credits
         setCredits((prev) => Math.max(0, prev - CREDIT_COST));
 
       } else if (json.status === 'FAILED') {
-        setError('AI Generation Failed. No credits were deducted.');
+        setError(`Generation Failed: ${json.error || 'Unknown error'}`);
         setLoading(false);
       } else {
+        // Still running -> Check again in 4 seconds using SAME URL
         setStatus(json.status);
-        setTimeout(() => checkStatus(requestId), 4000);
+        setTimeout(() => checkStatus(statusUrl), 4000);
       }
     } catch (err) {
       console.error(err);
@@ -123,10 +127,11 @@ export default function Dashboard() {
     }
   };
 
-  // --- Main Action ---
+  // --- MAIN ACTION: GENERATE ---
   const handleGenerate = async () => {
     if (!file) return setError('Please select an image first.');
     if (credits < CREDIT_COST) return setError('Insufficient credits.');
+    if (!userId) return setError('Please log in again.');
 
     setLoading(true);
     setError('');
@@ -134,7 +139,7 @@ export default function Dashboard() {
     setStatus('UPLOADING');
 
     try {
-      // 1. Upload
+      // 1. Upload Image
       const imageUrl = await uploadImage(file);
 
       // 2. Trigger Backend
@@ -142,15 +147,20 @@ export default function Dashboard() {
       const res = await fetch('/api/run-fal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ upload_your_portrait: imageUrl }),
+        body: JSON.stringify({ 
+          upload_your_portrait: imageUrl,
+          user_id: userId // Send ID for credit deduction
+        }),
       });
 
       const data = await res.json();
 
       if (!data.success) throw new Error(data.error || 'Failed to start job');
-
-      // 3. Start Polling
-      checkStatus(data.request_id);
+      
+      // 3. Start Polling using the SPECIFIC URL returned by FAL
+      if (!data.status_url) throw new Error('Backend did not return a status URL');
+      
+      checkStatus(data.status_url);
 
     } catch (err) {
       console.error(err);
@@ -160,12 +170,11 @@ export default function Dashboard() {
   };
 
   return (
-    // Centered Layout Wrapper
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       
       <div className="w-full max-w-md space-y-8">
         
-        {/* Header & Credits Display */}
+        {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-gray-900">
             Your Mood Today
@@ -182,7 +191,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Main Card */}
+        {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-8 space-y-6">
           
           {/* File Picker */}
@@ -219,9 +228,8 @@ export default function Dashboard() {
             </label>
           </div>
 
-          {/* Buttons Area */}
+          {/* Buttons */}
           {credits !== null && credits < CREDIT_COST ? (
-            // Zero/Low Credits State
             <div className="text-center space-y-3">
                 <div className="p-3 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
                     You need <strong>{CREDIT_COST} credits</strong> to generate a video.
@@ -234,7 +242,6 @@ export default function Dashboard() {
                 </button>
             </div>
           ) : (
-            // Normal Generate State
             <button 
                 onClick={handleGenerate}
                 disabled={loading || !file}
@@ -255,21 +262,21 @@ export default function Dashboard() {
             </button>
           )}
 
-          {/* Error Display */}
+          {/* Error */}
           {error && (
-            <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded">
+            <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-200">
               {error}
             </div>
           )}
 
-          {/* Progress/Logs */}
+          {/* Logs */}
           {loading && logs.length > 0 && (
              <div className="text-xs text-gray-400 font-mono text-center h-6 overflow-hidden">
                 {logs[logs.length - 1]}
              </div>
           )}
 
-          {/* Result Video */}
+          {/* Result */}
           {videoUrl && (
             <div className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <h3 className="text-center text-lg font-bold text-green-600 mb-3">Video Ready!</h3>
