@@ -9,29 +9,24 @@ export async function GET(request) {
   if (!url) return NextResponse.json({ error: 'Missing URL' }, { status: 400 })
 
   try {
-    // FIX: Removed 'Content-Type' header for GET requests.
-    // We only send the Key.
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Key ${process.env.FAL_KEY}`,
-        'Accept': 'application/json' // Accept JSON, but don't claim to send it
+        'Accept': 'application/json'
       }
     })
 
-    // 1. Get Raw Text first
+    // Get text first to safely handle non-JSON errors
     const rawText = await response.text()
 
-    // 2. Try to parse
     try {
         const data = JSON.parse(rawText)
         return NextResponse.json(data)
     } catch (jsonError) {
-        console.log("Non-JSON response from FAL:", rawText)
         return NextResponse.json({ 
             status: 'UNKNOWN', 
-            raw_content: rawText,
-            debug_note: "FAL returned non-JSON data" 
+            raw_content: rawText 
         })
     }
 

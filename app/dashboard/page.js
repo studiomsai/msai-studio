@@ -12,9 +12,7 @@ export default function Dashboard() {
   const [credits, setCredits] = useState(0)
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
-  
-  // RAW DEBUG DATA (We will use this to find the download link)
-  const [rawResult, setRawResult] = useState(null)
+  const [mediaResult, setMediaResult] = useState(null)
   
   const [selectedFile, setSelectedFile] = useState(null)
   const [email, setEmail] = useState('')
@@ -44,10 +42,17 @@ export default function Dashboard() {
     setLoading(true)
     setAuthMsg('')
     try {
-      let result = isSignUp ? await supabase.auth.signUp({ email, password }) : await supabase.auth.signInWithPassword({ email, password })
+      let result
+      if (isSignUp) {
+        result = await supabase.auth.signUp({ email, password })
+      } else {
+        result = await supabase.auth.signInWithPassword({ email, password })
+      }
       if (result.error) setAuthMsg(result.error.message)
       else if (isSignUp) setAuthMsg("Success! Account created. You can log in.")
-    } catch (err) { setAuthMsg("Error logging in.") }
+    } catch (err) {
+      setAuthMsg("Error logging in.")
+    }
     setLoading(false)
   }
 
@@ -74,9 +79,29 @@ export default function Dashboard() {
     })
   }
 
-  // --- MANUAL POLLING (The logic that worked) ---
+  const extractMedia = (obj) => {
+    if (!obj) return
+    const json = JSON.stringify(obj)
+    const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
+    const matches = json.match(urlRegex) || []
+    
+    let v = null, i = []
+    matches.forEach(url => {
+        const clean = url.replace(/\\/g, '')
+        if (clean.includes('avatar') || clean.includes('icon')) return
+        if (clean.match(/\.(mp4|webm)/i)) v = clean
+        else i.push(clean)
+    })
+    
+    // Fallback: If we found nothing, check for specific FAL keys
+    if (!v && obj.video && obj.video.url) v = obj.video.url
+    if (i.length === 0 && obj.images && obj.images.length > 0) i = obj.images.map(img => img.url)
+
+    return { video: v, images: i }
+  }
+
   async function pollStatus(statusUrl) {
-    setStatus('AI is generating... (Check your FAL dashboard for progress)')
+    setStatus('AI is generating... (This takes about 4-5 mins)')
     
     const interval = setInterval(async () => {
       try {
@@ -85,19 +110,30 @@ export default function Dashboard() {
 
         if (data.status === 'COMPLETED') {
           clearInterval(interval)
+          setStatus('Finalizing...')
+          
+          let finalPayload = { ...data }
+
+          // FETCH RESPONSE URL (As per requested rollback)
+          if (data.response_url) {
+             try {
+                 const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
+                 const finalData = await finalRes.json()
+                 // Merge data
+                 finalPayload = { ...finalPayload, ...finalData }
+             } catch (e) { console.warn(e) }
+          }
+
+          setMediaResult(finalPayload)
           setLoading(false)
           setStatus('Done!')
-          
-          // Capture the Status JSON (which contains logs)
-          setRawResult(data)
-          
           if(session?.user?.id) fetchCredits(session.user.id)
-        } 
-        else if (data.status === 'FAILED') {
+
+        } else if (data.status === 'FAILED') {
           clearInterval(interval)
           setLoading(false)
           setStatus('Generation Failed.')
-          setRawResult(data)
+          setMediaResult(data) // Show error details
         }
       } catch (e) {
         console.error("Polling error", e)
@@ -113,7 +149,7 @@ export default function Dashboard() {
 
     setLoading(true)
     setStatus('Compressing Image...')
-    setRawResult(null)
+    setMediaResult(null)
 
     try {
       let inputs = {}
@@ -121,6 +157,7 @@ export default function Dashboard() {
       if (appId === 'mood') {
         const base64Image = await compressImage(selectedFile)
         inputs = {
+          // V2 INPUT
           upload_your_portrait: base64Image
         }
       } else {
@@ -144,7 +181,6 @@ export default function Dashboard() {
         fetchCredits(session.user.id)
       } else {
         setStatus('Job Queued.')
-        // Pass the status URL to the poller
         pollStatus(data.data.status_url)
       }
 
@@ -153,6 +189,8 @@ export default function Dashboard() {
       setLoading(false)
     }
   }
+
+  const parsed = mediaResult ? extractMedia(mediaResult) : { video: null, images: [] }
 
   if (!session) {
     return (
@@ -202,26 +240,62 @@ export default function Dashboard() {
         
         <div className="mb-6">
             <label className="block text-sm font-bold mb-2 text-slate-700">Upload Portrait</label>
-            <input type="file" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+            <input 
+                type="file" 
+                accept="image/*" 
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
         </div>
 
         <div className="flex justify-between items-center">
             <span className="font-bold text-blue-600">20 Credits</span>
-            <button onClick={() => handleRunApp('mood')} disabled={loading || credits < 20} className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition">
+            <button 
+                onClick={() => handleRunApp('mood')} 
+                disabled={loading || credits < 20}
+                className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition"
+            >
                 {loading ? 'Processing...' : 'Run App'}
             </button>
         </div>
       </div>
 
-      {/* RAW RESULT DEBUGGER */}
-      {(status || rawResult) && (
+      {/* RESULT AREA */}
+      {(status || mediaResult) && (
         <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-12">
-          <h3 className="font-bold text-lg mb-2">Status: <span className={loading ? "text-blue-600 animate-pulse" : "text-green-600"}>{status}</span></h3>
-          {rawResult && (
+          <h3 className="font-bold text-lg mb-2">
+            Status: <span className={loading ? "text-blue-600 animate-pulse" : "text-green-600"}>{status}</span>
+          </h3>
+          
+          {parsed.video && (
+             <div className="mb-4">
+                <h4 className="font-bold mb-2 text-slate-700">Video Result</h4>
+                <video controls src={parsed.video} className="w-full rounded-lg shadow-md"></video>
+                <a href={parsed.video} download className="text-blue-600 underline text-sm font-bold mt-2 inline-block">Download Video</a>
+             </div>
+          )}
+
+          {parsed.images.length > 0 && (
+             <div className="mb-4">
+                <h4 className="font-bold mb-2 text-slate-700">Image Result</h4>
+                <div className="grid grid-cols-2 gap-4">
+                    {parsed.images.map((img, i) => (
+                        <div key={i}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={img} className="w-full rounded-lg shadow-md" alt="Result" />
+                            <a href={img} download className="text-blue-600 underline text-sm font-bold mt-2 inline-block">Download Image</a>
+                        </div>
+                    ))}
+                </div>
+             </div>
+          )}
+
+          {/* Debug Fallback */}
+          {mediaResult && !parsed.video && parsed.images.length === 0 && (
             <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
-                <p className="font-bold text-sm mb-2">Raw JSON Output (Check FAL Logs with Request ID):</p>
-                <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-96">
-                    {JSON.stringify(rawResult, null, 2)}
+                <p className="font-bold text-sm">Debug Data:</p>
+                <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
+                    {JSON.stringify(mediaResult, null, 2)}
                 </pre>
             </div>
           )}
@@ -229,11 +303,19 @@ export default function Dashboard() {
       )}
 
       <div className="grid md:grid-cols-2 gap-8 opacity-50">
-        <div className="bg-white p-6 rounded-xl border"><h3 className="font-bold text-xl">Pro Photoshoot</h3><p>Coming soon...</p></div>
-        <div className="bg-white p-6 rounded-xl border"><h3 className="font-bold text-xl">Story to Video</h3><p>Coming soon...</p></div>
+        <div className="bg-white p-6 rounded-xl border">
+            <h3 className="font-bold text-xl">Pro Photoshoot</h3>
+            <p>Coming soon...</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl border">
+            <h3 className="font-bold text-xl">Story to Video</h3>
+            <p>Coming soon...</p>
+        </div>
       </div>
 
-      <div className="text-center mt-20"><button onClick={() => supabase.auth.signOut()} className="text-slate-400 underline">Sign Out</button></div>
+      <div className="text-center mt-20">
+        <button onClick={() => supabase.auth.signOut()} className="text-slate-400 underline">Sign Out</button>
+      </div>
     </div>
   )
 }
