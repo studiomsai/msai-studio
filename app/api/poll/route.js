@@ -2,22 +2,22 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-// WORKFLOW ID (Must match the one in run-fal)
-const WORKFLOW_PATH = 'workflows/Mc-Mark/your-mood-today-v2';
-
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const requestId = searchParams.get('request_id');
 
+  // 1. Validation
   if (!requestId) {
     return NextResponse.json({ error: 'Missing request_id' }, { status: 400 });
   }
 
   try {
-    // 1. Check Status on the SPECIFIC Workflow Endpoint
-    // (This fixes the 405 Method Not Allowed error)
-    const statusUrl = `https://queue.fal.run/${WORKFLOW_PATH}/requests/${requestId}/status`;
-    
+    // 2. Construct URL (Standard FAL Queue Endpoint)
+    // We use the global ID endpoint which works for all V2 workflows
+    const statusUrl = `https://queue.fal.run/requests/${requestId}/status`;
+
+    console.log(`Polling FAL: ${statusUrl}`); // Logs to Vercel Console
+
     const statusResponse = await fetch(statusUrl, {
       method: 'GET',
       headers: {
@@ -26,20 +26,26 @@ export async function GET(request) {
       },
     });
 
+    // 3. Handle Non-OK Responses (without crashing)
     if (!statusResponse.ok) {
-      // If still failing, try the generic endpoint as fallback, or return error
       const errText = await statusResponse.text();
-      throw new Error(`FAL Status Error (${statusResponse.status}): ${errText}`);
+      console.error(`FAL Polling Error (${statusResponse.status}):`, errText);
+      
+      // Return clean JSON error instead of crashing
+      return NextResponse.json({ 
+        status: 'FAILED', 
+        error: `FAL API Error ${statusResponse.status}: ${errText}` 
+      }, { status: statusResponse.status });
     }
 
     const statusData = await statusResponse.json();
 
-    // 2. Handle Completion
+    // 4. Job Completed? Fetch the Result.
     if (statusData.status === 'COMPLETED') {
-      // The result URL is usually provided in the status payload as 'response_url'
-      // If not, we construct the standard result endpoint
-      const responseUrl = statusData.response_url || `https://queue.fal.run/${WORKFLOW_PATH}/requests/${requestId}`;
-
+      // FAL V2 usually puts the result URL in 'response_url'
+      // Fallback to the request endpoint if missing
+      const responseUrl = statusData.response_url || `https://queue.fal.run/requests/${requestId}`;
+      
       const resultResponse = await fetch(responseUrl, {
         method: 'GET',
         headers: {
@@ -56,14 +62,18 @@ export async function GET(request) {
       });
     }
 
-    // 3. Return In-Progress Status
+    // 5. Job In Progress
     return NextResponse.json({ 
-      status: statusData.status, // 'IN_QUEUE', 'IN_PROGRESS'
-      logs: statusData.logs || []
+      status: statusData.status, // 'IN_QUEUE' or 'IN_PROGRESS'
+      logs: statusData.logs || [] 
     });
 
   } catch (error) {
-    console.error('Poll Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Server Proxy Error:', error);
+    // Ensure we always return JSON, even on crash
+    return NextResponse.json({ 
+      status: 'FAILED', 
+      error: error.message 
+    }, { status: 500 });
   }
 }
