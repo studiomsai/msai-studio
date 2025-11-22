@@ -67,30 +67,43 @@ export default function Dashboard() {
     return data.publicUrl;
   };
 
-  // --- CORE: POLLING LOGIC ---
+  // --- CORE: POLLING LOGIC (Decoupled) ---
   const checkStatus = async (requestId) => {
     try {
-      // We send the ID. The Backend handles all URL complexity.
+      // STEP 1: Check Status (Mode B)
       const res = await fetch(`/api/poll?request_id=${requestId}`);
       
-      // Handle HTML/500 Errors gracefully
       if (!res.ok) {
-        throw new Error('Network error while polling server');
+        const errText = await res.text();
+        throw new Error(`Polling Error (${res.status}): ${errText}`);
       }
 
       const json = await res.json();
 
+      // Update Logs
       if (json.logs) {
         const newLogs = json.logs.map(l => l.message).filter(Boolean);
         if (newLogs.length > 0) setLogs(newLogs);
       }
 
+      // Handle Status
       if (json.status === 'COMPLETED') {
+        setStatus('FETCHING_RESULT');
         
-        // --- EXTRACT RESULT ---
-        // Your workflow returns 'video' AND 'images'
-        const vid = json.data?.video?.url || json.data?.url;
-        const imgs = json.data?.images;
+        let finalData = json;
+
+        // STEP 2: If there is a separate response_url, fetch it (Mode A)
+        if (json.response_url) {
+            const encodedUrl = encodeURIComponent(json.response_url);
+            const resultRes = await fetch(`/api/poll?url=${encodedUrl}`);
+            
+            if (!resultRes.ok) throw new Error('Failed to retrieve final result data');
+            finalData = await resultRes.json();
+        }
+
+        // STEP 3: Extract Media
+        const vid = finalData.video?.url || finalData.url; 
+        const imgs = finalData.images;
 
         if (vid) setVideoUrl(vid);
         if (imgs && imgs.length > 0) setImagesUrl(imgs[0].url);
@@ -107,9 +120,9 @@ export default function Dashboard() {
         setError(`Generation Failed: ${json.error || 'Unknown error'}`);
         setLoading(false);
       } else {
-        // Still running -> Poll again in 5 seconds
+        // Still running -> Poll again in 4 seconds
         setStatus(json.status);
-        setTimeout(() => checkStatus(requestId), 5000);
+        setTimeout(() => checkStatus(requestId), 4000);
       }
     } catch (err) {
       console.error(err);
@@ -144,7 +157,7 @@ export default function Dashboard() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to start job');
       
-      // Start polling with the simple request_id
+      // Start polling with ID
       checkStatus(data.request_id);
 
     } catch (err) {
@@ -220,7 +233,7 @@ export default function Dashboard() {
                 </div>
               )}
               
-              {/* Image Grid Preview (if available) */}
+              {/* Image Grid Preview */}
               {imagesUrl && (
                  <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
                    <img src={imagesUrl} alt="Generated" className="w-full" />
