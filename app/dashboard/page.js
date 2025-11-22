@@ -21,7 +21,11 @@ export default function Dashboard() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('IDLE'); 
+  
+  // Result State
   const [videoUrl, setVideoUrl] = useState(null);
+  const [imagesUrl, setImagesUrl] = useState(null);
+  
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState('');
   
@@ -33,25 +37,12 @@ export default function Dashboard() {
   useEffect(() => {
     const getUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        router.push('/login'); 
-        return;
-      }
+      if (!user) { router.push('/login'); return; }
 
       setUserId(user.id);
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('credits')
-        .eq('id', user.id)
-        .single();
-
-      if (data) {
-        setCredits(data.credits);
-      }
+      const { data } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
+      if (data) setCredits(data.credits);
     };
-
     getUserData();
   }, [router]);
 
@@ -62,6 +53,7 @@ export default function Dashboard() {
       setFile(selectedFile);
       setPreviewUrl(URL.createObjectURL(selectedFile));
       setVideoUrl(null);
+      setImagesUrl(null);
       setError('');
     }
   };
@@ -69,78 +61,55 @@ export default function Dashboard() {
   // --- HELPER: UPLOAD IMAGE ---
   const uploadImage = async (fileToUpload) => {
     const fileName = `${Date.now()}-${fileToUpload.name}`;
-    const { error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(fileName, fileToUpload);
-
+    const { error } = await supabase.storage.from(BUCKET_NAME).upload(fileName, fileToUpload);
     if (error) throw error;
-
-    const { data: publicData } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(fileName);
-
-    return publicData.publicUrl;
+    const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
+    return data.publicUrl;
   };
 
-  // --- CORE: POLLING LOGIC (FIXED WITH SAFETY CHECKS) ---
-  const checkStatus = async (statusUrl) => {
+  // --- CORE: POLLING LOGIC ---
+  const checkStatus = async (requestId) => {
     try {
-      // 1. Call Proxy for Status
-      const encodedUrl = encodeURIComponent(statusUrl);
-      const res = await fetch(`/api/poll?url=${encodedUrl}`);
+      // We send the ID. The Backend handles all URL complexity.
+      const res = await fetch(`/api/poll?request_id=${requestId}`);
       
+      // Handle HTML/500 Errors gracefully
       if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Polling Error: ${errText}`);
+        throw new Error('Network error while polling server');
       }
 
       const json = await res.json();
 
-      // Update Logs
       if (json.logs) {
         const newLogs = json.logs.map(l => l.message).filter(Boolean);
         if (newLogs.length > 0) setLogs(newLogs);
       }
 
-      // 2. Handle Status
       if (json.status === 'COMPLETED') {
         
-        let finalJson = json;
+        // --- EXTRACT RESULT ---
+        // Your workflow returns 'video' AND 'images'
+        const vid = json.data?.video?.url || json.data?.url;
+        const imgs = json.data?.images;
 
-        // If the result is at a different URL (e.g. fal.media), fetch it safely via proxy
-        if (json.response_url) {
-            const responseUrlEncoded = encodeURIComponent(json.response_url);
-            const finalRes = await fetch(`/api/poll?url=${responseUrlEncoded}`);
+        if (vid) setVideoUrl(vid);
+        if (imgs && imgs.length > 0) setImagesUrl(imgs[0].url);
 
-            // --- FIX: Check if this second request failed before parsing ---
-            if (!finalRes.ok) {
-                const errText = await finalRes.text();
-                throw new Error(`Failed to fetch final result: ${errText}`);
-            }
-            
-            finalJson = await finalRes.json();
+        if (!vid && (!imgs || imgs.length === 0)) {
+           throw new Error('Job finished but no media found in result.');
         }
 
-        // Extract Video
-        const video = finalJson.video?.url || finalJson.images?.[0]?.url || finalJson.url;
-
-        if (video) {
-            setVideoUrl(video);
-            setStatus('COMPLETED');
-            setLoading(false);
-            // Visual credit update
-            setCredits((prev) => Math.max(0, prev - CREDIT_COST));
-        } else {
-            throw new Error('Job completed but no video URL found in result.');
-        }
+        setStatus('COMPLETED');
+        setLoading(false);
+        setCredits((prev) => Math.max(0, prev - CREDIT_COST));
 
       } else if (json.status === 'FAILED') {
         setError(`Generation Failed: ${json.error || 'Unknown error'}`);
         setLoading(false);
       } else {
-        // Still running -> Poll again in 4 seconds
+        // Still running -> Poll again in 5 seconds
         setStatus(json.status);
-        setTimeout(() => checkStatus(statusUrl), 4000);
+        setTimeout(() => checkStatus(requestId), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -158,31 +127,25 @@ export default function Dashboard() {
     setLoading(true);
     setError('');
     setLogs([]);
+    setVideoUrl(null);
+    setImagesUrl(null);
     setStatus('UPLOADING');
 
     try {
-      // 1. Upload Image
       const imageUrl = await uploadImage(file);
 
-      // 2. Trigger Backend
       setStatus('QUEUED');
       const res = await fetch('/api/run-fal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          upload_your_portrait: imageUrl,
-          user_id: userId 
-        }),
+        body: JSON.stringify({ upload_your_portrait: imageUrl, user_id: userId }),
       });
 
       const data = await res.json();
-
       if (!data.success) throw new Error(data.error || 'Failed to start job');
       
-      // 3. Start Polling using the URL returned by the backend
-      if (!data.status_url) throw new Error('Backend did not return a status URL');
-      
-      checkStatus(data.status_url);
+      // Start polling with the simple request_id
+      checkStatus(data.request_id);
 
     } catch (err) {
       console.error(err);
@@ -193,22 +156,17 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      
       <div className="w-full max-w-md space-y-8">
         
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900">
-            Your Mood Today
-          </h1>
+          <h1 className="text-3xl font-extrabold text-gray-900">Your Mood Today</h1>
           <div className="mt-2 flex justify-center items-center space-x-2">
              <span className="text-gray-600">Available Credits:</span>
              {credits === null ? (
                <span className="animate-pulse bg-gray-200 w-8 h-6 rounded"></span>
              ) : (
-               <span className={`font-bold ${credits < CREDIT_COST ? 'text-red-500' : 'text-green-600'}`}>
-                 {credits}
-               </span>
+               <span className={`font-bold ${credits < CREDIT_COST ? 'text-red-500' : 'text-green-600'}`}>{credits}</span>
              )}
           </div>
         </div>
@@ -218,33 +176,15 @@ export default function Dashboard() {
           
           {/* File Picker */}
           <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 hover:bg-gray-50 transition relative">
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleFileChange}
-              className="hidden" 
-              id="file-upload"
-              disabled={loading}
-            />
-            <label 
-              htmlFor="file-upload" 
-              className="cursor-pointer flex flex-col items-center w-full"
-            >
+            <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" disabled={loading} />
+            <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center w-full">
               {previewUrl ? (
                 <div className="relative">
-                    <img 
-                    src={previewUrl} 
-                    alt="Preview" 
-                    className="h-64 w-64 object-cover rounded-full shadow-md mb-4 border-4 border-white"
-                    />
-                    <div className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow text-xs font-bold text-gray-600">
-                        CHANGE
-                    </div>
+                    <img src={previewUrl} alt="Preview" className="h-64 w-64 object-cover rounded-full shadow-md mb-4 border-4 border-white" />
+                    <div className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow text-xs font-bold text-gray-600">CHANGE</div>
                 </div>
               ) : (
-                <div className="h-32 w-32 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-4xl">
-                  📷
-                </div>
+                <div className="h-32 w-32 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-4xl">📷</div>
               )}
               {!previewUrl && <span className="text-blue-600 font-semibold">Select Portrait</span>}
             </label>
@@ -253,66 +193,45 @@ export default function Dashboard() {
           {/* Buttons */}
           {credits !== null && credits < CREDIT_COST ? (
             <div className="text-center space-y-3">
-                <div className="p-3 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
-                    You need <strong>{CREDIT_COST} credits</strong> to generate a video.
-                </div>
-                <button
-                    onClick={() => router.push('/shop')}
-                    className="w-full py-3 rounded-xl text-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-lg transition-transform transform hover:scale-105"
-                >
-                    Buy Credits ⚡
-                </button>
+                <div className="p-3 bg-yellow-50 text-yellow-800 rounded-lg text-sm">You need <strong>{CREDIT_COST} credits</strong>.</div>
+                <button onClick={() => router.push('/shop')} className="w-full py-3 rounded-xl text-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-lg transition-transform transform hover:scale-105">Buy Credits ⚡</button>
             </div>
           ) : (
-            <button 
-                onClick={handleGenerate}
-                disabled={loading || !file}
-                className={`w-full py-4 rounded-xl text-lg font-bold text-white shadow-lg transition-all flex items-center justify-center space-x-2
-                ${loading || !file 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl transform hover:-translate-y-0.5'
-                }`}
-            >
-                {loading ? (
-                    <span>Processing: {status}...</span>
-                ) : (
-                    <>
-                        <span>Generate Video</span>
-                        <span className="bg-white/20 px-2 py-0.5 rounded text-sm font-normal">-{CREDIT_COST}</span>
-                    </>
-                )}
+            <button onClick={handleGenerate} disabled={loading || !file} className={`w-full py-4 rounded-xl text-lg font-bold text-white shadow-lg transition-all flex items-center justify-center space-x-2 ${loading || !file ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl transform hover:-translate-y-0.5'}`}>
+                {loading ? <span>Processing: {status}...</span> : <><span>Generate Video</span><span className="bg-white/20 px-2 py-0.5 rounded text-sm font-normal">-{CREDIT_COST}</span></>}
             </button>
           )}
 
           {/* Error */}
-          {error && (
-            <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-200">
-              {error}
-            </div>
-          )}
+          {error && <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-200">{error}</div>}
 
           {/* Logs */}
-          {loading && logs.length > 0 && (
-             <div className="text-xs text-gray-400 font-mono text-center h-6 overflow-hidden">
-                {logs[logs.length - 1]}
-             </div>
-          )}
+          {loading && logs.length > 0 && <div className="text-xs text-gray-400 font-mono text-center h-6 overflow-hidden">{logs[logs.length - 1]}</div>}
 
-          {/* Result */}
-          {videoUrl && (
-            <div className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <h3 className="text-center text-lg font-bold text-green-600 mb-3">Video Ready!</h3>
-              <div className="rounded-xl overflow-hidden shadow-2xl border-4 border-gray-100 bg-black">
-                <video src={videoUrl} controls autoPlay loop className="w-full" />
-              </div>
-              <a 
-                href={videoUrl} 
-                download="mood.mp4"
-                target="_blank"
-                className="block mt-4 text-center text-blue-600 text-sm hover:underline"
-              >
-                Download Video
-              </a>
+          {/* RESULTS */}
+          {(videoUrl || imagesUrl) && (
+            <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <h3 className="text-center text-lg font-bold text-green-600">Your Results!</h3>
+              
+              {/* Video */}
+              {videoUrl && (
+                <div className="rounded-xl overflow-hidden shadow-2xl border-4 border-gray-100 bg-black">
+                  <video src={videoUrl} controls autoPlay loop className="w-full" />
+                </div>
+              )}
+              
+              {/* Image Grid Preview (if available) */}
+              {imagesUrl && (
+                 <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
+                   <img src={imagesUrl} alt="Generated" className="w-full" />
+                 </div>
+              )}
+
+              {videoUrl && (
+                <a href={videoUrl} download="mood.mp4" target="_blank" className="block text-center text-blue-600 text-sm hover:underline font-bold">
+                  Download Video ⬇️
+                </a>
+              )}
             </div>
           )}
         </div>
