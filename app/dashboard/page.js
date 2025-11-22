@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
-// Manual Supabase Client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -13,11 +12,7 @@ export default function Dashboard() {
   const [credits, setCredits] = useState(0)
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
-  
-  // Results
-  const [finalImage, setFinalImage] = useState(null)
-  const [finalVideo, setFinalVideo] = useState(null)
-  const [rawDebug, setRawDebug] = useState(null)
+  const [mediaResult, setMediaResult] = useState(null)
   
   const [selectedFile, setSelectedFile] = useState(null)
   
@@ -26,7 +21,6 @@ export default function Dashboard() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [authMsg, setAuthMsg] = useState('')
 
-  // --- AUTH & CREDITS ---
   async function fetchCredits(userId) {
     const { data } = await supabase.from('profiles').select('credits').eq('id', userId).single()
     if(data) setCredits(data.credits)
@@ -70,7 +64,6 @@ export default function Dashboard() {
     })
   }
 
-  // --- IMAGE COMPRESSOR ---
   const compressImage = (file) => {
     return new Promise((resolve, reject) => {
       const img = new Image()
@@ -90,84 +83,46 @@ export default function Dashboard() {
     })
   }
 
-  // --- UNIVERSAL PARSER (Finds hidden links) ---
   const extractMedia = (obj) => {
     if (!obj) return
     const json = JSON.stringify(obj)
-    
-    // Find all https links ending in media formats
     const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
     const matches = json.match(urlRegex) || []
     
+    let v = null, i = []
     matches.forEach(url => {
         const clean = url.replace(/\\/g, '')
         if (clean.includes('avatar') || clean.includes('icon')) return
-
-        if (clean.match(/\.(mp4|webm)/i)) {
-            setFinalVideo(clean)
-        } else {
-            setFinalImage(clean)
-        }
+        if (clean.match(/\.(mp4|webm)/i)) v = clean
+        else i.push(clean)
     })
+    return { video: v, images: i }
   }
 
-  // --- POLLING LOGIC ---
   async function pollStatus(statusUrl) {
-    setStatus('AI is generating... (Approx 3-5 mins)')
+    setStatus('AI is generating... (Wait ~4 mins)')
     
     const interval = setInterval(async () => {
       try {
-        // 1. Check Status
+        // Simple Poll - No extra tricks
         const res = await fetch(`/api/poll?url=${encodeURIComponent(statusUrl)}`)
         const data = await res.json()
 
-        // Scan status update for any immediate links (e.g. in logs)
-        extractMedia(data)
-
         if (data.status === 'COMPLETED') {
           clearInterval(interval)
-          setStatus('Finalizing...')
-          
-          // 2. Fetch the Result (response_url)
-          if (data.response_url) {
-             try {
-                 const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
-                 const finalData = await finalRes.json()
-                 extractMedia(finalData)
-                 // Add to debug payload
-                 data.final_result = finalData
-             } catch (e) { console.warn(e) }
-          }
-
-          // 3. Fetch the LOGS (Explicitly)
-          // Logic: status url ends in .../status. We want .../logs
-          if (statusUrl.endsWith('/status')) {
-              const logsUrl = statusUrl.replace('/status', '/logs')
-              try {
-                  const logRes = await fetch(`/api/poll?url=${encodeURIComponent(logsUrl)}`)
-                  const logData = await logRes.json()
-                  extractMedia(logData)
-                  // Add to debug payload
-                  data.full_logs = logData
-              } catch (e) { console.warn(e) }
-          }
-
-          // Save everything we found to debug if parser failed
-          setRawDebug(data)
-
           setLoading(false)
           setStatus('Done!')
+          setMediaResult(data) // Save the status object directly
           if(session?.user?.id) fetchCredits(session.user.id)
-
         } else if (data.status === 'FAILED') {
           clearInterval(interval)
           setLoading(false)
-          setStatus('Generation Failed. Credits refunded.')
+          setStatus('Generation Failed.')
         }
       } catch (e) {
         console.error("Polling error", e)
       }
-    }, 5000) // Poll every 5s
+    }, 5000)
   }
 
   async function handleRunApp(appId) {
@@ -178,9 +133,7 @@ export default function Dashboard() {
 
     setLoading(true)
     setStatus('Compressing Image...')
-    setFinalImage(null)
-    setFinalVideo(null)
-    setRawDebug(null)
+    setMediaResult(null)
 
     try {
       let inputs = {}
@@ -188,9 +141,11 @@ export default function Dashboard() {
       if (appId === 'mood') {
         const base64Image = await compressImage(selectedFile)
         
-        // V2 Workflow Inputs
         inputs = {
-          upload_your_portrait: base64Image 
+          // NO PROMPT (As per your V2 spec)
+          // If this fails with 422, we know FOR SURE it's the API hitting the wrong version
+          upload_your_portrait: base64Image,
+          seed: Date.now() // Force fresh run
         }
       } else {
         inputs = { prompt: "A futuristic masterpiece" }
@@ -205,7 +160,6 @@ export default function Dashboard() {
       })
 
       if (res.status === 413) throw new Error("Image too large.")
-      
       const data = await res.json()
 
       if (data.error) {
@@ -222,6 +176,9 @@ export default function Dashboard() {
       setLoading(false)
     }
   }
+
+  // Simple Renderer
+  const parsed = mediaResult ? extractMedia(mediaResult) : { video: null, images: [] }
 
   if (!session) {
     return (
@@ -287,44 +244,40 @@ export default function Dashboard() {
                 disabled={loading || credits < 20}
                 className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition"
             >
-                {loading ? 'Run App' : 'Run App'}
+                {loading ? 'Processing...' : 'Run App'}
             </button>
         </div>
       </div>
 
-      {/* RESULT AREA */}
-      {(status || finalImage || finalVideo || rawDebug) && (
+      {/* RESULT AREA - SIMPLIFIED */}
+      {(status || mediaResult) && (
         <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-12">
           <h3 className="font-bold text-lg mb-2">
             Status: <span className={loading ? "text-blue-600 animate-pulse" : "text-green-600"}>{status}</span>
           </h3>
           
-          <div className="grid gap-6 mt-4">
-            {finalImage && (
-                <div>
-                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Frame</h4>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={finalImage} className="w-full rounded-lg shadow-md" alt="Result" />
-                    <a href={finalImage} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download Image</a>
-                </div>
-            )}
+          {parsed.video && (
+             <div className="mb-4">
+                <h4 className="font-bold mb-2">Video Result</h4>
+                <video controls src={parsed.video} className="w-full rounded"></video>
+                <a href={parsed.video} download className="text-blue-600 underline text-sm">Download Video</a>
+             </div>
+          )}
 
-            {finalVideo && (
-                <div>
-                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Animation</h4>
-                    <video controls src={finalVideo} className="w-full rounded-lg shadow-md"></video>
-                    <a href={finalVideo} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
-                </div>
-            )}
+          {parsed.images.map((img, i) => (
+             <div key={i} className="mb-4">
+                <h4 className="font-bold mb-2">Image Result</h4>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img} className="w-full rounded" alt="result" />
+                <a href={img} download className="text-blue-600 underline text-sm">Download Image</a>
+             </div>
+          ))}
 
-            {!finalImage && !finalVideo && rawDebug && (
-                <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
-                    <p className="font-bold text-sm">Raw Data (If empty, FAL failed to generate media):</p>
-                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
-                        {JSON.stringify(rawDebug, null, 2)}
-                    </pre>
-                </div>
-            )}
+          <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
+            <p className="font-bold text-sm">Raw Data (For Debugging):</p>
+            <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
+                {JSON.stringify(mediaResult, null, 2)}
+            </pre>
           </div>
         </div>
       )}
