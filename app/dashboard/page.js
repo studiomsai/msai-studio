@@ -82,10 +82,10 @@ export default function Dashboard() {
     return publicData.publicUrl;
   };
 
-  // --- CORE: POLLING LOGIC (SMART FRONTEND) ---
+  // --- CORE: POLLING LOGIC (FIXED WITH SAFETY CHECKS) ---
   const checkStatus = async (statusUrl) => {
     try {
-      // 1. Call our "Pass-Through" Proxy to get the Status
+      // 1. Call Proxy for Status
       const encodedUrl = encodeURIComponent(statusUrl);
       const res = await fetch(`/api/poll?url=${encodedUrl}`);
       
@@ -96,7 +96,7 @@ export default function Dashboard() {
 
       const json = await res.json();
 
-      // Update Logs (FAL standard log format)
+      // Update Logs
       if (json.logs) {
         const newLogs = json.logs.map(l => l.message).filter(Boolean);
         if (newLogs.length > 0) setLogs(newLogs);
@@ -105,18 +105,23 @@ export default function Dashboard() {
       // 2. Handle Status
       if (json.status === 'COMPLETED') {
         
-        // SUCCESS! Now we need to find where the actual data is.
-        // FAL V2 usually puts the final result URL in 'json.response_url'
         let finalJson = json;
 
+        // If the result is at a different URL (e.g. fal.media), fetch it safely via proxy
         if (json.response_url) {
-            // We must fetch this new URL to get the actual video/image
             const responseUrlEncoded = encodeURIComponent(json.response_url);
             const finalRes = await fetch(`/api/poll?url=${responseUrlEncoded}`);
+
+            // --- FIX: Check if this second request failed before parsing ---
+            if (!finalRes.ok) {
+                const errText = await finalRes.text();
+                throw new Error(`Failed to fetch final result: ${errText}`);
+            }
+            
             finalJson = await finalRes.json();
         }
 
-        // Extract the video or image URL from the final JSON
+        // Extract Video
         const video = finalJson.video?.url || finalJson.images?.[0]?.url || finalJson.url;
 
         if (video) {
@@ -133,7 +138,7 @@ export default function Dashboard() {
         setError(`Generation Failed: ${json.error || 'Unknown error'}`);
         setLoading(false);
       } else {
-        // Still running (IN_QUEUE / IN_PROGRESS) -> Poll again in 4 seconds
+        // Still running -> Poll again in 4 seconds
         setStatus(json.status);
         setTimeout(() => checkStatus(statusUrl), 4000);
       }

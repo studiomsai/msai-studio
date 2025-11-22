@@ -10,8 +10,26 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Missing URL parameter' }, { status: 400 });
   }
 
+  // 1. Security: Allow all FAL domains (API & Storage)
+  const ALLOWED_DOMAINS = [
+    'queue.fal.run',
+    'fal.media',
+    'v3.fal.media',
+    'fal-cdn.com'
+  ];
+
   try {
-    // 1. Relay the request directly to FAL
+    const targetUrlObj = new URL(url);
+    if (!ALLOWED_DOMAINS.some(domain => targetUrlObj.hostname.endsWith(domain))) {
+      return NextResponse.json({ error: 'Invalid URL domain' }, { status: 403 });
+    }
+  } catch (e) {
+    return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
+  }
+
+  try {
+    // 2. Relay the request
+    // We remove content-type headers to avoid confusing the result fetch
     const falResponse = await fetch(url, {
       method: 'GET',
       headers: {
@@ -20,10 +38,9 @@ export async function GET(request) {
       },
     });
 
-    // 2. Get the raw body (text) so we don't crash on JSON parsing errors
+    // 3. Return the Raw Text (safer than parsing JSON here)
     const data = await falResponse.text();
 
-    // 3. Return exactly what FAL returned (Status + Body)
     return new NextResponse(data, {
       status: falResponse.status,
       headers: {
