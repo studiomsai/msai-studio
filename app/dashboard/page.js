@@ -1,6 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { fal } from '@fal-ai/client'
+
+// Configure Proxy
+fal.config({
+  proxyUrl: '/api/fal/proxy',
+})
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -14,9 +20,7 @@ export default function Dashboard() {
   const [status, setStatus] = useState('')
   
   // Results
-  const [finalImage, setFinalImage] = useState(null)
-  const [finalVideo, setFinalVideo] = useState(null)
-  const [rawDebug, setRawDebug] = useState(null)
+  const [mediaResult, setMediaResult] = useState(null)
   
   const [selectedFile, setSelectedFile] = useState(null)
   const [email, setEmail] = useState('')
@@ -61,101 +65,30 @@ export default function Dashboard() {
   }
 
   async function handleGoogleLogin() {
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/dashboard` } })
-  }
-
-  const compressImage = (file) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.src = URL.createObjectURL(file)
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX_WIDTH = 1500
-        const scale = MAX_WIDTH / img.width
-        canvas.width = scale < 1 ? MAX_WIDTH : img.width
-        canvas.height = scale < 1 ? img.height * scale : img.height
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        const base64 = canvas.toDataURL('image/jpeg', 0.7)
-        resolve(base64)
-      }
-      img.onerror = (e) => reject(e)
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` }
     })
   }
 
-  const extractMedia = (obj) => {
-    if (!obj) return
-    const json = JSON.stringify(obj)
-    const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
-    const matches = json.match(urlRegex) || []
-    
-    matches.forEach(url => {
-        const clean = url.replace(/\\/g, '')
-        if (clean.includes('avatar') || clean.includes('icon')) return
-
-        if (clean.match(/\.(mp4|webm)/i)) {
-            setFinalVideo(clean)
-        } else {
-            setFinalImage(clean)
-        }
-    })
+  async function deductCredits(cost) {
+    if (!session?.user?.id) return false
+    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
+    if (!profile || profile.credits < cost) {
+        setStatus('Not enough credits.')
+        return false
+    }
+    await supabase.from('profiles').update({ credits: profile.credits - cost }).eq('id', session.user.id)
+    fetchCredits(session.user.id)
+    return true
   }
 
-  // --- MANUAL POLLING WITH EXPLICIT LOG FETCH ---
-  async function pollStatus(statusUrl) {
-    setStatus('AI is generating... (This takes about 30s)')
-    
-    // 1. Remove the bad ?logs=1 param (Fixes 500 Error)
-    const pollUrl = statusUrl
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/poll?url=${encodeURIComponent(pollUrl)}`)
-        const data = await res.json()
-
-        if (data.status === 'COMPLETED') {
-          clearInterval(interval)
-          setStatus('Finalizing...')
-          
-          // 2. Fetch the RESULT
-          if (data.response_url) {
-             try {
-                 const finalRes = await fetch(`/api/poll?url=${encodeURIComponent(data.response_url)}`)
-                 const finalData = await finalRes.json()
-                 extractMedia(finalData)
-                 // If we found media in result, great. If not, we check logs below.
-             } catch (e) { console.warn(e) }
-          }
-
-          // 3. Fetch the LOGS (Explicitly)
-          // Construct logs URL: replace '/status' with '/logs'
-          if (statusUrl.includes('/status')) {
-              const logsUrl = statusUrl.replace('/status', '/logs')
-              try {
-                  const logsRes = await fetch(`/api/poll?url=${encodeURIComponent(logsUrl)}`)
-                  const logsData = await logsRes.json()
-                  
-                  // logsData is usually an array of log objects
-                  extractMedia(logsData)
-                  
-                  // Save logs as debug if everything else failed
-                  if (!finalImage && !finalVideo) setRawDebug(logsData)
-              } catch (e) { console.warn("Log fetch failed", e) }
-          }
-
-          setLoading(false)
-          setStatus('Done!')
-          if(session?.user?.id) fetchCredits(session.user.id)
-
-        } else if (data.status === 'FAILED') {
-          clearInterval(interval)
-          setLoading(false)
-          setStatus('Generation Failed. Credits refunded.')
-        }
-      } catch (e) {
-        console.error("Polling error", e)
-      }
-    }, 2000)
+  async function refundCredits(cost) {
+    if (!session?.user?.id) return
+    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single()
+    await supabase.from('profiles').update({ credits: profile.credits + cost }).eq('id', session.user.id)
+    fetchCredits(session.user.id)
+    setStatus('Run failed. Credits refunded.')
   }
 
   async function handleRunApp(appId) {
@@ -164,49 +97,116 @@ export default function Dashboard() {
         return
     }
 
+    const cost = 20
+    const paid = await deductCredits(cost)
+    if (!paid) return
+
     setLoading(true)
-    setStatus('Compressing Image...')
-    setFinalImage(null)
-    setFinalVideo(null)
-    setRawDebug(null)
+    setStatus('Uploading Image...')
+    setMediaResult(null)
 
     try {
-      let inputs = {}
-
-      if (appId === 'mood') {
-        const base64Image = await compressImage(selectedFile)
-        inputs = {
-          prompt: "make me smile", 
-          upload_your_portrait: base64Image 
-        }
-      } else {
-        inputs = { prompt: "A futuristic masterpiece" }
+      let imageUrl = null
+      if (selectedFile) {
+          // 1. Upload using official client (No 413)
+          imageUrl = await fal.storage.upload(selectedFile)
       }
 
-      setStatus('Sending to AI...')
-      
-      const res = await fetch('/api/run-fal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: session.user.id, appId, inputs })
+      setStatus('Queued. Waiting for AI...')
+
+      // 2. Run Workflow V2
+      const result = await fal.subscribe('workflows/Mc-Mark/your-mood-today-v2', {
+        input: {
+          // CORRECT INPUT KEY FOR V2
+          upload_your_portrait: imageUrl 
+        },
+        logs: true,
+        onQueueUpdate: (update) => {
+          if (update.status === 'IN_PROGRESS') {
+             if (update.logs && update.logs.length > 0) {
+                 const lastLog = update.logs[update.logs.length - 1].message
+                 setStatus(`AI: ${lastLog}`)
+             } else {
+                 setStatus('AI is generating video (approx 3-5 mins)...')
+             }
+          }
+        }
       })
 
-      if (res.status === 413) throw new Error("Image too large.")
-      const data = await res.json()
-
-      if (data.error) {
-        setStatus('Error: ' + data.error)
-        setLoading(false)
-        fetchCredits(session.user.id)
-      } else {
-        setStatus('Job Queued.')
-        pollStatus(data.data.status_url)
-      }
-
-    } catch (e) {
-      setStatus("Error: " + e.message)
-      setLoading(false)
+      setStatus('Done!')
+      setMediaResult(result)
+      
+    } catch (error) {
+      console.error(error)
+      setStatus(`Error: ${error.message}`)
+      refundCredits(cost)
     }
+    
+    setLoading(false)
+  }
+
+  // --- UNIVERSAL PARSER (Same logic as before, applied to official result) ---
+  const renderResults = (data) => {
+    if (!data) return null;
+    
+    let images = []
+    let videoUrl = null
+
+    // Convert everything to string to find hidden links
+    const jsonString = JSON.stringify(data)
+    const urlRegex = /https?:\/\/[^"'\s]+\.(?:mp4|png|jpg|jpeg|webp)(?:[^"'\s]*)?/gi
+    
+    const matches = jsonString.match(urlRegex) || []
+    
+    matches.forEach(url => {
+        const clean = url.replace(/\\/g, '') 
+        if (clean.includes('avatar') || clean.includes('icon') || clean.includes('profile')) return
+
+        if (clean.match(/\.(mp4|webm)/i)) {
+            videoUrl = clean
+        } else {
+            images.push(clean)
+        }
+    })
+    // Unique images
+    images = [...new Set(images)]
+
+    return (
+        <div className="grid gap-6 mt-4">
+            {images.length > 0 && (
+                <div>
+                    <h4 className="font-bold mb-2 text-slate-700">Images</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                        {images.map((url, i) => (
+                            <div key={i}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={url} className="w-full rounded-lg shadow-md" alt="AI Result" />
+                                <a href={url} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download</a>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {videoUrl && (
+                <div>
+                    <h4 className="font-bold mb-2 text-slate-700">Video</h4>
+                    <video controls src={videoUrl} className="w-full rounded-lg shadow-md"></video>
+                    <a href={videoUrl} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
+                </div>
+            )}
+
+            {/* Debugging */}
+            {images.length === 0 && !videoUrl && (
+                <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
+                    <p className="font-bold text-sm">Raw Output (Debug):</p>
+                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-96 mt-2">
+                        {JSON.stringify(data, null, 2)}
+                    </pre>
+                </div>
+            )}
+        </div>
+    )
   }
 
   if (!session) {
@@ -278,40 +278,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* RESULT AREA */}
-      {(status || finalImage || finalVideo || rawDebug) && (
+      {(status || mediaResult) && (
         <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-12">
           <h3 className="font-bold text-lg mb-2">
             Status: <span className={loading ? "text-blue-600 animate-pulse" : "text-green-600"}>{status}</span>
           </h3>
-          
-          <div className="grid gap-6 mt-4">
-            {finalImage && (
-                <div>
-                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Frame</h4>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={finalImage} className="w-full rounded-lg shadow-md" alt="Result" />
-                    <a href={finalImage} target="_blank" download className="block mt-2 text-center bg-blue-600 text-white py-2 rounded text-sm">Download Image</a>
-                </div>
-            )}
-
-            {finalVideo && (
-                <div>
-                    <h4 className="font-bold mb-2 text-slate-700">Your Mood Animation</h4>
-                    <video controls src={finalVideo} className="w-full rounded-lg shadow-md"></video>
-                    <a href={finalVideo} target="_blank" download className="block mt-2 text-center bg-slate-900 text-white py-2 rounded text-sm">Download Video</a>
-                </div>
-            )}
-
-            {!finalImage && !finalVideo && rawDebug && (
-                <div className="bg-yellow-50 p-4 rounded text-yellow-700 mt-4">
-                    <p className="font-bold text-sm">Debug Data:</p>
-                    <pre className="bg-slate-800 text-slate-200 p-4 rounded text-xs overflow-auto max-h-64 mt-2">
-                        {JSON.stringify(rawDebug, null, 2)}
-                    </pre>
-                </div>
-            )}
-          </div>
+          {renderResults(mediaResult)}
         </div>
       )}
 
