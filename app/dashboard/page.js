@@ -60,25 +60,23 @@ export default function Dashboard() {
 
   // --- HELPER: UPLOAD IMAGE ---
   const uploadImage = async (fileToUpload) => {
-    const fileName = `${Date.now()}-${fileToUpload.name}`;
+    // Sanitize filename
+    const cleanName = fileToUpload.name.replace(/[^a-zA-Z0-9.]/g, '_');
+    const fileName = `${Date.now()}_${cleanName}`;
+    
     const { error } = await supabase.storage.from(BUCKET_NAME).upload(fileName, fileToUpload);
     if (error) throw error;
+    
     const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
     return data.publicUrl;
   };
 
-  // --- CORE: POLLING LOGIC (Decoupled) ---
+  // --- CORE: POLLING LOGIC (RELAXED) ---
   const checkStatus = async (requestId) => {
     try {
-      // STEP 1: Check Status (Mode B)
+      // 1. Check Status
       const res = await fetch(`/api/poll?request_id=${requestId}`);
-      
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Polling Error (${res.status}): ${errText}`);
-      }
-
-      const json = await res.json();
+      const json = await res.json(); // We know backend now always returns JSON
 
       // Update Logs
       if (json.logs) {
@@ -86,52 +84,68 @@ export default function Dashboard() {
         if (newLogs.length > 0) setLogs(newLogs);
       }
 
-      // Handle Status
+      // 2. Decide what to do based on status
       if (json.status === 'COMPLETED') {
         setStatus('FETCHING_RESULT');
-        
-        let finalData = json;
+        console.log("Job marked COMPLETED. Fetching result...");
 
-        // STEP 2: If there is a separate response_url, fetch it (Mode A)
-        if (json.response_url) {
-            const encodedUrl = encodeURIComponent(json.response_url);
-            const resultRes = await fetch(`/api/poll?url=${encodedUrl}`);
+        // Try to get the result. 
+        // If the result URL is invalid/empty, we handle it safely.
+        try {
+            let finalData = json;
             
-            if (!resultRes.ok) throw new Error('Failed to retrieve final result data');
-            finalData = await resultRes.json();
+            if (json.response_url) {
+                const encodedUrl = encodeURIComponent(json.response_url);
+                const resultRes = await fetch(`/api/poll?url=${encodedUrl}`);
+                
+                if (resultRes.ok) {
+                    finalData = await resultRes.json();
+                } else {
+                    console.warn("Result URL not ready yet, retrying status check...");
+                    // If result fetch fails, maybe it's not actually ready. Go back to polling.
+                    setTimeout(() => checkStatus(requestId), 5000);
+                    return; 
+                }
+            }
+
+            // Extract Media
+            const vid = finalData.video?.url || finalData.url; 
+            const imgs = finalData.images;
+
+            if (vid || (imgs && imgs.length > 0)) {
+                if (vid) setVideoUrl(vid);
+                if (imgs) setImagesUrl(imgs[0].url);
+                
+                setStatus('COMPLETED');
+                setLoading(false);
+                setCredits((prev) => Math.max(0, prev - CREDIT_COST));
+            } else {
+               throw new Error('Completed, but no media found.');
+            }
+
+        } catch (fetchErr) {
+            console.error("Result fetch error:", fetchErr);
+            // Don't fail the whole job, just retry fetching result
+            setTimeout(() => checkStatus(requestId), 5000);
         }
-
-        // STEP 3: Extract Media
-        const vid = finalData.video?.url || finalData.url; 
-        const imgs = finalData.images;
-
-        if (vid) setVideoUrl(vid);
-        if (imgs && imgs.length > 0) setImagesUrl(imgs[0].url);
-
-        if (!vid && (!imgs || imgs.length === 0)) {
-           throw new Error('Job finished but no media found in result.');
-        }
-
-        setStatus('COMPLETED');
-        setLoading(false);
-        setCredits((prev) => Math.max(0, prev - CREDIT_COST));
 
       } else if (json.status === 'FAILED') {
         setError(`Generation Failed: ${json.error || 'Unknown error'}`);
         setLoading(false);
       } else {
-        // Still running -> Poll again in 4 seconds
-        setStatus(json.status);
-        setTimeout(() => checkStatus(requestId), 4000);
+        // Still running (IN_QUEUE, IN_PROGRESS, or fake 404 IN_QUEUE)
+        // Wait 5 seconds (Relaxed Polling)
+        setStatus(json.status || 'LOADING');
+        setTimeout(() => checkStatus(requestId), 5000);
       }
     } catch (err) {
-      console.error(err);
-      setError(err.message);
-      setLoading(false);
+      console.error("Network/System Error:", err);
+      // Don't kill the app on temporary network glitches, just retry
+      setTimeout(() => checkStatus(requestId), 5000);
     }
   };
 
-  // --- MAIN ACTION: GENERATE ---
+  // --- MAIN ACTION ---
   const handleGenerate = async () => {
     if (!file) return setError('Please select an image first.');
     if (credits < CREDIT_COST) return setError('Insufficient credits.');
@@ -157,7 +171,7 @@ export default function Dashboard() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to start job');
       
-      // Start polling with ID
+      // Start polling
       checkStatus(data.request_id);
 
     } catch (err) {
