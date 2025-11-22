@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// THE WORKFLOW ID (Hardcoded to match your specific FAL app)
+// Ensure this ID matches your FAL URL exactly
 const WORKFLOW_ID = 'workflows/Mc-Mark/your-mood-today-v2';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing inputs' }, { status: 400 });
     }
 
-    // 2. Credit Check & Deduction
+    // 2. Credit Check
     const { data: profile } = await supabase
       .from('profiles')
       .select('credits')
@@ -32,12 +32,14 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
     }
 
+    // 3. Deduct Credits
     await supabase
       .from('profiles')
       .update({ credits: profile.credits - 20 })
       .eq('id', user_id);
 
-    // 3. Trigger FAL (Using the specific workflow URL)
+    // 4. Trigger FAL
+    // FIX: We wrap the data in "input" because Workflow V2 requires it.
     const falResponse = await fetch(`https://queue.fal.run/${WORKFLOW_ID}`, {
       method: 'POST',
       headers: {
@@ -45,18 +47,22 @@ export async function POST(request) {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({ upload_your_portrait }),
+      body: JSON.stringify({ 
+        input: {
+            upload_your_portrait: upload_your_portrait
+        }
+      }),
     });
 
     if (!falResponse.ok) {
       const errText = await falResponse.text();
-      return NextResponse.json({ error: `FAL Error: ${errText}` }, { status: falResponse.status });
+      // Refund credits if launch failed
+      await supabase.from('profiles').update({ credits: profile.credits }).eq('id', user_id);
+      return NextResponse.json({ error: `FAL Launch Error: ${errText}` }, { status: falResponse.status });
     }
 
     const falData = await falResponse.json();
 
-    // 4. Return ONLY the request_id. 
-    // The backend poller will handle the URLs from now on.
     return NextResponse.json({ 
       success: true, 
       request_id: falData.request_id 

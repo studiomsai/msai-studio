@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('IDLE'); 
+  const [requestId, setRequestId] = useState(null);
   
   // Result State
   const [videoUrl, setVideoUrl] = useState(null);
@@ -60,7 +61,7 @@ export default function Dashboard() {
 
   // --- HELPER: UPLOAD IMAGE ---
   const uploadImage = async (fileToUpload) => {
-    // Sanitize filename
+    // FIX: Sanitize filename (Spaces cause API errors)
     const cleanName = fileToUpload.name.replace(/[^a-zA-Z0-9.]/g, '_');
     const fileName = `${Date.now()}_${cleanName}`;
     
@@ -71,44 +72,32 @@ export default function Dashboard() {
     return data.publicUrl;
   };
 
-  // --- CORE: POLLING LOGIC (RELAXED) ---
-  const checkStatus = async (requestId) => {
+  // --- CORE: POLLING LOGIC ---
+  const checkStatus = async (reqId) => {
     try {
-      // 1. Check Status
-      const res = await fetch(`/api/poll?request_id=${requestId}`);
-      const json = await res.json(); // We know backend now always returns JSON
+      const res = await fetch(`/api/poll?request_id=${reqId}`);
+      const json = await res.json();
 
-      // Update Logs
-      if (json.logs) {
+      if (json.logs && json.logs.length > 0) {
         const newLogs = json.logs.map(l => l.message).filter(Boolean);
-        if (newLogs.length > 0) setLogs(newLogs);
+        setLogs(prev => [...new Set([...prev, ...newLogs])]);
       }
 
-      // 2. Decide what to do based on status
       if (json.status === 'COMPLETED') {
         setStatus('FETCHING_RESULT');
-        console.log("Job marked COMPLETED. Fetching result...");
-
-        // Try to get the result. 
-        // If the result URL is invalid/empty, we handle it safely.
-        try {
-            let finalData = json;
+        
+        if (json.response_url) {
+            const encodedUrl = encodeURIComponent(json.response_url);
+            const resultRes = await fetch(`/api/poll?url=${encodedUrl}`);
             
-            if (json.response_url) {
-                const encodedUrl = encodeURIComponent(json.response_url);
-                const resultRes = await fetch(`/api/poll?url=${encodedUrl}`);
-                
-                if (resultRes.ok) {
-                    finalData = await resultRes.json();
-                } else {
-                    console.warn("Result URL not ready yet, retrying status check...");
-                    // If result fetch fails, maybe it's not actually ready. Go back to polling.
-                    setTimeout(() => checkStatus(requestId), 5000);
-                    return; 
-                }
+            if (!resultRes.ok) {
+                // If result is 404, wait and try again (it might be uploading)
+                console.warn("Result not ready yet...");
+                setTimeout(() => checkStatus(reqId), 5000);
+                return;
             }
-
-            // Extract Media
+            
+            const finalData = await resultRes.json();
             const vid = finalData.video?.url || finalData.url; 
             const imgs = finalData.images;
 
@@ -120,28 +109,24 @@ export default function Dashboard() {
                 setLoading(false);
                 setCredits((prev) => Math.max(0, prev - CREDIT_COST));
             } else {
-               throw new Error('Completed, but no media found.');
+               throw new Error('Workflow finished but returned no media.');
             }
-
-        } catch (fetchErr) {
-            console.error("Result fetch error:", fetchErr);
-            // Don't fail the whole job, just retry fetching result
-            setTimeout(() => checkStatus(requestId), 5000);
+        } else {
+            throw new Error('Workflow finished without a response URL.');
         }
 
       } else if (json.status === 'FAILED') {
         setError(`Generation Failed: ${json.error || 'Unknown error'}`);
         setLoading(false);
       } else {
-        // Still running (IN_QUEUE, IN_PROGRESS, or fake 404 IN_QUEUE)
-        // Wait 5 seconds (Relaxed Polling)
+        // Still running -> Poll again
         setStatus(json.status || 'LOADING');
-        setTimeout(() => checkStatus(requestId), 5000);
+        setTimeout(() => checkStatus(reqId), 5000);
       }
     } catch (err) {
-      console.error("Network/System Error:", err);
-      // Don't kill the app on temporary network glitches, just retry
-      setTimeout(() => checkStatus(requestId), 5000);
+      console.error(err);
+      // Retry on network errors
+      setTimeout(() => checkStatus(reqId), 5000);
     }
   };
 
@@ -156,6 +141,7 @@ export default function Dashboard() {
     setLogs([]);
     setVideoUrl(null);
     setImagesUrl(null);
+    setRequestId(null);
     setStatus('UPLOADING');
 
     try {
@@ -171,7 +157,7 @@ export default function Dashboard() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to start job');
       
-      // Start polling
+      setRequestId(data.request_id);
       checkStatus(data.request_id);
 
     } catch (err) {
@@ -185,7 +171,6 @@ export default function Dashboard() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="w-full max-w-md space-y-8">
         
-        {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-gray-900">Your Mood Today</h1>
           <div className="mt-2 flex justify-center items-center space-x-2">
@@ -198,10 +183,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-8 space-y-6">
-          
-          {/* File Picker */}
           <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 hover:bg-gray-50 transition relative">
             <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" disabled={loading} />
             <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center w-full">
@@ -217,7 +199,6 @@ export default function Dashboard() {
             </label>
           </div>
 
-          {/* Buttons */}
           {credits !== null && credits < CREDIT_COST ? (
             <div className="text-center space-y-3">
                 <div className="p-3 bg-yellow-50 text-yellow-800 rounded-lg text-sm">You need <strong>{CREDIT_COST} credits</strong>.</div>
@@ -229,35 +210,31 @@ export default function Dashboard() {
             </button>
           )}
 
-          {/* Error */}
-          {error && <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-200">{error}</div>}
+          {requestId && <div className="text-xs text-center text-gray-400 font-mono select-all">ID: {requestId}</div>}
+          {error && <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-200 font-medium">{error}</div>}
 
-          {/* Logs */}
-          {loading && logs.length > 0 && <div className="text-xs text-gray-400 font-mono text-center h-6 overflow-hidden">{logs[logs.length - 1]}</div>}
+          {logs.length > 0 && (
+            <div className="bg-gray-900 rounded-lg p-3 text-left h-32 overflow-y-auto shadow-inner border border-gray-700">
+                <div className="text-xs text-gray-400 mb-2 border-b border-gray-700 pb-1">Server Logs:</div>
+                {logs.map((log, i) => <div key={i} className="text-xs font-mono text-green-400 mb-1 whitespace-pre-wrap break-words">{`> ${log}`}</div>)}
+            </div>
+          )}
 
-          {/* RESULTS */}
           {(videoUrl || imagesUrl) && (
             <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <h3 className="text-center text-lg font-bold text-green-600">Your Results!</h3>
-              
-              {/* Video */}
               {videoUrl && (
                 <div className="rounded-xl overflow-hidden shadow-2xl border-4 border-gray-100 bg-black">
                   <video src={videoUrl} controls autoPlay loop className="w-full" />
                 </div>
               )}
-              
-              {/* Image Grid Preview */}
               {imagesUrl && (
                  <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
                    <img src={imagesUrl} alt="Generated" className="w-full" />
                  </div>
               )}
-
               {videoUrl && (
-                <a href={videoUrl} download="mood.mp4" target="_blank" className="block text-center text-blue-600 text-sm hover:underline font-bold">
-                  Download Video ⬇️
-                </a>
+                <a href={videoUrl} download="mood.mp4" target="_blank" className="block text-center text-blue-600 text-sm hover:underline font-bold">Download Video ⬇️</a>
               )}
             </div>
           )}

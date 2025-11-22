@@ -7,7 +7,7 @@ export async function GET(request) {
   const requestId = searchParams.get('request_id');
   const proxyUrl = searchParams.get('url');
 
-  // --- MODE A: PROXY URL (For fetching the final result later) ---
+  // --- MODE A: PROXY URL (Get Result) ---
   if (proxyUrl) {
     try {
       const response = await fetch(proxyUrl, {
@@ -16,10 +16,12 @@ export async function GET(request) {
           'Accept': 'application/json'
         }
       });
-      // If the final result isn't ready, don't crash. Just say 404.
+      
       if (!response.ok) {
-         return NextResponse.json({ error: 'Not ready' }, { status: 404 });
+        const errText = await response.text();
+        return NextResponse.json({ error: `Upstream Error ${response.status}: ${errText}` }, { status: response.status });
       }
+      
       const data = await response.json();
       return NextResponse.json(data);
     } catch (error) {
@@ -27,42 +29,44 @@ export async function GET(request) {
     }
   }
 
-  // --- MODE B: CHECK STATUS (The Relaxed Poller) ---
+  // --- MODE B: CHECK STATUS ---
   if (requestId) {
     try {
-      // Use the specific Workflow ID provided by you
       const WORKFLOW_ID = 'workflows/Mc-Mark/your-mood-today-v2';
       const statusUrl = `https://queue.fal.run/${WORKFLOW_ID}/requests/${requestId}/status`;
 
-      const response = await fetch(statusUrl, {
+      let response = await fetch(statusUrl, {
         headers: { 
           'Authorization': `Key ${process.env.FAL_KEY}`,
           'Accept': 'application/json' 
         }
       });
 
-      // --- THE FIX IS HERE ---
-      // If FAL says 404 (Request not found), it just means it hasn't propagated yet.
-      // We lie to the frontend and say "IN_QUEUE" so it doesn't panic.
-      if (response.status === 404) {
-        return NextResponse.json({ status: 'IN_QUEUE', logs: [{ message: 'Initializing...' }] });
+      // Fallback to global status if specific fails
+      if (!response.ok) {
+         const globalUrl = `https://queue.fal.run/requests/${requestId}/status`;
+         response = await fetch(globalUrl, {
+            headers: { 'Authorization': `Key ${process.env.FAL_KEY}`, 'Accept': 'application/json' }
+         });
       }
 
-      // If legitimate error, report it
+      // FIX: If 404, it means "Not Ready Yet", NOT "Error". Return IN_QUEUE.
+      if (response.status === 404) {
+        return NextResponse.json({ status: 'IN_QUEUE', logs: [] });
+      }
+
       if (!response.ok) {
         const errText = await response.text();
-        return NextResponse.json({ status: 'FAILED', error: errText }, { status: 200 }); // Return 200 so frontend parses JSON
+        return NextResponse.json({ status: 'FAILED', error: errText }, { status: 200 });
       }
 
       const data = await response.json();
       return NextResponse.json(data);
 
     } catch (error) {
-      console.error('Poll Error:', error);
-      // Return a valid JSON even on crash, to prevent parsing errors
       return NextResponse.json({ status: 'FAILED', error: error.message });
     }
   }
 
-  return NextResponse.json({ error: 'Missing params' }, { status: 400 });
+  return NextResponse.json({ error: 'Missing request_id or url' }, { status: 400 });
 }
