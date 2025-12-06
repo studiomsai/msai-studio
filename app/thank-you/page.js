@@ -30,7 +30,7 @@ export default function ThankYouPage() {
           setError('Email confirmation failed. Please check your email and try again.');
           setLoading(false);
         }
-      } catch (err) {
+      } catch (_err) {
         setError('An error occurred. Please try signing in manually.');
         setLoading(false);
       }

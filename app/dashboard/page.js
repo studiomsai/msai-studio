@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -38,8 +39,8 @@ export default function Dashboard() {
     getUserData();
   }, [router]);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
       setPreviewUrl(URL.createObjectURL(selectedFile));
@@ -174,7 +175,7 @@ export default function Dashboard() {
           <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 hover:bg-gray-50 transition relative">
             <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" disabled={loading} />
             <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center w-full">
-              {previewUrl ? <div className="relative"><img src={previewUrl} alt="Preview" className="h-64 w-64 object-cover rounded-full shadow-md mb-4 border-4 border-white" /><div className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow text-xs font-bold text-gray-600">CHANGE</div></div> : <div className="h-32 w-32 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-4xl">📷</div>}
+            {previewUrl ? <div className="relative"><Image src={previewUrl} alt="Preview" width={256} height={256} className="h-64 w-64 object-cover rounded-full shadow-md mb-4 border-4 border-white" /><div className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow text-xs font-bold text-gray-600">CHANGE</div></div> : <div className="h-32 w-32 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-4xl">📷</div>}
               {!previewUrl && <span className="text-blue-600 font-semibold">Select Portrait</span>}
             </label>
           </div>
@@ -188,7 +189,7 @@ export default function Dashboard() {
           {requestId && <div className="text-xs text-center text-gray-400 font-mono select-all">ID: {requestId}</div>}
           {error && <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded border border-red-200 font-medium whitespace-pre-wrap break-words">{error}</div>}
           {logs.length > 0 && <div className="bg-gray-900 rounded-lg p-3 text-left h-32 overflow-y-auto shadow-inner border border-gray-700"><div className="text-xs text-gray-400 mb-2 border-b border-gray-700 pb-1">Server Logs:</div>{logs.map((log, i) => <div key={i} className="text-xs font-mono text-green-400 mb-1 whitespace-pre-wrap break-words">{`> ${log}`}</div>)}</div>}
-          {(videoUrl || imagesUrl) && <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700"><h3 className="text-center text-lg font-bold text-green-600">Your Results!</h3>{videoUrl && <div className="rounded-xl overflow-hidden shadow-2xl border-4 border-gray-100 bg-black"><video src={videoUrl} controls autoPlay loop className="w-full" /></div>}{imagesUrl && <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200"><img src={imagesUrl} alt="Generated" className="w-full" /></div>}{videoUrl && <a href={videoUrl} download="mood.mp4" target="_blank" className="block text-center text-blue-600 text-sm hover:underline font-bold">Download Video ⬇️</a>}</div>}
+          {imagesUrl && <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200"><Image src={imagesUrl} alt="Generated" width={400} height={300} className="w-full" /></div>}
         </div>
       </div>
     </div>

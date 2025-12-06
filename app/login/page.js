@@ -38,6 +38,10 @@ export default function LoginPage() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/thank-you`,
+          data: {
+            display_name: name,
+            phone: phone
+          }
         },
       });
 
@@ -45,14 +49,6 @@ export default function LoginPage() {
         setError(error.message);
         setLoading(false);
       } else {
-        // Update user metadata with display_name and phone
-        const { error: updateError } = await supabase.auth.updateUser({
-          data: { display_name: name, phone: phone }
-        });
-
-        if (updateError) {
-          console.error('Failed to update user metadata:', updateError);
-        }
         setSuccess('Check your email for confirmation link.');
         setLoading(false);
       }
