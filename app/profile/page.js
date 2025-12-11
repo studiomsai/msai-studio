@@ -112,13 +112,13 @@ export default function ProfilePage() {
   const uploadProfileImage = async (file) => {
     const fileName = `profile_${user.id}_${Date.now()}.${file.name.split('.').pop()}`;
     const { error } = await supabase.storage
-      .from('uploads')
+      .from('profile-images')
       .upload(fileName, file);
 
     if (error) throw error;
 
     const { data } = supabase.storage
-      .from('uploads')
+      .from('profile-images')
       .getPublicUrl(fileName);
 
     return data.publicUrl;
@@ -148,16 +148,23 @@ export default function ProfilePage() {
         if (passwordError) throw passwordError;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('users')
         .update(updates)
-        .eq('id', user.id)
-        .select()
-        .single();
+        .eq('id', user.id);
 
       if (error) throw error;
 
-      setUserData(data);
+      // Refetch the updated profile data
+      const { data: updatedProfile, error: fetchError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      setUserData(updatedProfile);
       setIsEditModalOpen(false);
       setProfileImageFile(null);
       setProfileImagePreview(null);
@@ -178,6 +185,11 @@ export default function ProfilePage() {
       password: ''
     });
     setIsEditModalOpen(true);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
   };
 
   if (loading) {
@@ -254,12 +266,20 @@ export default function ProfilePage() {
             <div className="md:w-3/5 p-8">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
-                <button
-                  onClick={openEditModal}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Edit Profile
-                </button>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={openEditModal}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-4">

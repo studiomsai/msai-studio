@@ -1,10 +1,8 @@
-# Sync All Users to Supabase User Table
+# TODO: Add Logout Button and Navigation Dropdown
 
 ## Tasks
-- [x] Create `/api/sync-users/route.js` API route to sync all authenticated users to the 'users' table
-- [x] Test the sync API route to ensure it works correctly
-- [ ] Optionally, integrate the sync call after successful sign-up in login page
-- [ ] Consider fixing table name inconsistency (profiles vs users) in other API routes
-
-## Progress
-- Started: Creating the sync API route
+- [x] Add logout button to profile page next to "Edit Profile" button
+- [x] Modify navigation bar to replace "Profile" link with dropdown menu triggered by user name
+- [x] Include "Profile" and "Logout" links with icons in the dropdown
+- [x] Test logout functionality on profile page and navigation
+- [ ] Ensure dropdown works correctly on different screen sizes

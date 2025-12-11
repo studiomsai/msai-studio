@@ -10,7 +10,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const BUCKET_NAME = 'uploads';
+const BUCKET_NAME = 'profile-images';
 const CREDIT_COST = 20;
 
 export default function Dashboard() {
