@@ -53,8 +53,8 @@ export default function ProfilePage() {
             phone: user.user_metadata?.phone || '',
             password: '', // Will be handled separately
             profile_image: null,
-            available_credit: 0,
-            total_credit: 0
+            available_credit: 20,
+            total_credit: 20
           };
           const { data: newProfile, error: insertError } = await supabase
             .from('users')
