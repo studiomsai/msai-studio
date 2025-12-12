@@ -33,24 +33,27 @@ export default function LoginPage() {
         return;
       }
 
-      // FIX: Remove unused `data`
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/thank-you`,
-          data: {
-            display_name: name,
-            phone: phone
-          }
-        }
+      // Call the signup API
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          phone
+        }),
       });
 
-      if (error) {
-        setError(error.message);
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error);
         setLoading(false);
       } else {
-        setSuccess('Check your email for confirmation link.');
+        setSuccess('Account created successfully! You can now sign in.');
         setLoading(false);
       }
     } else {
