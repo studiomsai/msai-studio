@@ -104,11 +104,15 @@ body {
   background: #f8f9fa;
   border-radius: 10px;
   border: 1px solid #e9ecef;
+  max-width:70vw;
 }
 
 .results-title {
   margin-bottom: 15px;
   color: #333;
+  font-size:24px;
+  text-align: center;
+    font-weight: 700;
 }
 
 .media-grid {
@@ -159,4 +163,10 @@ body {
   border-radius: 6px;
   overflow-x: auto;
   text-align: left;
+}
+@media  (max-width:767px) {
+  .results-container {
+    max-width:100%;
+  }
+
 }

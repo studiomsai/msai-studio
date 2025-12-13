@@ -141,7 +141,7 @@ export default function DashboardPage() {
         <button
           onClick={handleGenerate}
           disabled={loading || credit <= 0}
-          className="generate-button"
+          className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
             Insufficient credits
           </p>
         )}
-
+    </div>
         {result && (
           <div className="results-container">
             <h3 className="results-title">Your Results:</h3>
@@ -198,7 +198,7 @@ export default function DashboardPage() {
             )}
           </div>
         )}
-      </div>
+     
     </div>
   );
 }
