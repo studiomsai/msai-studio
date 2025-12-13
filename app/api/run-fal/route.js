@@ -1,75 +1,84 @@
-import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { fal } from "@fal-ai/client";
+import { createClient } from "@supabase/supabase-js";
+
+export const runtime = "nodejs";
+
+fal.config({
+  credentials: process.env.FAL_KEY,
+});
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Ensure this ID matches your FAL URL exactly
-const WORKFLOW_ID = 'workflows/Mc-Mark/your-mood-today-v2';
-
-export const dynamic = 'force-dynamic';
-
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const body = await request.json();
-    const { upload_your_portrait, user_id } = body;
+    const body = await req.json();
 
-    // 1. Validation
-    if (!upload_your_portrait || !user_id) {
-      return NextResponse.json({ error: 'Missing inputs' }, { status: 400 });
+    console.log("🔥 RAW REQUEST BODY:", body);
+
+    const { userId, imageUrl } = body;
+
+    // 🔴 HARD GUARD (MOST IMPORTANT LINE)
+    if (!imageUrl || typeof imageUrl !== "string" || imageUrl.trim() === "") {
+      console.error("❌ EMPTY imageUrl RECEIVED:", imageUrl);
+
+      return NextResponse.json(
+        {
+          error: "Image URL is empty before calling FAL",
+          receivedImageUrl: imageUrl,
+        },
+        { status: 400 }
+      );
     }
 
-    // 2. Credit Check
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('credits')
-      .eq('id', user_id)
+    // 1️⃣ Credit check
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("available_credit")
+      .eq("id", userId)
       .single();
 
-    if (!profile || profile.credits < 20) {
-      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
+    if (error) throw error;
+
+    if (user.available_credit <= 0) {
+      return NextResponse.json(
+        { error: "Insufficient credits" },
+        { status: 403 }
+      );
     }
 
-    // 3. Deduct Credits
-    await supabase
-      .from('profiles')
-      .update({ credits: profile.credits - 20 })
-      .eq('id', user_id);
+    console.log("✅ IMAGE URL SENT TO FAL:", imageUrl);
 
-    // 4. Trigger FAL
-    // FIX: We wrap the data in "input" because Workflow V2 requires it.
-    const falResponse = await fetch(`https://queue.fal.run/${WORKFLOW_ID}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${process.env.FAL_KEY}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ 
+    // 2️⃣ Call FAL
+    const stream = await fal.stream(
+      "workflows/MSAI-Studio-is8ypgvdt74v/your-mood-today",
+      {
         input: {
-            upload_your_portrait: upload_your_portrait
-        }
-      }),
-    });
+          upload_your_portrait: imageUrl,
+          enable_safety_checker: true,
+        },
+      }
+    );
 
-    if (!falResponse.ok) {
-      const errText = await falResponse.text();
-      // Refund credits if launch failed
-      await supabase.from('profiles').update({ credits: profile.credits }).eq('id', user_id);
-      return NextResponse.json({ error: `FAL Launch Error: ${errText}` }, { status: falResponse.status });
-    }
+    const result = await stream.done();
 
-    const falData = await falResponse.json();
+    // 3️⃣ Deduct credit
+    await supabase
+      .from("users")
+      .update({
+        available_credit: user.available_credit - 1,
+      })
+      .eq("id", userId);
 
-    return NextResponse.json({ 
-      success: true, 
-      request_id: falData.request_id 
-    });
-
-  } catch (error) {
-    console.error('Trigger Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, result });
+  } catch (err) {
+    console.error("RUN-FAL ERROR:", err);
+    return NextResponse.json(
+      { error: err.message },
+      { status: 500 }
+    );
   }
 }

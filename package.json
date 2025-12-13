@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@fal-ai/client": "^1.0.4",
+    "@fal-ai/client": "^1.7.2",
     "@fal-ai/server-proxy": "^1.1.1",
     "@supabase/supabase-js": "^2.46.1",
     "next": "^15.0.5",
