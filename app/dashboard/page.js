@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 // Client-side Supabase
 const supabase = createClient(
@@ -10,6 +11,7 @@ const supabase = createClient(
 );
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [credit, setCredit] = useState(null);
   const [file, setFile] = useState(null);
@@ -40,6 +42,13 @@ export default function DashboardPage() {
 
     init();
   }, []);
+
+  /* Redirect to login if not authenticated */
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [authLoading, user, router]);
 
   /* ▶ Upload & Generate */
   const handleGenerate = async () => {
@@ -116,7 +125,7 @@ export default function DashboardPage() {
   };
 
   if (authLoading) return <p style={{ padding: 30 }}>Loading…</p>;
-  if (!user) return <p style={{ padding: 30 }}>Please login</p>;
+  if (!user) return null; // This should not be reached due to redirect
 
   return (
     <div className="dashboard-container">

@@ -43,7 +43,7 @@ export async function POST(req) {
 
     if (error) throw error;
 
-    if (user.available_credit <= 0) {
+    if (user.available_credit <= 20) {
       return NextResponse.json(
         { error: "Insufficient credits" },
         { status: 403 }
@@ -69,7 +69,7 @@ export async function POST(req) {
     await supabase
       .from("users")
       .update({
-        available_credit: user.available_credit - 1,
+        available_credit: user.available_credit - 20,
       })
       .eq("id", userId);
 
