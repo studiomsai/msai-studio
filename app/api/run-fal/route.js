@@ -74,19 +74,7 @@ export async function POST(req) {
       .eq("id", userId);
 
     // 4️⃣ Save work to database
-    const { error: workError } = await supabase
-      .from("work")
-      .insert({
-        user_id: userId,
-        title: "Mood Analysis",
-        status: "completed",
-        created_at: new Date().toISOString(),
-      });
-
-    if (workError) {
-      console.error("Error saving work:", workError);
-      throw new Error("Failed to save work to database");
-    }
+   
 
     return NextResponse.json({ success: true, result });
   } catch (err) {
