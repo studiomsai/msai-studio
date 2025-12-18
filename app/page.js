@@ -28,7 +28,7 @@ export default function Home() {
             Generate videos, photoshoots, and stories in seconds.
           </p>
           <Link 
-            href="/dashboard" 
+            href="/mood-today" 
             className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40"
           >
             Get Started Free

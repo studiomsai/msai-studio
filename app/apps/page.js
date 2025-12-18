@@ -19,7 +19,7 @@ export default function Apps() {
                 <p className="text-slate-500 mb-4">{app.desc}</p>
                 <div className="text-blue-600 font-bold">{app.cost} Credits per run</div>
             </div>
-            <Link href="/dashboard" className="bg-slate-900 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-600 transition whitespace-nowrap">
+            <Link href="/mood-today" className="bg-slate-900 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-600 transition whitespace-nowrap">
                 Launch App
             </Link>
           </div>

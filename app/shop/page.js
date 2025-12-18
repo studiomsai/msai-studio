@@ -18,7 +18,7 @@ export default function Shop() {
 
   // Helper to attach User ID to Stripe Link
   const getLink = (baseUrl) => {
-    if (!userId) return "/dashboard" // Redirect to login if not signed in
+    if (!userId) return "/mood-today" // Redirect to login if not signed in
     return `${baseUrl}?client_reference_id=${userId}`
   }
 

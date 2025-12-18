@@ -26,7 +26,7 @@ export default function ThankYouPage() {
         }
 
         if (data.session) {
-          router.push('/dashboard');
+          router.push('/mood-today');
         } else {
           setError('Email confirmation failed. Please check your email and try again.');
           setLoading(false);
@@ -90,7 +90,7 @@ export default function ThankYouPage() {
             Your email has been confirmed. You are now signed in.
           </p>
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/mood-today')}
             className="mt-4 w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Go to Dashboard

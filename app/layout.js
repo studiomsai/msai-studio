@@ -71,7 +71,7 @@ export default function RootLayout({ children }) {
               <Link href="/apps" className="hover:text-blue-400 transition">AI Apps</Link>
               {user ? (
                 <>
-                  <Link href="/dashboard" className="hover:text-blue-400 transition">Dashboard</Link>
+                  <Link href="/mood-today" className="hover:text-blue-400 transition">Dashboard</Link>
                   <div className="relative dropdown-container">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}

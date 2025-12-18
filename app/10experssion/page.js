@@ -99,7 +99,7 @@ export default function DashboardPage() {
       console.log("✅ Image URL verified, sending to backend");
 
       /* 4️⃣ Call backend (INLINE VALUE — NO STATE REUSE) */
-      const res = await fetch("/api/run-fal", {
+      const res = await fetch("/api/run-fal-10-expression", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -130,7 +130,7 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">
-        Your Mood Today
+        10 Expression Images
       </h1>
 
       <div className="dashboard-card">
@@ -168,34 +168,23 @@ export default function DashboardPage() {
               {result.output?.images?.[0]?.url && (
                 <div className="media-item">
                   <h4 className="media-heading">Generated Image</h4>
-                  <img
-                    src={result.output.images[0].url}
-                    alt="Generated Image"
-                    className="generated-image"
-                  />
+                  <div className="flex flex-wrap gap-4">
+                     <img src={result.output.images[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_2[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_3[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_4[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_5[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_6[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_7[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_8[0].url} alt="Generated Image" className="experssion-image"/>
+                     <img src={result.output.images_9[0].url} alt="Generated Image" className="experssion-image"/>
+                  </div>
                   <a
                     href={result.output.images[0].url}
                     download
                     className="download-button"
                   >
                     Download Image
-                  </a>
-                </div>
-              )}
-              {result.output?.video?.url && (
-                <div className="media-item">
-                  <h4 className="media-heading">Generated Video</h4>
-                  <video
-                    controls
-                    src={result.output.video.url}
-                    className="generated-video"
-                  />
-                  <a
-                    href={result.output.video.url}
-                    download
-                    className="download-button"
-                  >
-                    Download Video
                   </a>
                 </div>
               )}

@@ -3,7 +3,7 @@
 ## Completed Tasks
 - [x] Updated `app/api/run-fal/route.js` to use FAL SDK streaming instead of fetch
 - [x] Modified credit logic to deduct credits after successful completion
-- [x] Updated `app/dashboard/page.js` to handle direct API response (removed polling)
+- [x] Updated `app/mood-today/page.js` to handle direct API response (removed polling)
 - [x] Changed workflow URL to new workflow: `workflows/MSAI-Studio-is8ypgvdt74v/your-mood-today`
 - [x] Fixed field name mismatch: Changed from 'credits' to 'available_credit' in both API and dashboard
 - [x] Fixed table name mismatch: Changed from 'profiles' to 'users' table in both API and dashboard
