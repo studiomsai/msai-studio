@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // Client-side Supabase
 const supabase = createClient(
@@ -168,10 +169,12 @@ export default function DashboardPage() {
               {result.output?.images?.[0]?.url && (
                 <div className="media-item">
                   <h4 className="media-heading">Generated Image</h4>
-                  <img
+                  <Image
                     src={result.output.images[0].url}
                     alt="Generated Image"
                     className="generated-image"
+                    width={200}
+                    height={200}
                   />
                   <a
                     href={result.output.images[0].url}

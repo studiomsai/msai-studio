@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // Client-side Supabase
 const supabase = createClient(
@@ -169,15 +170,16 @@ export default function DashboardPage() {
                 <div className="media-item">
                   <h4 className="media-heading">Generated Image</h4>
                   <div className="flex flex-wrap gap-4">
-                     <img src={result.output.images[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_2[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_3[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_4[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_5[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_6[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_7[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_8[0].url} alt="Generated Image" className="experssion-image"/>
-                     <img src={result.output.images_9[0].url} alt="Generated Image" className="experssion-image"/>
+                     <Image src={result.output.images[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_2[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_3[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_4[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_5[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_6[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_7[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_8[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images_9[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                      <Image src={result.output.images_10[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
                   </div>
                   <a
                     href={result.output.images[0].url}

@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request) {
+export async function POST(_request) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     // Fetch all authenticated users from Supabase Auth
     const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();

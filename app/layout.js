@@ -2,7 +2,7 @@
 
 import './globals.css'
 import Link from 'next/link'
-import { useState, useEffect } from 'react';
+import { useState, useLayoutEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -16,7 +16,8 @@ export default function RootLayout({ children }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
 
     const getUser = async () => {
