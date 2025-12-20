@@ -51,19 +51,45 @@ export async function POST(req) {
       if (amountTotal === 2500) creditsToAdd = 300
       if (amountTotal === 7900) creditsToAdd = 1000
 
+      // if (creditsToAdd > 0) {
+      //   console.log("Here------------- creditsToAdd : ", creditsToAdd);
+      //   const { data: profile } = await supabase
+      //     .from('users')
+      //     .select('available_credits')
+      //     .eq('id', userId)
+      //     .single()
+
+
+      //   console.log("Here------------- profile : ", profile);
+
+      //   const currentCredits = profile ? profile.credits : 0
+
+      //   await supabase
+      //     .from('users')
+      //     .update({ available_credits: currentCredits + creditsToAdd })
+      //     .eq('id', userId)
+      // }
+
       if (creditsToAdd > 0) {
-        const { data: profile } = await supabase
+        const { data: profile, error: fetchError } = await supabase
           .from('users')
           .select('available_credits')
           .eq('id', userId)
           .single()
 
-        const currentCredits = profile ? profile.credits : 0
+        console.log('profile:', profile);
+        console.log('fetchError:', fetchError);
 
-        await supabase
+        if (fetchError || !profile) return;
+
+        const currentCredits = profile.available_credits || 0;
+
+        const { error: updateError } = await supabase
           .from('users')
           .update({ available_credits: currentCredits + creditsToAdd })
           .eq('id', userId)
+
+        console.log('updateError:', updateError);
       }
     }
   }
