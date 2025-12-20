@@ -38,6 +38,10 @@ export async function POST(req) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
+
+    console.log("session : ", JSON.stringify(session));
+
+
     const userId = session.client_reference_id
     const amountTotal = session.amount_total
 
