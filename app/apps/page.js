@@ -2,9 +2,11 @@ import Link from 'next/link'
 
 export default function Apps() {
   const apps = [
-    {id: 'mood', name: 'Your Mood Today', cost: 20, icon: '😊', desc: 'Turn your selfie into a mood animation. Upload a portrait and let AI animate your emotions.'},
-    {id: 'photo', name: 'Pro Photoshoot', cost: 15, icon: '📸', desc: 'Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.'},
-    {id: 'story', name: 'Story to Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.'}
+    {id: 'mood', name: 'Your Mood Today', cost: 20, icon: '😊', desc: 'Turn your selfie into a mood animation. Upload a portrait and let AI animate your emotions.', link: '/mood-today' },
+    {id: 'photo', name: '10 Experssion', cost: 15, icon: '📸', desc: 'Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.',link: '/10experssion'},
+    {id: 'video', name: 'Caricature Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/caricature-video'},
+    {id: 'story', name: 'Experssion Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/experssion-video'},
+    {id: 'Selfie', name: 'Dual Selfie', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/dual-selfie'}
   ]
 
   return (
@@ -19,7 +21,7 @@ export default function Apps() {
                 <p className="text-slate-500 mb-4">{app.desc}</p>
                 <div className="text-blue-600 font-bold">{app.cost} Credits per run</div>
             </div>
-            <Link href="/mood-today" className="bg-slate-900 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-600 transition whitespace-nowrap">
+            <Link href={app.link} className="bg-slate-900 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-600 transition whitespace-nowrap">
                 Launch App
             </Link>
           </div>
