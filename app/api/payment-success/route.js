@@ -73,7 +73,7 @@ export async function POST(req) {
       if (creditsToAdd > 0) {
         const { data: profile, error: fetchError } = await supabase
           .from('users')
-          .select('available_credits')
+          .select('available_credit')
           .eq('id', userId)
           .single()
 
@@ -82,11 +82,11 @@ export async function POST(req) {
 
         if (fetchError || !profile) return;
 
-        const currentCredits = profile.available_credits || 0;
+        const currentCredits = profile.available_credit || 0;
 
         const { error: updateError } = await supabase
           .from('users')
-          .update({ available_credits: currentCredits + creditsToAdd })
+          .update({ available_credit: currentCredits + creditsToAdd })
           .eq('id', userId)
 
         console.log('updateError:', updateError);
