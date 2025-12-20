@@ -9,6 +9,7 @@ export const runtime = 'nodejs' // ensure env vars work properly
 
 export async function POST(req) {
   console.log(`Payment success webhook triggered [${new Date().toLocaleString('en-GB', { hour12: false }).replace(/\//g, '-').replace(',', '')}]`);
+  console.log('Request body:', await req.json());
   // Initialize SDKs inside the handler (fixes Vercel build crash)
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   const supabase = createClient(
