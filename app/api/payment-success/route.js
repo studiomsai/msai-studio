@@ -45,16 +45,16 @@ export async function POST(req) {
 
       if (creditsToAdd > 0) {
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('credits')
+          .from('users')
+          .select('available_credits')
           .eq('id', userId)
           .single()
 
         const currentCredits = profile ? profile.credits : 0
 
         await supabase
-          .from('profiles')
-          .update({ credits: currentCredits + creditsToAdd })
+          .from('users')
+          .update({ available_credits: currentCredits + creditsToAdd })
           .eq('id', userId)
       }
     }
