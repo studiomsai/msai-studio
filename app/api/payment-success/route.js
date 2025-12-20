@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs' // ensure env vars work properly
 
 export async function POST(req) {
+  console.log('Payment success webhook triggered');
   // Initialize SDKs inside the handler (fixes Vercel build crash)
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   const supabase = createClient(
