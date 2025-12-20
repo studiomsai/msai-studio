@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs' // ensure env vars work properly
 
 export async function POST(req) {
-  console.log('Payment success webhook triggered');
+  console.log(`Payment success webhook triggered [${new Date().toLocaleString('en-GB', { hour12: false }).replace(/\//g, '-').replace(',', '')}]`);
+  
   // Initialize SDKs inside the handler (fixes Vercel build crash)
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   const supabase = createClient(
@@ -18,6 +19,8 @@ export async function POST(req) {
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 
   const body = await req.text()
+
+  console.log('Request body:', body);
   const headersList = await headers()
   const sig = headersList.get('stripe-signature')
 
@@ -35,6 +38,10 @@ export async function POST(req) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
+
+    console.log("session : ", JSON.stringify(session));
+
+
     const userId = session.client_reference_id
     const amountTotal = session.amount_total
 
@@ -44,19 +51,45 @@ export async function POST(req) {
       if (amountTotal === 2500) creditsToAdd = 300
       if (amountTotal === 7900) creditsToAdd = 1000
 
+      // if (creditsToAdd > 0) {
+      //   console.log("Here------------- creditsToAdd : ", creditsToAdd);
+      //   const { data: profile } = await supabase
+      //     .from('users')
+      //     .select('available_credits')
+      //     .eq('id', userId)
+      //     .single()
+
+
+      //   console.log("Here------------- profile : ", profile);
+
+      //   const currentCredits = profile ? profile.credits : 0
+
+      //   await supabase
+      //     .from('users')
+      //     .update({ available_credits: currentCredits + creditsToAdd })
+      //     .eq('id', userId)
+      // }
+
       if (creditsToAdd > 0) {
-        const { data: profile } = await supabase
+        const { data: profile, error: fetchError } = await supabase
           .from('users')
-          .select('available_credits')
+          .select('available_credit')
           .eq('id', userId)
           .single()
 
-        const currentCredits = profile ? profile.credits : 0
+        console.log('profile:', profile);
+        console.log('fetchError:', fetchError);
 
-        await supabase
+        if (fetchError || !profile) return;
+
+        const currentCredits = profile.available_credit || 0;
+
+        const { error: updateError } = await supabase
           .from('users')
-          .update({ available_credits: currentCredits + creditsToAdd })
+          .update({ available_credit: currentCredits + creditsToAdd })
           .eq('id', userId)
+
+        console.log('updateError:', updateError);
       }
     }
   }
