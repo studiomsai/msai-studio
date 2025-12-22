@@ -216,6 +216,9 @@ export default function DashboardPage() {
                           className="caricature-image"
                           width="400"
                           height="400"
+                          unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}
                         />
                           <a
                           href={result.output.images[0].url}

@@ -3,9 +3,9 @@ import Link from 'next/link'
 export default function Apps() {
   const apps = [
     {id: 'mood', name: 'Your Mood Today', cost: 20, icon: '😊', desc: 'Turn your selfie into a mood animation. Upload a portrait and let AI animate your emotions.', link: '/mood-today' },
-    {id: 'photo', name: '10 Experssion', cost: 15, icon: '📸', desc: 'Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.',link: '/10experssion'},
+    {id: 'photo', name: '10 expression', cost: 15, icon: '📸', desc: 'Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.',link: '/10expression'},
     {id: 'video', name: 'Caricature Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/caricature-video'},
-    {id: 'story', name: 'Experssion Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/experssion-video'},
+    {id: 'story', name: 'expression Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/expression-video'},
     {id: 'Selfie', name: 'Dual Selfie', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/dual-selfie'}
   ]
 

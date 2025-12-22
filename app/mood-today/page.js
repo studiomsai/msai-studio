@@ -173,8 +173,11 @@ export default function DashboardPage() {
                     src={result.output.images[0].url}
                     alt="Generated Image"
                     className="generated-image"
-                    width={200}
-                    height={200}
+                    width={300}
+                    height={300}
+                    unoptimized={true}
+                    priority={true}
+                    onError={() => console.error("Failed to load generated image")}
                   />
                   <a
                     href={result.output.images[0].url}

@@ -170,16 +170,34 @@ export default function DashboardPage() {
                 <div className="media-item">
                   <h4 className="media-heading">Generated Image</h4>
                   <div className="flex flex-wrap gap-4">
-                     <Image src={result.output.images[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_2[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_3[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_4[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_5[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_6[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_7[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_8[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                     <Image src={result.output.images_9[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
-                      <Image src={result.output.images_10[0].url} alt="Generated Image" className="experssion-image" width={200} height={200}/>
+                     <Image src={result.output.images[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                     <Image src={result.output.images_2[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                     <Image src={result.output.images_3[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                     <Image src={result.output.images_4[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                     <Image src={result.output.images_5[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                     <Image src={result.output.images_6[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                     <Image src={result.output.images_7[0].url} alt="Generated Image" className="expression-image" width={200} height={200}/>
+                     <Image src={result.output.images_8[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                     <Image src={result.output.images_9[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
+                      <Image src={result.output.images_10[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}/>
                   </div>
                   <a
                     href={result.output.images[0].url}

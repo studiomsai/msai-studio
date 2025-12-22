@@ -1,17 +1,11 @@
-# FAL Workflow Integration TODO
+# TODO: Optimize Dual Selfie Image Loading
 
-## Completed Tasks
-- [x] Updated `app/api/run-fal/route.js` to use FAL SDK streaming instead of fetch
-- [x] Modified credit logic to deduct credits after successful completion
-- [x] Updated `app/mood-today/page.js` to handle direct API response (removed polling)
-- [x] Changed workflow URL to new workflow: `workflows/MSAI-Studio-is8ypgvdt74v/your-mood-today`
-- [x] Fixed field name mismatch: Changed from 'credits' to 'available_credit' in both API and dashboard
-- [x] Fixed table name mismatch: Changed from 'profiles' to 'users' table in both API and dashboard
+- [x] Update Next.js Image component in app/dual-selfie/page.js:
+  - Add unoptimized={true} to bypass Next.js optimization
+  - Add onError prop for error handling
+  - Add priority={true} for eager loading
 
-## Pending Tasks
-- [x] Test workflow execution and credit deduction (App builds successfully)
-- [x] Verify FAL API key security (server-side only) (API key used server-side in route.js)
-- [x] Ensure real-time dashboard credit updates (Credits update locally after generation)
-- [ ] Test error handling for insufficient credits (Ready for manual testing - may need to add credits to user account first)
-- [ ] Test error handling for FAL workflow failures (Ready for manual testing)
-- [ ] Verify Supabase RLS policies for credit management (Requires manual verification)
+## Followup Steps
+- Test the dual selfie feature to verify faster image loading (should be under 10953ms).
+- Check browser console for any errors related to image loading.
+- If issues persist, consider adding loading states or fallback images.

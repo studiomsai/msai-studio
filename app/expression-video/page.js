@@ -100,7 +100,7 @@ export default function DashboardPage() {
       console.log("✅ Image URL verified, sending to backend");
 
       /* 4️⃣ Call backend (INLINE VALUE — NO STATE REUSE) */
-      const res = await fetch("/api/run-fal-experssion-video", {
+      const res = await fetch("/api/run-fal-expression-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -131,7 +131,7 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">
-        Experssion Video - 10 seconds
+        expression Video - 10 seconds
       </h1>
 
       <div className="dashboard-card">
@@ -166,38 +166,58 @@ export default function DashboardPage() {
        <div className="results-container">
                   <h3 className="results-title">Your Results:</h3>
                   <div className="media-grid">
-                    {result.output?.images_10?.[0]?.url && (
+                    {result.output?.images?.[0]?.url && (
                       <div className="media-item">
                         <h4 className="media-heading">Generated Image</h4>
-                         <Image
-                          src={result.output.images_10[0].url}
-                          alt="Generated Image"
-                          className="caricature-image"
-                        />
                         <Image
                           src={result.output.images[0].url}
                           alt="Generated Image"
                           className="caricature-image"
+                           width={300}
+                          height={300}
+                           unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}
                         />
                           <Image
                           src={result.output.images_2[0].url}
                           alt="Generated Image"
                           className="caricature-image"
+                           width={300}
+                          height={300}
+                           unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}
                         />
                            <Image
                           src={result.output.images_3[0].url}
                           alt="Generated Image"
                           className="caricature-image"
+                           width={300}
+                          height={300}
+                           unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}
                         />
                            <Image
                           src={result.output.images_4[0].url}
                           alt="Generated Image"
                           className="caricature-image"
+                           width={300}
+                          height={300}
+                           unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}
                         />
                          <Image
                           src={result.output.images_5[0].url}
                           alt="Generated Image"
                           className="caricature-image"
+                          width={300}
+                          height={300}
+                           unoptimized={true}
+                          priority={true}
+                          onError={() => console.error("Failed to load generated image")}
                         />
                       </div>
                     )}
@@ -219,7 +239,7 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </div>
-                  {(!result.output?.images_10?.[0]?.url && !result.output?.video?.url) && (
+                  {(!result.output?.images?.[0]?.url && !result.output?.video?.url) && (
                     <pre className="json-fallback">
                       {JSON.stringify(result, null, 2)}
                     </pre>
