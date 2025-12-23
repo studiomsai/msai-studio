@@ -50,14 +50,28 @@ export default function Home() {
           {/* App 2 */}
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
             <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">📸</div>
-            <h3 className="text-2xl font-bold mb-2">Pro Photoshoot</h3>
+            <h3 className="text-2xl font-bold mb-2">Dual Selfie</h3>
             <p className="text-slate-500">Complete AI fashion photography studio.</p>
           </div>
 
           {/* App 3 */}
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
             <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">🎬</div>
-            <h3 className="text-2xl font-bold mb-2">Story to Video</h3>
+            <h3 className="text-2xl font-bold mb-2">10 expression</h3>
+            <p className="text-slate-500">Turn text into cinematic video.</p>
+          </div>
+
+          {/* App 4 */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
+            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">🎬</div>
+            <h3 className="text-2xl font-bold mb-2">Caricature Video</h3>
+            <p className="text-slate-500">Turn text into cinematic video.</p>
+          </div>
+
+          {/* App 5 */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
+            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">🎬</div>
+            <h3 className="text-2xl font-bold mb-2">Expression Video</h3>
             <p className="text-slate-500">Turn text into cinematic video.</p>
           </div>
         </div>
