@@ -150,6 +150,41 @@ export default function DashboardPage() {
 
       setResult(json.result);
       setCredit((c) => c - 20);
+
+      // Upload result image to user folder
+      if (json.result && json.result.output && json.result.output.images && json.result.output.images[0]) {
+        try {
+          const imageUrl = json.result.output.images[0].url;
+          const response = await fetch(imageUrl);
+          if (!response.ok) throw new Error('Failed to fetch result image');
+          const blob = await response.blob();
+          const contentType = response.headers.get('content-type');
+          let ext = 'png'; // default
+          if (contentType) {
+            if (contentType.includes('jpeg') || contentType.includes('jpg')) ext = 'jpg';
+            else if (contentType.includes('png')) ext = 'png';
+            else if (contentType.includes('gif')) ext = 'gif';
+            // add more if needed
+          }
+          const filePath = `${user.id}/result-${Date.now()}.${ext}`;
+          const { error: uploadError } = await supabase.storage
+            .from("profile-images")
+            .upload(filePath, blob, {
+              cacheControl: "3600",
+              upsert: true,
+            });
+          console.log("filePath", filePath);
+          if (uploadError) {
+            console.error("❌ Upload failed for result image:", uploadError);
+            alert("Result generated but failed to save to profile");
+          } else {
+            console.log("✅ Result image uploaded to:", filePath);
+          }
+        } catch (uploadErr) {
+          console.error("🔥 Upload error:", uploadErr);
+          alert("Result generated but failed to save to profile");
+        }
+      }
     } catch (err) {
       console.error("🔥 Generate error:", err);
       alert(err.message);
