@@ -101,7 +101,7 @@ export default function DashboardPage() {
       console.log("✅ Image URL verified, sending to backend");
 
       /* 4️⃣ Call backend (INLINE VALUE — NO STATE REUSE) */
-      const res = await fetch("/api/run-fal-popcorn-on-steriods", {
+      const res = await fetch("/api/run-fal-popcorn-on-steroids", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

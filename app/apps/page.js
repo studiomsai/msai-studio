@@ -6,7 +6,8 @@ export default function Apps() {
     {id: 'photo', name: '10 expression', cost: 15, icon: '📸', desc: 'Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.',link: '/10expression'},
     {id: 'video', name: 'Caricature Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/caricature-video'},
     {id: 'story', name: 'expression Video', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/expression-video'},
-    {id: 'Selfie', name: 'Dual Selfie', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/dual-selfie'}
+    {id: 'Selfie', name: 'Dual Selfie', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/dual-selfie'},
+    {id: 'story', name: 'Popcorn on Steroids', cost: 32, icon: '🎬', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/popcorn-on-steroids'}
   ]
 
   return (
