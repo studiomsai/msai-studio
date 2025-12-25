@@ -74,16 +74,10 @@ export default function ProfilePage() {
         }
 
         // Fetch recent work
-        const { data: workData, error: workError } = await supabase
-          .from('work')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
+          const media = await fetchRecentWorkMedia(user.id);
+      setRecentWork(media);
 
-        if (!workError) {
-          setRecentWork(workData || []);
-        }
+      setLoading(false);
 
       } catch (error) {
         // Handle loading errors gracefully
@@ -96,7 +90,26 @@ export default function ProfilePage() {
 
     getUserData();
   }, [router]);
+ const fetchRecentWorkMedia = async (userId) => {
+    const { data, error } = await supabase.storage
+      .from('profile-images')
+      .list(userId, { limit: 20, sortBy: { column: 'created_at', order: 'desc' } });
 
+    if (error || !data) return [];
+
+    return data.map(file => {
+      const { data: url } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(`${userId}/${file.name}`);
+
+      return {
+        id: file.id || file.name,
+        type: file.metadata?.mimetype,
+        url: url.publicUrl,
+        created_at: file.created_at
+      };
+    });
+  };
   const handleEditFormChange = (field, value) => {
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
@@ -109,72 +122,32 @@ export default function ProfilePage() {
     }
   };
 
-  const uploadProfileImage = async (file) => {
-    const fileName = `profile_${user.id}_${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage
-      .from('profile-images')
-      .upload(fileName, file);
-
-    if (error) throw error;
-
-    const { data } = supabase.storage
-      .from('profile-images')
-      .getPublicUrl(fileName);
-
+   const uploadProfileImage = async (file) => {
+    const ext = file.name.split('.').pop();
+    const filePath = `${user.id}/${Date.now()}.${ext}`;
+    await supabase.storage.from('profile-images').upload(filePath, file, { upsert: true });
+    const { data } = supabase.storage.from('profile-images').getPublicUrl(filePath);
     return data.publicUrl;
   };
 
+
   const handleSaveProfile = async () => {
     setSaving(true);
-    try {
-      let profileImageUrl = userData?.profile_image;
+    let imageUrl = userData.profile_image;
 
-      if (profileImageFile) {
-        profileImageUrl = await uploadProfileImage(profileImageFile);
-      }
+    if (profileImageFile) imageUrl = await uploadProfileImage(profileImageFile);
 
-      const updates = {
-        full_name: editForm.full_name,
-        email: editForm.email,
-        phone: editForm.phone,
-        profile_image: profileImageUrl
-      };
+    await supabase.from('users').update({
+      full_name: editForm.full_name,
+      phone: editForm.phone,
+      profile_image: imageUrl
+    }).eq('id', user.id);
 
-      // Update password if provided
-      if (editForm.password) {
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password: editForm.password
-        });
-        if (passwordError) throw passwordError;
-      }
+    const media = await fetchRecentWorkMedia(user.id);
+    setRecentWork(media);
 
-      const { error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      // Refetch the updated profile data
-      const { data: updatedProfile, error: fetchError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      setUserData(updatedProfile);
-      setIsEditModalOpen(false);
-      setProfileImageFile(null);
-      setProfileImagePreview(null);
-
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      alert('Error saving profile: ' + error.message);
-    } finally {
-      setSaving(false);
-    }
+    setIsEditModalOpen(false);
+    setSaving(false);
   };
 
   const openEditModal = () => {
@@ -308,30 +281,21 @@ export default function ProfilePage() {
         </div>
 
         {/* Recent Work Section */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Work</h2>
-          {recentWork.length > 0 ? (
-            <div className="space-y-4">
-              {recentWork.map((work) => (
-                <div key={work.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{work.title}</h3>
-                    <p className="text-sm text-gray-600">{new Date(work.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    work.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    work.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {work.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No recent work found.</p>
-          )}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold mb-6">Recent Work</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {recentWork.map((file) => (
+              <div key={file.id} className="border rounded overflow-hidden">
+                {file.type?.includes('video') ? (
+                  <video src={file.url} controls className="w-full h-32 object-cover" />
+                ) : (
+                  <Image alt="file" src={file.url} width={300} height={200} className="w-full h-32 object-cover" />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
+
       </div>
 
       {/* Edit Modal */}
