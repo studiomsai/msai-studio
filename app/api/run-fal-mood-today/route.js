@@ -43,7 +43,7 @@ export async function POST(req) {
 
     if (error) throw error;
 
-    if (user.available_credit <= 20) {
+    if (user.available_credit <= 0) {
       return NextResponse.json(
         { error: "Insufficient credits" },
         { status: 403 }
@@ -73,9 +73,40 @@ export async function POST(req) {
       })
       .eq("id", userId);
 
-    // 4️⃣ Save work to database
-   
+    // 4️⃣ Upload result image and video to user folder
+    if (result.output && result.output.images && result.output.images[0]) {
+      try {
+        const imageUrl = result.output.images[0].url;
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error('Failed to fetch result image');
+        const blob = await response.blob();
+        const contentType = response.headers.get('content-type');
+        let ext = 'png'; // default
+        if (contentType) {
+          if (contentType.includes('jpeg') || contentType.includes('jpg')) ext = 'jpg';
+          else if (contentType.includes('png')) ext = 'png';
+          else if (contentType.includes('gif')) ext = 'gif';
+          // add more if needed
+        }
+        const filePath = `${userId}/result-${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("profile-images")
+          .upload(filePath, blob, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+        if (uploadError) {
+          console.error("❌ Upload failed for result image:", uploadError);
+        } else {
+          console.log("✅ Result image uploaded to:", filePath);
+        }
+      } catch (uploadErr) {
+        console.error("🔥 Upload error for image:", uploadErr);
+      }
+    }
 
+
+    // 5️⃣ Save work to database
     return NextResponse.json({ success: true, result });
   } catch (err) {
     console.error("RUN-FAL ERROR:", err);
