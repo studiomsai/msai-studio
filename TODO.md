@@ -8,3 +8,4 @@
 - [x] Add back button or link to return to sign-in from forgot password
 - [x] Handle success/error messages for forgot password
 - [x] Test the functionality
+- [x] Refactor to use single mode state instead of multiple boolean states

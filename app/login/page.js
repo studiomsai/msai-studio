@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -11,7 +11,6 @@ const supabase = createClient(
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,11 +21,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [isResetPassword, setIsResetPassword] = useState(false);
+  const [mode, setMode] = useState('login');
+  const handledRef = useRef(false);
 
   useEffect(() => {
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     // Check if user is returning from password reset email
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
@@ -39,9 +40,7 @@ export default function LoginPage() {
         access_token: accessToken,
         refresh_token: refreshToken,
       });
-      setIsResetPassword(true);
-      setIsSignUp(false);
-      setIsForgotPassword(false);
+      setMode('reset');
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -52,7 +51,7 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    if (isSignUp) {
+    if (mode === 'signup') {
       if (password !== confirmPassword) {
         setError('Passwords do not match.');
         setLoading(false);
@@ -82,7 +81,7 @@ export default function LoginPage() {
         setSuccess('Account created successfully! You can now sign in.');
         setLoading(false);
       }
-    } else if (isResetPassword) {
+    } else if (mode === 'reset') {
       if (newPassword.length < 6) {
         setError('Password should be at least 6 characters.');
         setLoading(false);
@@ -105,9 +104,9 @@ export default function LoginPage() {
       } else {
         setSuccess('Password updated successfully! You can now sign in.');
         setLoading(false);
-        setIsResetPassword(false);
+        setMode('login');
       }
-    } else if (isForgotPassword) {
+    } else if (mode === 'forgot') {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/login`,
       });
@@ -135,8 +134,7 @@ export default function LoginPage() {
   };
 
   const handleForgotPassword = () => {
-    setIsForgotPassword(true);
-    setIsSignUp(false);
+    setMode('forgot');
     setError('');
     setSuccess('');
   };
@@ -146,31 +144,31 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isResetPassword ? 'Update your password' : isForgotPassword ? 'Reset your password' : isSignUp ? 'Create your account' : 'Sign in to your account'}
+            {mode === 'reset' ? 'Update your password' : mode === 'forgot' ? 'Reset your password' : mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {isResetPassword ? (
+            {mode === 'reset' ? (
               <>
                 Enter your new password below
               </>
-            ) : isForgotPassword ? (
+            ) : mode === 'forgot' ? (
               <>
                 Remember your password?{' '}
                 <button
                   type="button"
-                  onClick={() => setIsForgotPassword(false)}
+                  onClick={() => setMode('login')}
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                   suppressHydrationWarning={true}
                 >
                   Sign in
                 </button>
               </>
-            ) : isSignUp ? (
+            ) : mode === 'signup' ? (
               <>
                 Already have an account?{' '}
                 <button
                   type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={() => setMode('login')}
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                   suppressHydrationWarning={true}
                 >
@@ -182,7 +180,7 @@ export default function LoginPage() {
                 Don't have an account?{' '}
                 <button
                   type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={() => setMode('signup')}
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                   suppressHydrationWarning={true}
                 >
@@ -194,7 +192,7 @@ export default function LoginPage() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleAuth} suppressHydrationWarning={true}>
-          {isSignUp ? (
+          {mode === 'signup' ? (
             <div className="rounded-md shadow-sm -space-y-px">
               <input
                 type="text"
@@ -251,7 +249,7 @@ export default function LoginPage() {
                 suppressHydrationWarning={true}
               />
             </div>
-          ) : isResetPassword ? (
+          ) : mode === 'reset' ? (
             <div className="rounded-md shadow-sm -space-y-px">
               <input
                 type="password"
@@ -275,7 +273,7 @@ export default function LoginPage() {
                 suppressHydrationWarning={true}
               />
             </div>
-          ) : isForgotPassword ? (
+          ) : mode === 'forgot' ? (
             <div className="rounded-md shadow-sm -space-y-px">
               <input
                 type="email"
@@ -314,7 +312,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          {!isSignUp && !isForgotPassword && !isResetPassword && (
+          {mode === 'login' && (
             <div className="text-sm">
               <button
                 type="button"
@@ -337,18 +335,18 @@ export default function LoginPage() {
             suppressHydrationWarning={true}
           >
             {loading
-              ? isResetPassword
+              ? mode === 'reset'
                 ? 'Updating password...'
-                : isForgotPassword
+                : mode === 'forgot'
                 ? 'Sending reset email...'
-                : isSignUp
+                : mode === 'signup'
                 ? 'Signing up...'
                 : 'Signing in...'
-              : isResetPassword
+              : mode === 'reset'
               ? 'Update password'
-              : isForgotPassword
+              : mode === 'forgot'
               ? 'Send reset email'
-              : isSignUp
+              : mode === 'signup'
               ? 'Sign up'
               : 'Sign in'}
           </button>
