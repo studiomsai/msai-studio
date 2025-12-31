@@ -21,7 +21,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const type = hashParams.get('type');
+      if (type === 'recovery') return 'reset';
+    }
+    return 'login';
+  });
   const handledRef = useRef(false);
 
   useEffect(() => {
@@ -40,7 +47,6 @@ export default function LoginPage() {
         access_token: accessToken,
         refresh_token: refreshToken,
       });
-      setMode('reset');
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -177,7 +183,7 @@ export default function LoginPage() {
               </>
             ) : (
               <>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button
                   type="button"
                   onClick={() => setMode('signup')}
