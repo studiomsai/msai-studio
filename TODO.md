@@ -9,3 +9,11 @@
 - [x] Handle success/error messages for forgot password
 - [x] Test the functionality
 - [x] Refactor to use single mode state instead of multiple boolean states
+
+# TODO: Create Super Admin Page
+
+- [x] Create app/admin/super/page.js with login form
+- [x] Implement static login credentials (superadmin / superadmin@123)
+- [x] Create app/api/get-all-users/route.js API endpoint with service role key
+- [x] Update page to fetch all users via API after login
+- [x] Display users in a table
