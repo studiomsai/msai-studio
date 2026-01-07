@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main>
       {/* Hero Section */}
-      <div className="relative h-screen flex items-center justify-center text-center text-white overflow-hidden">
+      <div className="main-banner relative h-screen flex items-center justify-center text-center text-white overflow-hidden bg-black bg-opacity-25">
         {/* Background Video */}
         <video 
           autoPlay 
@@ -21,15 +21,15 @@ export default function Home() {
         
         {/* Content */}
         <div className="max-w-3xl p-5 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight drop-shadow-lg">
-            Create with AI.<br/>Limitless Potential.
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight drop-shadow-lg title">
+            Create stunning <br/>AI videos in minutes.
           </h1>
           <p className="text-xl text-slate-200 mb-10 drop-shadow-md">
-            Generate videos, photoshoots, and stories in seconds.
+            Pick an app. Upload. Watch the magic.
           </p>
           <Link 
             href="/mood-today" 
-            className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40"
+            className="primary-btn"
           >
             Get Started Free
           </Link>
@@ -38,51 +38,64 @@ export default function Home() {
 
       {/* Apps Preview Section */}
       <div className="max-w-6xl mx-auto py-20 px-5">
-        <h2 className="text-4xl font-bold text-center mb-16 text-slate-800">AI Apps Available</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+        <h2 className="text-2xl md:text-4xl font-medium text-center mb-16 sub-title">Next-Gen AI Videos for Every Need</h2>
+        <div className="flex flex-wrap justify-center gap-8">
           {/* App 1 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
-            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">😊</div>
-            <h3 className="text-2xl font-bold mb-2">Your Mood Today</h3>
-            <p className="text-slate-500">Turn your selfie into a mood animation.</p>
+          <div className="service-box">
+            <img src="/icon/smile.svg" alt="Mood Animation Icon" className="w-12 h-12 mb-4"/>
+            <h3 className="service-title">Your Mood Today</h3>
+            <p className="service-details mb-4">Turn your selfie into a mood animation. Upload a portrait and let AI animate your emotions.</p>
+            <a href="/mood-today" className="primary-outline-btn">Run App</a>
           </div>
           
           {/* App 2 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
-            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">📸</div>
-            <h3 className="text-2xl font-bold mb-2">Dual Selfie</h3>
-            <p className="text-slate-500">Complete AI fashion photography studio.</p>
+          <div className="service-box">
+            <img src="/icon/photo.svg" alt="Mood Animation Icon" className="w-12 h-12 mb-4"/>
+            <h3 className="service-title">10 expression</h3>
+            <p className="service-details mb-4">Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.</p>
+             <a href="/10expression" className="primary-outline-btn">Run App</a>
           </div>
 
           {/* App 3 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
-            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">🎬</div>
-            <h3 className="text-2xl font-bold mb-2">10 expression</h3>
-            <p className="text-slate-500">Turn text into cinematic video.</p>
+          <div className="service-box">
+            <img src="/icon/video.svg" alt="Mood Animation Icon" className="w-12 h-12 mb-4"/>
+            <h3 className="service-title">Caricature Video</h3>
+            <p className="service-details mb-4">Turn text into cinematic video. Write a script and watch it come to life in seconds.</p>
+             <a href="/caricature-video" className="primary-outline-btn">Run App</a>
           </div>
 
           {/* App 4 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
-            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">🎬</div>
-            <h3 className="text-2xl font-bold mb-2">Caricature Video</h3>
-            <p className="text-slate-500">Turn text into cinematic video.</p>
+          <div className="service-box">
+           <img src="/icon/smile.svg" alt="Mood Animation Icon" className="w-12 h-12 mb-4"/>
+            <h3 className="service-title">Expression Video</h3>
+            <p className="service-details mb-4">Turn text into cinematic video.</p>
+             <a href="/expression-video" className="primary-outline-btn">Run App</a>
           </div>
 
           {/* App 5 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
-            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">🎬</div>
-            <h3 className="text-2xl font-bold mb-2">Expression Video</h3>
-            <p className="text-slate-500">Turn text into cinematic video.</p>
+          <div className="service-box">
+           <img src="/icon/smile.svg" alt="Mood Animation Icon" className="w-12 h-12 mb-4"/>
+            <h3 className="service-title">Expression 5 Image 20 seconds video </h3>
+            <p className="service-details mb-4">Turn text into cinematic video.</p>
+            <a href="/expressions-5-images-20sec-video" className="primary-outline-btn">Run App</a>
           </div>
 
             {/* App 6 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl transition hover:-translate-y-1">
-            <div className="text-4xl mb-4 bg-blue-50 w-16 h-16 flex items-center justify-center rounded-full">🎬</div>
-            <h3 className="text-2xl font-bold mb-2">Popcorn on Steroids</h3>
-            <p className="text-slate-500">Turn text into cinematic video.</p>
+          <div className="service-box">
+           <img src="/icon/smile.svg" alt="Mood Animation Icon" className="w-12 h-12 mb-4"/>
+            <h3 className="service-title">Dual Selfie</h3>
+            <p className="service-details mb-4">Turn text into cinematic video.</p>
+             <a href="/dual-selfie" className="primary-outline-btn">Run App</a>
+          </div>
+
+             {/* App 7 */}
+          <div className="service-box">
+           <img src="/icon/smile.svg" alt="Mood Animation Icon" className="w-12 h-12 mb-4"/>
+            <h3 className="service-title">Popcorn on Steroids</h3>
+            <p className="service-details mb-4">Turn text into cinematic video.</p>
+             <a href="/popcorn-on-steroids" className="primary-outline-btn">Run App</a>
           </div>
         </div>
-        <div className="text-center mt-10 text-slate-400">More to Come Soon...</div>
       </div>
     </main>
   )

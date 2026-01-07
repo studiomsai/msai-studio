@@ -2,6 +2,7 @@
 
 import './globals.css'
 import Link from 'next/link'
+import Head from 'next/head'
 import { useState, useLayoutEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -62,22 +63,40 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
+      <Head>
+        <link href="https://fonts.googleapis.com/css2?family=Martel+Sans:wght@200;300;400;600;700;800;900&family=TikTok+Sans:opsz,wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      </Head>
       <body className="bg-slate-50 text-slate-900 font-sans">
         {/* Navigation Bar - Only render after mounted to prevent hydration mismatch */}
         {mounted && (
-          <nav className="fixed w-full z-50 bg-slate-900/90 backdrop-blur text-white p-4 flex justify-between items-center border-b border-white/10">
-            <div className="text-xl font-bold tracking-tighter">msai.studio</div>
-            <div className="space-x-6 text-sm font-medium flex">
-              <Link href="/" className="hover:text-blue-400 transition">Home</Link>
-              <Link href="/apps" className="hover:text-blue-400 transition">AI Apps</Link>
-              {user ? (
+          <nav className="fixed w-full z-50 text-white p-4 flex justify-between items-center">
+             <div className="container flex justify-between items-center mx-auto">
+            <div className="text-xl font-bold tracking-tighter">
+              <Link href="/" >
+                <img
+                  src="/image/msai-studio.svg"
+                  alt="Site Logo"
+                  width={128}
+                  height={128}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
+            </div>
+            <div className="space-x-6 text-sm font-medium flex justify-center">
+              <Link href="/" className="font-tiktok text-lg hover:text-blue-400 transition">Home</Link>
+              <Link href="/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Service</Link>
+              <Link href="/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credit</Link>
+              <Link href="/contact" className="font-tiktok text-lg hover:text-blue-400 transition">Contact</Link>
+              <Link href="/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link>
+            </div>
+            <div className="profile-btn">
+              <img src="/image/user-icon.svg" alt="User Icon" className="w-10 h-10 inline-block mr-3" />
+             {user ? (
                 <>
-                  <Link href="/mood-today" className="hover:text-blue-400 transition">Dashboard</Link>
                   <div className="relative dropdown-container">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="hover:text-blue-400 transition flex items-center space-x-1"
-                    >
+                      className="font-tiktok text-lg hover:text-blue-400 transition flex items-center space-x-1 ">
                       <span>{userName || 'Profile'}</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -109,9 +128,9 @@ export default function RootLayout({ children }) {
                   </div>
                 </>
               ) : (
-                <Link href="/login" className="hover:text-blue-400 transition">Login</Link>
+                <Link href="/login" className="font-tiktok text-lg hover:text-blue-400 transition">Login</Link>
               )}
-              <Link href="/shop" className="hover:text-blue-400 transition">Shop</Link>
+             </div>
             </div>
           </nav>
         )}
