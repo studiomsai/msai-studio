@@ -1,146 +1,52 @@
-'use client';
-
 import './globals.css'
-import Link from 'next/link'
-import Head from 'next/head'
-import { useState, useLayoutEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import Navigation from './components/Navigation'
 
 export default function RootLayout({ children }) {
-  const [user, setUser] = useState(null);
-  const [userName, setUserName] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useLayoutEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        // Try to get name from users table first, fallback to auth metadata
-        const { data: profileData } = await supabase
-          .from('users')
-          .select('full_name')
-          .eq('id', user.id)
-          .single();
-
-        if (profileData?.full_name) {
-          setUserName(profileData.full_name);
-        } else {
-          setUserName(user.user_metadata?.display_name || user.email);
-        }
-      }
-    };
-
-    getUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        setUserName(session.user.user_metadata?.display_name || session.user.email);
-      } else {
-        setUser(null);
-        setUserName('');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
-  };
-
   return (
     <html lang="en">
-      <Head>
+      <head>
         <link href="https://fonts.googleapis.com/css2?family=Martel+Sans:wght@200;300;400;600;700;800;900&family=TikTok+Sans:opsz,wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-      </Head>
+      </head>
       <body className="bg-slate-50 text-slate-900 font-sans">
-        {/* Navigation Bar - Only render after mounted to prevent hydration mismatch */}
-        {mounted && (
-          <nav className="fixed w-full z-50 text-white p-4 flex justify-between items-center">
-             <div className="container flex justify-between items-center mx-auto">
-            <div className="text-xl font-bold tracking-tighter">
-              <Link href="/" >
-                <img
-                  src="/image/msai-studio.svg"
-                  alt="Site Logo"
-                  width={128}
-                  height={128}
-                  className="w-full h-full object-cover"
-                />
-              </Link>
-            </div>
-            <div className="space-x-6 text-sm font-medium flex justify-center">
-              <Link href="/" className="font-tiktok text-lg hover:text-blue-400 transition">Home</Link>
-              <Link href="/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Service</Link>
-              <Link href="/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credit</Link>
-              <Link href="/contact" className="font-tiktok text-lg hover:text-blue-400 transition">Contact</Link>
-              <Link href="/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link>
-            </div>
-            <div className="profile-btn">
-              <img src="/image/user-icon.svg" alt="User Icon" className="w-10 h-10 inline-block mr-3" />
-             {user ? (
-                <>
-                  <div className="relative dropdown-container">
-                    <button
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="font-tiktok text-lg hover:text-blue-400 transition flex items-center space-x-1 ">
-                      <span>{userName || 'Profile'}</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                        <Link
-                          href="/profile"
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                          Profile
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <Link href="/login" className="font-tiktok text-lg hover:text-blue-400 transition">Login</Link>
-              )}
-             </div>
-            </div>
-          </nav>
-        )}
+        <Navigation />
 
         {/* Main Content Area */}
         {children}
 
         {/* Footer */}
-        <footer className="bg-slate-900 text-slate-400 py-8 text-center mt-20">
-          <p>© 2025 msai.studio – Affordable for ALL.</p>
+        <footer className="bg-black  mt-20">
+          <div className="max-w-7xl mx-auto py-20 px-5">
+            <div className="footer-top flex justify-between mb-6 gap-15">
+              <div className="w-1/3">
+                <img src="/image/msai-studio.svg" alt="Site Logo" className='mb-4' />
+                <p>At msai.studio, anyone can create amazing AI-powered videos and images no coding, no setup, no experience needed. We make powerful creative tools simple, fun, and affordable for everyone. Each app on msai.studio runs advanced AI workflows in the background while you focus on the result from turning a selfie into cinematic motion to creating full story-based videos or photo shoots in seconds.Our goal is to make professional AI creation effortless and accessible so you can bring your ideas to life, anytime, anywhere.</p>
+              </div>
+              <div className="w-auto ml-auto mr-0">
+                <h3 className="text-xl font-semibold mb-3">Quick link</h3>
+                <ul>
+                  <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">About</a></li>
+                  <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]">Contact</a></li>
+                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Terms of Service</a></li>
+                  <li><a href="/privacy" className="mb-2 text-lg hover:text-[#00C0FF]">Privacy Policy</a></li>
+                </ul>
+              </div>
+              <div className="w-auto">
+                <h3 className="text-xl font-semibold mb-3">Social link</h3>
+                <ul>
+                  <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">LinkedIn</a></li>
+                  <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]">YouTube</a></li>
+                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Instagram</a></li>
+                </ul>
+              </div>
+              <div className="w-auto">
+                <h3 className="text-xl font-semibold mb-3">Company</h3>
+                <ul>
+                  <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">Privacy Policy</a></li>
+                  <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]">Teams & Condition</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </footer>
       </body>
     </html>

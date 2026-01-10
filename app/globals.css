@@ -24,11 +24,17 @@ body {
   color: var(--foreground);
   font-family:"Martel Sans", sans-serif;
   background-image: url("/image/background-pattern.png");
-  background-size: cover;
+  background-size: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: "TikTok Sans", sans-serif;
+}
+
+a {
+  text-decoration: none;
+  transition: 0.5s all ease;
+  display: inline-block;
 }
 
 .primary-btn{
@@ -92,7 +98,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .sub-title{
   position: relative;
-  padding-bottom:10px
+  padding-bottom:10px;
+  font-weight: 500;
 }
 
 .sub-title:after{

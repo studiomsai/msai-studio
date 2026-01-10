@@ -23,9 +23,9 @@ export default function Shop() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto pt-32 px-5 pb-20">
-      <h1 className="text-4xl font-bold text-center mb-4">Top Up Credits</h1>
-      <p className="text-center text-slate-500 mb-16">Secure payment via Stripe</p>
+    <div className="max-w-7xl mx-auto py-20 px-5">
+      <h2 className="text-2xl md:text-4xl font-medium text-center mb-6 sub-title">Buy credits. Use them anytime.</h2>
+      <p className="text-center text-lg mb-16">Choose the credit pack that matches your workflow.</p>
       
       {!userId && (
         <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg text-center mb-10 border border-yellow-200">
@@ -33,33 +33,33 @@ export default function Shop() {
         </div>
       )}
       
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="flex flex-wrap justify-center gap-8">
         {/* Starter Pack */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border hover:shadow-xl transition text-center">
-          <h3 className="text-blue-600 font-bold text-xl mb-2">Starter Pack</h3>
-          <div className="text-5xl font-bold mb-2">100</div>
-          <div className="text-slate-400 mb-6">Credits</div>
-          <div className="text-2xl font-bold mb-8">$9.00</div>
-          <a href={getLink("https://buy.stripe.com/test_fZu7sNaZ74RB0oz86OgYU00")} className="block w-full bg-slate-900 text-white py-3 rounded-full hover:bg-blue-600 transition">Buy Now</a>
+        <div className="service-box">
+          <h3 className="font-tiktok text-lg md:text-xl mb-10">Starter Pack</h3>
+          <p className="text-3xl md:text-5xl lg:text-7xl font-bold mb-2">100<span className="text-3xl font-normal ml-2">Credits</span></p>
+          <div className="text-2xl font-semibold mt-4 mb-6">$9.00</div>
+          <a href={getLink("https://buy.stripe.com/test_fZu7sNaZ74RB0oz86OgYU00")} className="primary-btn w-full text-center">Buy Now</a>
+          <p className="text-xs mt-4 text-slate-300">*Use credits for any app. No subscriptions or hidden costs.*</p>
         </div>
 
         {/* Medium Pack */}
-        <div className="bg-white p-8 rounded-2xl shadow-lg border-2 border-blue-600 transform scale-105 text-center relative">
+        <div className="service-box relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold">MOST POPULAR</div>
-          <h3 className="text-blue-600 font-bold text-xl mb-2">Medium Pack</h3>
-          <div className="text-5xl font-bold mb-2">300</div>
-          <div className="text-slate-400 mb-6">Credits</div>
-          <div className="text-2xl font-bold mb-8">$25.00</div>
-          <a href={getLink("https://buy.stripe.com/00waEZgjr97RdblfzggYU03")} className="block w-full bg-blue-600 text-white py-3 rounded-full hover:bg-blue-700 transition">Buy Now</a>
+          <h3 className="font-tiktok text-lg md:text-xl mb-10">Medium Pack</h3>
+             <p className="text-3xl md:text-5xl lg:text-7xl font-bold mb-2">300<span className="text-3xl font-normal ml-2">Credits</span></p>
+          <div className="text-2xl font-semibold mt-4 mb-6">$25.00</div>
+          <a href={getLink("https://buy.stripe.com/00waEZgjr97RdblfzggYU03")} className="primary-btn w-full text-center">Buy Now</a>
+           <p className="text-xs mt-4 text-slate-300">*Use credits for any app. No subscriptions or hidden costs.*</p>
         </div>
 
         {/* Large Pack */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border hover:shadow-xl transition text-center">
-          <h3 className="text-blue-600 font-bold text-xl mb-2">Large Pack</h3>
-          <div className="text-5xl font-bold mb-2">1000</div>
-          <div className="text-slate-400 mb-6">Credits</div>
-          <div className="text-2xl font-bold mb-8">$79.00</div>
-          <a href={getLink("https://buy.stripe.com/00waEZc3b5VF8V5cn4gYU04")} className="block w-full bg-slate-900 text-white py-3 rounded-full hover:bg-blue-600 transition">Buy Now</a>
+        <div className="service-box">
+          <h3 className="font-tiktok text-lg md:text-xl mb-10">Large Pack</h3>
+          <p className="text-3xl md:text-5xl lg:text-7xl font-bold mb-2">1000<span className="text-3xl font-normal ml-2">Credits</span></p>
+          <div className="text-2xl font-semibold mt-4 mb-6">$79.00</div>
+          <a href={getLink("https://buy.stripe.com/00waEZc3b5VF8V5cn4gYU04")} className="primary-btn w-full text-center">Buy Now</a>
+           <p className="text-xs mt-4 text-slate-300">*Use credits for any app. No subscriptions or hidden costs.*</p>
         </div>
       </div>
     </div>
