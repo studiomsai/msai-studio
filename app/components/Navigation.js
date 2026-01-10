@@ -69,10 +69,10 @@ export default function Navigation() {
         </div>
         <div className="space-x-6 text-sm font-medium flex justify-center">
           <Link href="/" className="font-tiktok text-lg hover:text-blue-400 transition">Home</Link>
-          <Link href="/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Service</Link>
-          <Link href="/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credit</Link>
+          <Link href="/Page/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Service</Link>
+          <Link href="/Page/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credit</Link>
           <Link href="/contact" className="font-tiktok text-lg hover:text-blue-400 transition">Contact</Link>
-          <Link href="/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link>
+          <Link href="/Service/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link>
         </div>
         <div className="profile-btn">
           <img src="/image/user-icon.svg" alt="User Icon" className="w-10 h-10 inline-block mr-3" />
@@ -90,7 +90,7 @@ export default function Navigation() {
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                     <Link
-                      href="/profile"
+                      href="/Page/profile"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsDropdownOpen(false)}
                     >
@@ -113,7 +113,7 @@ export default function Navigation() {
               </div>
             </>
           ) : (
-            <Link href="/login" className="font-tiktok text-lg hover:text-blue-400 transition">Login</Link>
+            <Link href="/Page/login" className="font-tiktok text-lg hover:text-blue-400 transition">Login</Link>
           )}
         </div>
       </div>

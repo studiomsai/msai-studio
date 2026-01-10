@@ -114,7 +114,7 @@ export default function LoginPage() {
       }
     } else if (mode === 'forgot') {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`,
+        redirectTo: `${window.location.origin}/Page/login`,
       });
 
       if (error) {
@@ -134,7 +134,7 @@ export default function LoginPage() {
         setError(error.message);
         setLoading(false);
       } else {
-        router.push('/mood-today');
+        router.push('/Service/mood-today');
       }
     }
   };
