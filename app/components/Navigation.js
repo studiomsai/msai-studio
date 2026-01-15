@@ -13,6 +13,7 @@ export default function Navigation() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -48,13 +49,29 @@ export default function Navigation() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsSticky(true);
+      } else {
+        setIsSticky(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
   };
 
   return (
-    <nav className="fixed w-full z-50 text-white p-4 flex justify-between items-center">
+    <nav className={`fixed w-full z-50 text-white p-4 flex justify-between items-center ${isSticky ? 'sticky-nav' : ''}`}>
       <div className="container flex justify-between items-center mx-auto">
         <div className="text-xl font-bold tracking-tighter">
           <Link href="/" >

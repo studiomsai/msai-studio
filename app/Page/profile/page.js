@@ -177,41 +177,41 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">Please log in to view your profile.</p>
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p>Please log in to view your profile.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="user-profile py-30">
+      <div className="container mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
-          <p className="text-gray-600 mt-2">Manage your account information and view your activity.</p>
+        <div className="mb-8 text-center ">
+          <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">User Profile</h1>
+          <p className="text-xl mb-16">Manage your account information and view your activity.</p>
         </div>
 
         {/* Credit Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Available Credit</h3>
+          <div className="credit-box">
+            <h3 className="text-3xl font-semibold mb-2">Available Credits</h3>
             <p className="text-3xl font-bold text-green-600">{userData.available_credit || 0}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Credit</h3>
-            <p className="text-3xl font-bold text-blue-600">{userData.total_credit || 0}</p>
+          <div className="credit-box">
+            <h3 className="text-3xl font-semibold mb-2">Total Credits</h3>
+            <p className="text-3xl font-bold text-[#00C0FF]">{userData.total_credit + userData.available_credit|| 0} </p>
           </div>
         </div>
 
         {/* Main Profile Section */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
           <div className="md:flex">
             {/* Left Column - Profile Image */}
-            <div className="md:w-2/5 p-8 bg-gray-50 flex flex-col items-center">
+            <div className="md:w-2/5 p-8 bg-black flex flex-col items-center">
               <div className="relative mb-6">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                <div className="w-80 h-80 rounded-full overflow-hidden border-4 border-white shadow-lg">
                   {userData.profile_image ? (
                     <Image
                       src={userData.profile_image}
@@ -229,7 +229,7 @@ export default function ProfilePage() {
               </div>
               <button
                 onClick={openEditModal}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors"
               >
                 Change Photo
               </button>
@@ -238,11 +238,11 @@ export default function ProfilePage() {
             {/* Right Column - User Information */}
             <div className="md:w-3/5 p-8">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
+                <h2 className="text-3xl font-semibold">Personal Information</h2>
                 <div className="flex space-x-3">
                   <button
                     onClick={openEditModal}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors"
                   >
                     Edit Profile
                   </button>
@@ -257,23 +257,23 @@ export default function ProfilePage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">{userData.full_name || 'Not set'}</p>
+                  <label className="block text-sm font-medium mb-1">Full Name</label>
+                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">{userData.full_name || 'Not set'}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">{userData.email || 'Not set'}</p>
+                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">{userData.email || 'Not set'}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">{userData.phone || 'Not set'}</p>
+                  <label className="block text-sm font-medium mb-1">Phone Number</label>
+                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">{userData.phone || 'Not set'}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">••••••••</p>
+                  <label className="block text-sm font-medium mb-1">Password</label>
+                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">••••••••</p>
                 </div>
               </div>
             </div>
@@ -281,11 +281,11 @@ export default function ProfilePage() {
         </div>
 
         {/* Recent Work Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-6">Recent Work</h2>
+        <div className="bg-[#121212] rounded-lg shadow py-10 text-center">
+          <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title inline-block mx-auto">Recent Work</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {recentWork.map((file) => (
-              <div key={file.id} className="border rounded overflow-hidden">
+              <div key={file.id} className="recent-work-box border border-gray-400 rounded overflow-hidden">
                 {file.type?.includes('video') ? (
                   <video src={file.url} controls className="w-full h-32 object-cover" />
                 ) : (
@@ -301,12 +301,12 @@ export default function ProfilePage() {
       {/* Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="bg-[#121212] rounded-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Edit Profile</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block text-sm font-medium mb-1">Full Name</label>
                 <input
                   type="text"
                   value={editForm.full_name}
@@ -316,7 +316,7 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium mb-1">Email</label>
                 <input
                   type="email"
                   value={editForm.email}
@@ -326,7 +326,7 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <label className="block text-sm font-medium mb-1">Phone Number</label>
                 <input
                   type="tel"
                   value={editForm.phone}
@@ -336,7 +336,7 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New Password (optional)</label>
+                <label className="block text-sm font-medium mb-1">New Password (optional)</label>
                 <input
                   type="password"
                   value={editForm.password}
@@ -347,7 +347,7 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image</label>
+                <label className="block text-sm font-medium mb-1">Profile Image</label>
                 <input
                   type="file"
                   accept="image/*"
@@ -378,7 +378,7 @@ export default function ProfilePage() {
               <button
                 onClick={handleSaveProfile}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

@@ -1,4 +1,5 @@
 import './globals.css'
+import Image from 'next/image'
 import Navigation from './components/Navigation'
 
 export default function RootLayout({ children }) {
@@ -14,8 +15,8 @@ export default function RootLayout({ children }) {
         {children}
 
         {/* Footer */}
-        <footer className="bg-black  mt-20">
-          <div className="max-w-7xl mx-auto py-20 px-5">
+        <footer className="bg-black  py-20 px-5">
+          <div className="container mx-auto">
             <div className="footer-top flex justify-between mb-6 gap-15">
               <div className="w-1/3">
                 <img src="/image/msai-studio.svg" alt="Site Logo" className='mb-4' />
@@ -26,16 +27,16 @@ export default function RootLayout({ children }) {
                 <ul>
                   <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">About</a></li>
                   <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]">Contact</a></li>
-                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Terms of Service</a></li>
-                  <li><a href="/privacy" className="mb-2 text-lg hover:text-[#00C0FF]">Privacy Policy</a></li>
+                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Our Service</a></li>
+                   <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Purchase Credit</a></li>
                 </ul>
               </div>
               <div className="w-auto">
                 <h3 className="text-xl font-semibold mb-3">Social link</h3>
                 <ul>
-                  <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">LinkedIn</a></li>
-                  <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]">YouTube</a></li>
-                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Instagram</a></li>
+                  <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]"><Image className='mr-2' src="/icon/linkedin.svg" alt="linkedin" width={24} height={24} />Linkedin</a></li>
+                  <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]"> <Image className='mr-2' src="/icon/youtube.svg" alt="youtube" width={24} height={24} />YouTube</a></li>
+                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]"><Image className='mr-2' src="/icon/instagram.svg" alt="instagram" width={24} height={24} /> Instagram</a></li>
                 </ul>
               </div>
               <div className="w-auto">
@@ -45,6 +46,9 @@ export default function RootLayout({ children }) {
                   <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]">Teams & Condition</a></li>
                 </ul>
               </div>
+            </div>
+            <div className='footer-bottom border-t border-slate-400 pt-6'>
+              <p className="text-center text-white">© 2026 msai.studio - Powered by Hn9 Codecraft.</p>
             </div>
           </div>
         </footer>

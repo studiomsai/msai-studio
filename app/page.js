@@ -39,7 +39,7 @@ export default function Home() {
       </div>
 
       {/* Apps Preview Section */}
-      <div className="max-w-6xl mx-auto py-20 px-5">
+      <div className="container mx-auto py-20 px-5">
         <h2 className="text-2xl md:text-4xl font-medium text-center mb-16 sub-title">Next-Gen AI Videos for Every Need</h2>
         <div className="flex flex-wrap justify-center gap-8">
           {/* App 1 */}

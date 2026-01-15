@@ -59,7 +59,11 @@ a {
   font-weight: 600;
   display: inline-block;
 }
-
+img{
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+}
 
 .font-tiktok {
   font-family: "TikTok Sans", sans-serif;
@@ -77,6 +81,16 @@ a {
   align-items: center;
   justify-content: center;
   padding: 0px 20px 0px 0px;
+}
+/* Navigation */
+nav{
+  transition: 0.5s all ease;
+}
+
+nav.sticky-nav{
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Dashboard Styles */
@@ -112,6 +126,7 @@ a {
   right: 0;
   margin: auto;
   width: 20%;
+  min-width: 100px;
   height: 2px;
   background: linear-gradient(96.6deg, #155DFC 19.23%, #53EDEF 88.16%);
 }
@@ -296,4 +311,26 @@ a {
   margin-bottom: 10px;
   font-family: "TikTok Sans", sans-serif;
   color: #00C0FF;
+}
+
+.credit-box {
+  background:#121212;
+  background-image: url(/image/background-pattern.png);
+  background-size: cover;
+      background-position: center;
+  background-repeat: no-repeat;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+.recent-work-box > img,
+.recent-work-box > video{
+  width: 100%;
+  height: 300px;
+  object-fit: contain;
+  object-position: center;
 }
