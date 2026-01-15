@@ -116,7 +116,7 @@ export default function DashboardPage() {
       }
 
       setResult(json.result);
-      setCredit((c) => c - 1);
+      setCredit((c) => c - 30);
     } catch (err) {
       console.error("🔥 Generate error:", err);
       alert(err.message);
@@ -150,13 +150,13 @@ export default function DashboardPage() {
 
         <button
           onClick={handleGenerate}
-          disabled={loading || credit <= 30}
+          disabled={loading || credit < 30}
           className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>
 
-        {credit <= 30 && (
+        {credit < 30 && (
           <p className="insufficient-credits">
             Insufficient credits
           </p>

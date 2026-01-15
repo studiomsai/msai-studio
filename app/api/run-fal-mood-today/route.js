@@ -43,7 +43,7 @@ export async function POST(req) {
 
     if (error) throw error;
 
-    if (user.available_credit <= 30) {
+    if (user.available_credit < 30) {
       return NextResponse.json(
         { error: "Insufficient credits" },
         { status: 403 }

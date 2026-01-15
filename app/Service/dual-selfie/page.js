@@ -56,7 +56,7 @@ export default function DashboardPage() {
   const handleGenerate = async () => {
     if (!user) return alert("Please login");
     if (!file1 || !file2) return alert("Please select both images");
-    if (credit < 20) return alert("Insufficient credits (20 required)");
+    if (credit < 2) return alert("Insufficient credits");
 
     setLoading(true);
     setResult(null);
@@ -149,7 +149,7 @@ export default function DashboardPage() {
       }
 
       setResult(json.result);
-      setCredit((c) => c - 20);
+      setCredit((c) => c - 2);
 
       // Upload result image to user folder
       if (json.result && json.result.output && json.result.output.images && json.result.output.images[0]) {
@@ -206,6 +206,7 @@ export default function DashboardPage() {
         <p className="credits-text">
           <strong>Available Credits:</strong> {credit}
         </p>
+        <p className="credits-text"><strong>Note:</strong> Minimum 2 credits require</p>
 
         <div className="file-input-container">
           <label>Person 1 Image:</label>
@@ -226,15 +227,15 @@ export default function DashboardPage() {
 
         <button
           onClick={handleGenerate}
-          disabled={loading || credit < 20}
+          disabled={loading || credit < 2}
           className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>
 
-        {credit < 20 && (
+        {credit < 2 && (
           <p className="insufficient-credits">
-            Insufficient credits (20 required)
+            Insufficient credits 
           </p>
         )}
     </div>
