@@ -197,8 +197,8 @@ export default function DashboardPage() {
   if (!user) return null; // This should not be reached due to redirect
 
   return (
-    <div className="dashboard-container">
-      <h1 className="dashboard-title">
+    <div className="dashboard-container container mx-auto">
+      <h1 className="text-2xl md:text-4xl font-medium text-center mb-8 sub-title w-full mt-30">
         Dual Selfie
       </h1>
 
@@ -209,20 +209,24 @@ export default function DashboardPage() {
         <p className="credits-text"><strong>Note:</strong> Minimum 2 credits require</p>
 
         <div className="file-input-container">
-          <label>Person 1 Image:</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile1(e.target.files[0])}
-            className="file-input"
-          />
-          <label>Person 2 Image:</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile2(e.target.files[0])}
-            className="file-input"
-          />
+          <div className="file-input-wrapper">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile1(e.target.files[0])}
+              className="file-input"
+              />
+              <label>Choose file</label>
+          </div>
+          <div className="file-input-wrapper">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile2(e.target.files[0])}
+              className="file-input"
+            />
+            <label>Choose file</label>
+          </div>
         </div>
 
         <button
@@ -239,41 +243,60 @@ export default function DashboardPage() {
           </p>
         )}
     </div>
+        <div className="result-section p-6 rounded-lg shadow-md w-full max-w-4xl">
+          <h3 className="results-title">Results:</h3>
+          <div className="loader-wrapper">
+            <div className="orbital">
+              <div className="ringOne"></div>
+              <div className="ringTwo"></div>
+              <div className="ringThree"></div>
+              <div className="core">
+                <Image
+                              src="/icon/loader.png"
+                              alt="Generated Image"
+                              className="setting-image"
+                              width="400"
+                              height="400"
+                            />
+              </div>
+              <div className="spin"></div>
+            </div>
+          </div>
         {result && (
-       <div className="results-container">
-                  <h3 className="results-title">Your Results:</h3>
-                  <div className="media-grid">
-                    {result.output?.images?.[0]?.url && (
-                      <div className="media-item">
-                        <h4 className="media-heading">Generated Image</h4>
-                        <Image
-                          src={result.output.images[0].url}
-                          alt="Generated Image"
-                          className="caricature-image"
-                          width="400"
-                          height="400"
-                          unoptimized={true}
-                          priority={true}
-                          onError={() => console.error("Failed to load generated image")}
-                        />
-                          <a
-                          href={result.output.images[0].url}
-                          download
-                          className="download-button"
-                        >
-                          Download Image
-                        </a>
-                      </div>
+          <div className="results-container">
+                   
+                    <div className="media-grid">
+                      {result.output?.images?.[0]?.url && (
+                        <div className="media-item">
+                          <h4 className="media-heading">Generated Image</h4>
+                          <Image
+                            src={result.output.images[0].url}
+                            alt="Generated Image"
+                            className="caricature-image"
+                            width="400"
+                            height="400"
+                            unoptimized={true}
+                            priority={true}
+                            onError={() => console.error("Failed to load generated image")}
+                          />
+                            <a
+                            href={result.output.images[0].url}
+                            download
+                            className="download-button"
+                          >
+                            Download Image
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    {(!result.output?.images?.[0]?.url && !result.output?.video?.url) && (
+                      <pre className="json-fallback">
+                        {JSON.stringify(result, null, 2)}
+                      </pre>
                     )}
-                  </div>
-                  {(!result.output?.images?.[0]?.url && !result.output?.video?.url) && (
-                    <pre className="json-fallback">
-                      {JSON.stringify(result, null, 2)}
-                    </pre>
-                  )}
-                </div>
+          </div>
         )}
-     
+      </div>
     </div>
   );
 }

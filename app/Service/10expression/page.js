@@ -129,8 +129,8 @@ export default function DashboardPage() {
   if (!user) return null; // This should not be reached due to redirect
 
   return (
-    <div className="dashboard-container">
-      <h1 className="dashboard-title">
+    <div className="dashboard-container container mx-auto">
+      <h1 className="text-2xl md:text-4xl font-medium text-center mb-16 sub-title w-full">
         10 Expression Images
       </h1>
 
