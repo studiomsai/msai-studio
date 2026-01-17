@@ -60,6 +60,7 @@ export default function DashboardPage() {
 
     setLoading(true);
     setResult(null);
+    document.body.classList.add("generating-work");
 
     try {
       /* 1️⃣ Upload first image to Supabase */
@@ -189,6 +190,7 @@ export default function DashboardPage() {
       console.error("🔥 Generate error:", err);
       alert(err.message);
     } finally {
+      document.body.classList.remove("generating-work");
       setLoading(false);
     }
   };
@@ -204,35 +206,37 @@ export default function DashboardPage() {
 
       <div className="dashboard-card">
         <p className="credits-text">
-          <strong>Available Credits:</strong> {credit}
+          <strong>Available Credits:</strong><span className="text-green-500"> {credit} </span> 
         </p>
-        <p className="credits-text"><strong>Note:</strong> Minimum 2 credits require</p>
+        <p className="credits-text"><strong>Note:</strong> Minimum  <span className="text-green-500">2 credits </span>require</p>
 
         <div className="file-input-container">
+         <p>Person 1 Image</p>
           <div className="file-input-wrapper">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setFile1(e.target.files[0])}
-              className="file-input"
+              className="file-input" id="person1"
               />
-              <label>Choose file</label>
+              <label htmlFor="person1">Choose Person Image</label>
           </div>
+          <p>Person 2 Image</p>
           <div className="file-input-wrapper">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setFile2(e.target.files[0])}
-              className="file-input"
+              className="file-input" id="person2"
             />
-            <label>Choose file</label>
+            <label htmlFor="person2">Choose Person Image</label>
           </div>
         </div>
 
         <button
           onClick={handleGenerate}
           disabled={loading || credit < 2}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40"
+          className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40 generate-button"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>
@@ -245,23 +249,25 @@ export default function DashboardPage() {
     </div>
         <div className="result-section p-6 rounded-lg shadow-md w-full max-w-4xl">
           <h3 className="results-title">Results:</h3>
-          <div className="loader-wrapper">
-            <div className="orbital">
-              <div className="ringOne"></div>
-              <div className="ringTwo"></div>
-              <div className="ringThree"></div>
-              <div className="core">
-                <Image
-                              src="/icon/loader.png"
-                              alt="Generated Image"
-                              className="setting-image"
-                              width="400"
-                              height="400"
-                            />
+          {!result && (
+            <div className="loader-wrapper">
+              <div className="orbital">
+                <div className="ringOne"></div>
+                <div className="ringTwo"></div>
+                <div className="ringThree"></div>
+                <div className="core">
+                  <Image
+                                src="/icon/loader.png"
+                                alt="Generated Image"
+                                className="setting-image"
+                                width="400"
+                                height="400"
+                              />
+                </div>
+                <div className="spin"></div>
               </div>
-              <div className="spin"></div>
             </div>
-          </div>
+          )}
         {result && (
           <div className="results-container">
                    

@@ -139,7 +139,6 @@ nav.sticky-nav{
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  align-items: center;
   justify-content: center;
   padding: 60px 0px;
   font-family: Arial, sans-serif;
@@ -147,7 +146,7 @@ nav.sticky-nav{
 
 .dashboard-card {
   background: #181818;
-  border-radius: 15px;
+  border-radius: 8px;
   padding: 30px;
   box-shadow: 10px 10px 0px rgb(0 0 0);
   max-width: 600px;
@@ -158,35 +157,7 @@ nav.sticky-nav{
   font-size: 1.2rem;
   margin-bottom: 20px;
 }
-.file-input-wrapper{
-  display: flex;
-  gap: 10px;
-   margin-bottom: 20px;
-}
-.file-input-container {
-  margin-bottom: 20px;
-}
-.file-input-container label {
-  width: 200px;
-  height: 50px;
-  padding: 14px 30px;
-  background: #484848;
-  border-radius: 10px;
-  color: #ffffff;
-  font-family: "TikTok Sans", sans-serif;
-  font-size: 16px;
-  display: inline-block;
-}
 
-.file-input {
-  display: block;
-  margin: 0 auto;
-  padding: 10px;
-  border-radius: 8px;
-  background: #000000;
-  cursor: pointer;
-  width: 100%;
-}
 
 .generate-button {
   padding: 15px 30px;
@@ -211,14 +182,6 @@ nav.sticky-nav{
   font-weight: bold;
 }
 
-.results-container {
-  margin-top: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border: 1px solid #e9ecef;
-  max-width:70vw;
-}
 
 .results-title {
   margin-bottom: 15px;
@@ -242,7 +205,6 @@ nav.sticky-nav{
 }
 
 .media-heading {
-  color: black;
   margin-bottom: 10px;
 }
 
@@ -261,13 +223,15 @@ nav.sticky-nav{
 }
 
 .download-button {
+  padding: 14px 30px;
+  background: linear-gradient(90deg, #155DFC 0%, #53EDEF 100%);
+  border-radius: 60px;
+  color: #000;
+  font-family: "TikTok Sans", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
   display: inline-block;
-  padding: 10px 20px;
-  background: #007bff;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  font-size: 14px;
+ margin-top: 20px;
 }
 
 .json-fallback {
@@ -804,4 +768,92 @@ nav.sticky-nav{
 
 .setting-image{
   padding: 30px;
+}
+
+.generating-work .setting-image{
+  animation-name: spinRotation;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+
+.file-input-container{
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* wrapper */
+.file-input-wrapper{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position:relative;
+  margin-bottom:20px;
+}
+
+
+/* hide default ugly browser button */
+.file-input-wrapper input[type="file"]::-webkit-file-upload-button {
+  display: none;
+}
+/* add small file icon before text */
+.file-input-wrapper input[type="file"]{
+    position: absolute;
+    bottom: 0px;
+    z-index: 99;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 10px 20px;
+    pointer-events: none;
+}
+
+/* --- STYLE LABEL AS DASHED UPLOAD BOX --- */
+.file-input-wrapper label{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  text-align: center;
+  padding: 32px 14px 16px;
+  border: 2px dashed #626262;
+  border-radius: 10px;
+  background: #000000;
+  color: #00C0FF;;
+  font-weight: 600;
+  cursor: pointer;
+  position:relative;
+  transition: 0.5s all ease;
+}
+
+/* add icon AFTER label (your request) */
+.file-input-wrapper label::after{
+    content: "";
+    background-image: url("/icon/upload.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 22px;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+}
+
+/* hover effect */
+.file-input-wrapper label:hover{
+  background: #181818;
+}
+
+.generating-work  .result-section {
+      background-image: url("/image/LCPT.gif");
+    background-repeat: no-repeat;
+    background-size: cover;
+    mix-blend-mode: lighten;
 }
