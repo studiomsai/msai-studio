@@ -236,7 +236,7 @@ export default function DashboardPage() {
         <button
           onClick={handleGenerate}
           disabled={loading || credit < 2}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40 generate-button"
+          className="primary-btn generate-button"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>

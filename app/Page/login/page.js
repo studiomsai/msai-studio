@@ -146,13 +146,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div className="user-profile py-30">
+      <div className="container mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">
             {mode === 'reset' ? 'Update your password' : mode === 'forgot' ? 'Reset your password' : mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          </h1>
+          <p className="text-xl mb-16">
             {mode === 'reset' ? (
               <>
                 Enter your new password below
@@ -163,7 +163,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setMode('login')}
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-[#00c0ff] hover:text-[#0e6c8b]"
                   suppressHydrationWarning={true}
                 >
                   Sign in
@@ -175,7 +175,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setMode('login')}
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-[#00c0ff] hover:text-[#0e6c8b]"
                   suppressHydrationWarning={true}
                 >
                   Sign in
@@ -187,7 +187,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setMode('signup')}
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-[#00c0ff] hover:text-[#0e6c8b]"
                   suppressHydrationWarning={true}
                 >
                   Sign up
@@ -197,166 +197,203 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleAuth} suppressHydrationWarning={true}>
-          {mode === 'signup' ? (
-            <div className="rounded-md shadow-sm -space-y-px">
-              <input
-                type="text"
-                required
-                autoComplete="name"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                suppressHydrationWarning={true}
-              />
+        <div className="max-w-md w-full mx-auto">
+          <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
 
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                suppressHydrationWarning={true}
-              />
+            <div className="p-8">
+              <form className="space-y-6" onSubmit={handleAuth} suppressHydrationWarning={true}>
+                {mode === 'signup' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        required
+                        autoComplete="name"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Full Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
 
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                suppressHydrationWarning={true}
-              />
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Email</label>
+                      <input
+                        type="email"
+                        required
+                        autoComplete="email"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Email address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
 
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                suppressHydrationWarning={true}
-              />
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Password</label>
+                      <input
+                        type="password"
+                        required
+                        autoComplete="new-password"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
 
-              <input
-                type="tel"
-                required
-                autoComplete="tel"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Phone Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                suppressHydrationWarning={true}
-              />
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Confirm Password</label>
+                      <input
+                        type="password"
+                        required
+                        autoComplete="new-password"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Phone Number</label>
+                      <input
+                        type="tel"
+                        required
+                        autoComplete="tel"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Phone Number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
+                  </div>
+                ) : mode === 'reset' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">New Password</label>
+                      <input
+                        type="password"
+                        required
+                        autoComplete="new-password"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="New Password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Confirm New Password</label>
+                      <input
+                        type="password"
+                        required
+                        autoComplete="new-password"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Confirm New Password"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
+                  </div>
+                ) : mode === 'forgot' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Email</label>
+                      <input
+                        type="email"
+                        required
+                        autoComplete="email"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Email address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Email</label>
+                      <input
+                        type="email"
+                        required
+                        autoComplete="email"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Email address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Password</label>
+                      <input
+                        type="password"
+                        required
+                        autoComplete="current-password"
+                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        suppressHydrationWarning={true}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {mode === 'login' && (
+                  <div className="text-sm">
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="font-medium text-[#00c0ff] hover:text-[#0e6c8b]"
+                      suppressHydrationWarning={true}
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                )}
+
+                {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+                {success && <div className="text-green-500 text-sm text-center">{success}</div>}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full px-4 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors disabled:opacity-50"
+                  suppressHydrationWarning={true}
+                >
+                  {loading
+                    ? mode === 'reset'
+                      ? 'Updating password...'
+                      : mode === 'forgot'
+                      ? 'Sending reset email...'
+                      : mode === 'signup'
+                      ? 'Signing up...'
+                      : 'Signing in...'
+                    : mode === 'reset'
+                    ? 'Update password'
+                    : mode === 'forgot'
+                    ? 'Send reset email'
+                    : mode === 'signup'
+                    ? 'Sign up'
+                    : 'Sign in'}
+                </button>
+              </form>
             </div>
-          ) : mode === 'reset' ? (
-            <div className="rounded-md shadow-sm -space-y-px">
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="New Password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                suppressHydrationWarning={true}
-              />
-
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Confirm New Password"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                suppressHydrationWarning={true}
-              />
-            </div>
-          ) : mode === 'forgot' ? (
-            <div className="rounded-md shadow-sm -space-y-px">
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                suppressHydrationWarning={true}
-              />
-            </div>
-          ) : (
-            <div className="rounded-md shadow-sm -space-y-px">
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                suppressHydrationWarning={true}
-              />
-
-              <input
-                type="password"
-                required
-                autoComplete="current-password"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md sm:text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                suppressHydrationWarning={true}
-              />
-            </div>
-          )}
-
-          {mode === 'login' && (
-            <div className="text-sm">
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-                suppressHydrationWarning={true}
-              >
-                Forgot your password?
-              </button>
-            </div>
-          )}
-
-          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-          {success && <div className="text-green-500 text-sm text-center">{success}</div>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 rounded-md text-white text-sm font-medium bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            suppressHydrationWarning={true}
-          >
-            {loading
-              ? mode === 'reset'
-                ? 'Updating password...'
-                : mode === 'forgot'
-                ? 'Sending reset email...'
-                : mode === 'signup'
-                ? 'Signing up...'
-                : 'Signing in...'
-              : mode === 'reset'
-              ? 'Update password'
-              : mode === 'forgot'
-              ? 'Send reset email'
-              : mode === 'signup'
-              ? 'Sign up'
-              : 'Sign in'}
-          </button>
-        </form>
+          </div>
+        </div>
       </div>
     </div>
   );

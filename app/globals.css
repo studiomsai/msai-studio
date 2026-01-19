@@ -159,22 +159,7 @@ nav.sticky-nav{
 }
 
 
-.generate-button {
-  padding: 15px 30px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.3s;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
 
-.generate-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
 
 .insufficient-credits {
   color: red;
@@ -791,7 +776,7 @@ nav.sticky-nav{
   flex-direction: column;
   gap: 10px;
   position:relative;
-  margin-bottom:20px;
+  margin-bottom: 30px;
 }
 
 
