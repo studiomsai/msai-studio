@@ -130,29 +130,33 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-container container mx-auto">
-      <h1 className="text-2xl md:text-4xl font-medium text-center mb-16 sub-title w-full">
+      <h1 className="text-2xl md:text-4xl font-medium text-center mb-8 sub-title w-full mt-20">
         10 Expression Images
       </h1>
 
       <div className="dashboard-card">
         <p className="credits-text">
-          <strong>Available Credits:</strong> {credit}
+          <strong>Available Credits:</strong><span className="text-green-500"> {credit} </span>
         </p>
-        <p className="credits-text"><strong>Note:</strong> Minimum 15 credits require</p>
+        <p className="credits-text"><strong>Note:</strong> Minimum  <span className="text-green-500">15 credits </span>require</p>
 
         <div className="file-input-container">
+            <p>Please upload the Image here:</p>
+          <div className="file-input-wrapper">
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setFile(e.target.files[0])}
-            className="file-input"
+            className="file-input" id="expression"
           />
+          <label htmlFor="expression">Choose Image</label>
+          </div>
         </div>
 
         <button
           onClick={handleGenerate}
           disabled={loading || credit < 15}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-lg shadow-blue-600/40"
+          className="primary-btn generate-button"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>
@@ -163,13 +167,34 @@ export default function DashboardPage() {
           </p>
         )}
     </div>
+        <div className="result-section p-6 rounded-lg shadow-md w-full max-w-4xl">
+          <h3 className="results-title">Results:</h3>
+          {!result && (
+            <div className="loader-wrapper">
+              <div className="orbital">
+                <div className="ringOne"></div>
+                <div className="ringTwo"></div>
+                <div className="ringThree"></div>
+                <div className="core">
+                  <Image
+                                src="/icon/loader.png"
+                                alt="Generated Image"
+                                className="setting-image"
+                                width="400"
+                                height="400"
+                              />
+                </div>
+                <div className="spin"></div>
+              </div>
+            </div>
+          )}
         {result && (
           <div className="results-container">
-            <h3 className="results-title">Your Results:</h3>
+
             <div className="media-grid">
               {result.output?.images?.[0]?.url && (
                 <div className="media-item">
-                  <h4 className="media-heading">Generated Image</h4>
+                  <h4 className="media-heading">Generated Images</h4>
                   <div className="flex flex-wrap gap-4">
                      <Image src={result.output.images[0].url} alt="Generated Image" className="expression-image" width={200} height={200} unoptimized={true}
                           priority={true}
@@ -205,7 +230,7 @@ export default function DashboardPage() {
                     download
                     className="download-button"
                   >
-                    Download Image
+                    Download Images
                   </a>
                 </div>
               )}
@@ -217,7 +242,7 @@ export default function DashboardPage() {
             )}
           </div>
         )}
-     
+      </div>
     </div>
   );
 }

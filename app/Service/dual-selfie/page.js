@@ -200,7 +200,7 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-container container mx-auto">
-      <h1 className="text-2xl md:text-4xl font-medium text-center mb-8 sub-title w-full mt-30">
+      <h1 className="text-2xl md:text-4xl font-medium text-center mb-8 sub-title w-full mt-20">
         Dual Selfie
       </h1>
 

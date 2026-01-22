@@ -281,7 +281,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Recent Work Section */}
-        <div className="bg-[#121212] rounded-lg shadow py-10 text-center">
+        <div className="bg-[#121212] rounded-lg shadow p-10 text-center">
           <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title inline-block mx-auto">Recent Work</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {recentWork.map((file) => (
