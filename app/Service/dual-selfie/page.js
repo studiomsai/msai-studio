@@ -195,7 +195,13 @@ export default function DashboardPage() {
     }
   };
 
-  if (authLoading) return <p style={{ padding: 30 }}>Loading…</p>;
+  if (authLoading) return <p style={{ padding: 30 }} className="loading-page"> <Image
+                                src="/icon/galaxy-loading.gif"
+                                alt="Loading"
+                                className="loading-image"
+                                width="200"
+                                height="200"
+                              /></p>;
   if (!user) return null; // This should not be reached due to redirect
 
   return (
