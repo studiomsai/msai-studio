@@ -32,7 +32,7 @@ export default function ProfilePage() {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError || !user) {
-          router.push('/login');
+          router.push('/Page/login');
           return;
         }
         setUser(user);
