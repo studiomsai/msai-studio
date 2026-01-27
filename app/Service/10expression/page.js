@@ -59,6 +59,7 @@ export default function DashboardPage() {
 
     setLoading(true);
     setResult(null);
+    document.body.classList.add("generating-work");
 
     try {
       /* 1️⃣ Upload to Supabase */
@@ -121,6 +122,7 @@ export default function DashboardPage() {
       console.error("🔥 Generate error:", err);
       alert(err.message);
     } finally {
+      document.body.classList.remove("generating-work");
       setLoading(false);
     }
   };

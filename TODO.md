@@ -1,29 +1,9 @@
-# Task: Make all service pages match the design of the dual selfie page
-
-## Overview
-Update all service pages (caricature-video, 10expression, expression-video, expressions-5-images-20sec-video, mood-today, popcorn-on-steroids) to match the layout and styling of the dual-selfie page.
-
-## Key Changes to Apply
-- Title: Change `mb-16` to `mb-8` and add `mt-30`
-- Credits display: Wrap credit value in `<span className="text-green-500">`
-- Note: Wrap credit requirement in `<span className="text-green-500">`
-- File input: Standardize to use wrapper with label (for single image pages)
-- Button: Change class to `primary-btn generate-button`
-- Results: Move results section outside `dashboard-card` into a new `result-section` div with loader when no result
-- Ensure consistent structure across all pages
-
-## Pages to Update
-- [ ] app/Service/caricature-video/page.js
-- [ ] app/Service/10expression/page.js
-- [ ] app/Service/expression-video/page.js
-- [ ] app/Service/expressions-5-images-20sec-video/page.js
-- [ ] app/Service/mood-today/page.js
-- [ ] app/Service/popcorn-on-steroids/page.js
-
-## Implementation Steps
-1. Update title styling
-2. Update credits and note display
-3. Standardize file input structure
-4. Update button class
-5. Restructure results section with loader
-6. Test each page for consistency
+- [x] Update title classes to match other pages (mb-8 mt-20)
+- [x] Update credits text to include green span for credit value
+- [x] Update note text to include green span for credit requirement
+- [x] Update file input container to include <p>Please upload the Image here:</p> and file-input-wrapper with label
+- [x] Keep story input as is
+- [x] Update button class to primary-btn generate-button
+- [x] Wrap results in result-section div with loader when !result
+- [x] Adjust results-container and media-grid to display images in flex flex-wrap gap-4 with width=400 height=400
+- [x] Add download button for images

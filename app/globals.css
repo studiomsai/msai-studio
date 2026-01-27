@@ -229,11 +229,13 @@ nav.sticky-nav{
   max-width: 32%;
   height: auto;
  flex: 0 0 32%;
+  border-radius: 8px;
 }
 .caricature-image{
   max-width: 100%;
   height: auto;
   width: 100%;
+  border-radius: 8px;
 }
 @media  (max-width:767px) {
   .title:after{
@@ -829,7 +831,7 @@ nav.sticky-nav{
   background: #181818;
 }
 
-.generating-work  .result-section {
+.generating-work  .result-section .loader-wrapper {
       background-image: url("/image/LCPT.gif");
     background-repeat: no-repeat;
     background-size: cover;
@@ -844,5 +846,5 @@ nav.sticky-nav{
     display: flex;
     align-items: center;
     justify-content: center;
-        background: #000000;
+   background: #000000;
 }
