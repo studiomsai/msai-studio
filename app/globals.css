@@ -225,12 +225,6 @@ nav.sticky-nav{
   }
 
 }
-.expression-image{
-  max-width: 32%;
-  height: auto;
- flex: 0 0 32%;
-  border-radius: 8px;
-}
 .caricature-image{
   max-width: 100%;
   height: auto;
@@ -851,4 +845,16 @@ nav.sticky-nav{
 
 .generate-button{
   cursor: pointer;
+}
+
+.expression-group > .group{
+  max-width: 32%;
+  height: auto;
+ flex: 0 0 32%;
+  border-radius: 8px;
+}
+
+.expression-group > .group > img{
+  width: 100%;
+  border-radius:8px;
 }
