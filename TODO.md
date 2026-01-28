@@ -1,2 +1,5 @@
-- [x] Add logic to upload result image to user folder in mood-today/page.js
-- [x] Add logic to upload result video to user folder in mood-today/page.js
+- [x] Add upload logic to popcorn-on-steroids/page.js
+- [x] Add upload logic to expressions-5-images-20sec-video/page.js
+- [x] Add upload logic to expression-video/page.js
+- [x] Add upload logic to caricature-video/page.js
+- [x] Add upload logic to 10expression/page.js
