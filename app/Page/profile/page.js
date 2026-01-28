@@ -216,8 +216,8 @@ export default function ProfilePage() {
                     <Image
                       src={userData.profile_image}
                       alt="Profile"
-                      width={128}
-                      height={128}
+                      width={300}
+                      height={300}
                       className="w-full h-full object-cover"
                     />
                   ) : (
