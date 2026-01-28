@@ -1,9 +1,20 @@
-- [x] Update title classes to match other pages (mb-8 mt-20)
-- [x] Update credits text to include green span for credit value
-- [x] Update note text to include green span for credit requirement
-- [x] Update file input container to include <p>Please upload the Image here:</p> and file-input-wrapper with label
-- [x] Keep story input as is
-- [x] Update button class to primary-btn generate-button
-- [x] Wrap results in result-section div with loader when !result
-- [x] Adjust results-container and media-grid to display images in flex flex-wrap gap-4 with width=400 height=400
-- [x] Add download button for images
+# TODO: Implement Hover-to-Download for Service Pages
+
+## Overview
+Remove download buttons and add hover-to-show download icon on media (images/videos) for direct download on click.
+
+## Tasks
+- [x] Update app/Service/10expression/page.js
+- [x] Update app/Service/caricature-video/page.js
+- [x] Update app/Service/dual-selfie/page.js
+- [x] Update app/Service/expression-video/page.js
+- [x] Update app/Service/expressions-5-images-20sec-video/page.js
+- [x] Update app/Service/mood-today/page.js
+- [x] Update app/Service/popcorn-on-steroids/page.js
+
+## Implementation Details
+- Remove `<a href="..." download className="download-button">Download ...</a>` elements
+- Wrap media in div with relative positioning
+- Add download icon SVG on hover (position: absolute, top/right corner)
+- Add onClick handler to icon for direct download
+- Add CSS classes for hover effects

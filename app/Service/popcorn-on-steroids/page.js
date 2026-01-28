@@ -21,6 +21,29 @@ export default function DashboardPage() {
   const [result, setResult] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  // Function to handle direct download
+   const handleDownload = async (url, filename = "dual-selfie.jpg") => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Download failed");
+
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.error("Download error:", err);
+    alert("Failed to download image");
+  }
+};
+  
   /* 🔐 Load user & credits */
   useEffect(() => {
     const init = async () => {
@@ -218,46 +241,86 @@ export default function DashboardPage() {
                 <div className="media-item">
                   <h4 className="media-heading">Generated Images</h4>
                   <div className="flex flex-wrap gap-4">
-                     <Image src={result.output.images[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
-                          priority={true}
-                          onError={() => console.error("Failed to load generated image")}/>
-                     <Image src={result.output.images_2[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
-                          priority={true}
-                          onError={() => console.error("Failed to load generated image")}/>
-                     <Image src={result.output.images_3[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
-                          priority={true}
-                          onError={() => console.error("Failed to load generated image")}/>
-                     <Image src={result.output.images_4[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
-                          priority={true}
-                          onError={() => console.error("Failed to load generated image")}/>
-                     <Image src={result.output.images_5[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
-                          priority={true}
-                          onError={() => console.error("Failed to load generated image")}/>
+                     <div className="relative group">
+                       <Image src={result.output.images[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
+                            priority={true}
+                            onError={() => console.error("Failed to load generated image")}/>
+                       <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn" onClick={() => handleDownload(result.output.images[0].url, 'popcorn-1.jpg')}>
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                         </svg>
+                       </div>
+                     </div>
+                     <div className="relative group">
+                       <Image src={result.output.images_2[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
+                            priority={true}
+                            onError={() => console.error("Failed to load generated image")}/>
+                       <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn" onClick={() => handleDownload(result.output.images_2[0].url, 'popcorn-2.jpg')}>
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                         </svg>
+                       </div>
+                     </div>
+                     <div className="relative group">
+                       <Image src={result.output.images_3[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
+                            priority={true}
+                            onError={() => console.error("Failed to load generated image")}/>
+                       <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn" onClick={() => handleDownload(result.output.images_3[0].url, 'popcorn-3.jpg')}>
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                         </svg>
+                       </div>
+                     </div>
+                     <div className="relative group">
+                       <Image src={result.output.images_4[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
+                            priority={true}
+                            onError={() => console.error("Failed to load generated image")}/>
+                       <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn" onClick={() => handleDownload(result.output.images_4[0].url, 'popcorn-4.jpg')}>
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                         </svg>
+                       </div>
+                     </div>
+                     <div className="relative group">
+                       <Image src={result.output.images_5[0].url} alt="Generated Image" className="caricature-image" width="400" height="400" unoptimized={true}
+                            priority={true}
+                            onError={() => console.error("Failed to load generated image")}/>
+                       <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn" onClick={() => handleDownload(result.output.images_5[0].url, 'popcorn-5.jpg')}>
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                           <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                         </svg>
+                       </div>
+                     </div>
                   </div>
-                  <a
-                    href={result.output.images[0].url}
-                    download
-                    className="download-button"
-                  >
-                    Download Images
-                  </a>
                 </div>
               )}
               {result.output?.video?.url && (
                 <div className="media-item">
                   <h4 className="media-heading">Generated Video</h4>
-                  <video
-                    controls
-                    src={result.output.video.url}
-                    className="generated-video"
-                  />
-                  <a
-                    href={result.output.video.url}
-                    download
-                    className="download-button"
-                  >
-                    Download Video
-                  </a>
+                  <div className="relative group">
+                    <video
+                      controls
+                      src={result.output.video.url}
+                      className="generated-video"
+                    />
+                    <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn z-10" onClick={() => handleDownload(result.output.video.url, 'popcorn-video.mp4')}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
