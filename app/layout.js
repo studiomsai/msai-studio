@@ -27,8 +27,8 @@ export default function RootLayout({ children }) {
                 <ul>
                   <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">About</a></li>
                   <li><a href="/Page/contact" className="mb-2 text-lg hover:text-[#00C0FF]">Contact</a></li>
-                  <li><a href="/Page/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Our Service</a></li>
-                   <li><a href="/Page/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Purchase Credit</a></li>
+                  <li><a href="/Page/apps" className="mb-2 text-lg hover:text-[#00C0FF]">Our Service</a></li>
+                   <li><a href="/Page/shop" className="mb-2 text-lg hover:text-[#00C0FF]">Purchase Credit</a></li>
                 </ul>
               </div>
               <div className="w-auto">
