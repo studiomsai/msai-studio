@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -75,11 +76,11 @@ export default function Navigation() {
       <div className="container flex justify-between items-center mx-auto">
         <div className="text-xl font-bold tracking-tighter">
           <Link href="/" >
-            <img
+            <Image
               src="/image/msai-studio.svg"
               alt="Site Logo"
-              width={128}
-              height={128}
+              width={175}
+              height={24}
               className="w-full h-full object-cover"
             />
           </Link>
