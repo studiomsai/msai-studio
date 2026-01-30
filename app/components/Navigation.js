@@ -93,7 +93,8 @@ export default function Navigation() {
           <Link href="/Service/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link>
         </div>
         <div className="profile-btn">
-          <img src="/image/user-icon.svg" alt="User Icon" className="w-10 h-10 inline-block mr-3" />
+          <Image src="/image/user-icon.svg" alt="User Icon" className="w-10 h-10 inline-block mr-3"  width={40}
+              height={40}/>
           {user ? (
             <>
               <div className="relative dropdown-container">
