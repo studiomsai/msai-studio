@@ -3,3 +3,6 @@
 - [x] Add upload logic to expression-video/page.js
 - [x] Add upload logic to caricature-video/page.js
 - [x] Add upload logic to 10expression/page.js
+- [ ] Create app/Page/terms/page.js with dummy Terms and Conditions content
+- [x] Create app/Page/privacy/page.js with dummy Privacy Policy content
+- [x] Update app/layout.js to correct footer links and fix typo

@@ -36,14 +36,14 @@ export default function RootLayout({ children }) {
                 <ul>
                   <li><a href="/Page/about" className="mb-2 text-lg hover:text-[#00C0FF]"><Image className='mr-2' src="/icon/linkedin.svg" alt="linkedin" width={24} height={24} />Linkedin</a></li>
                   <li><a href="/Page/contact" className="mb-2 text-lg hover:text-[#00C0FF]"> <Image className='mr-2' src="/icon/youtube.svg" alt="youtube" width={24} height={24} />YouTube</a></li>
-                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]"><Image className='mr-2' src="/icon/instagram.svg" alt="instagram" width={24} height={24} /> Instagram</a></li>
+                  <li><a href="/terms" className="mb-2 text-lg hover:text-[#00C0FF]"><Image className='mr-2' src="/icon/instagram.svg" alt="instagram" width={24} height={24} />Instagram</a></li>
                 </ul>
               </div>
               <div className="w-auto">
                 <h3 className="text-xl font-semibold mb-3">Company</h3>
                 <ul>
-                  <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">Privacy Policy</a></li>
-                  <li><a href="/contact" className="mb-2 text-lg hover:text-[#00C0FF]">Teams & Condition</a></li>
+                  <li><a href="/Page/privacy" className="mb-2 text-lg hover:text-[#00C0FF]">Privacy Policy</a></li>
+                  <li><a href="/Page/terms" className="mb-2 text-lg hover:text-[#00C0FF]">Terms & Conditions</a></li>
                 </ul>
               </div>
             </div>
