@@ -281,22 +281,22 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Full Name</label>
-                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">{userData.full_name || 'Not set'}</p>
+                  <p className="border border-[#3a3a3a] bg-transparent text-white p-3 rounded">{userData.full_name || 'Not set'}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">Email</label>
-                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">{userData.email || 'Not set'}</p>
+                  <p className="border border-[#3a3a3a] bg-transparent text-white p-3 rounded">{userData.email || 'Not set'}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">Phone Number</label>
-                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">{userData.phone || 'Not set'}</p>
+                  <p className="border border-[#3a3a3a] bg-transparent text-white p-3 rounded">{userData.phone || 'Not set'}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">Password</label>
-                  <p className="border border-gray-400 bg-transparent text-white p-3 rounded">••••••••</p>
+                  <p className="border border-[#3a3a3a] bg-transparent text-white p-3 rounded">••••••••</p>
                 </div>
               </div>
             </div>

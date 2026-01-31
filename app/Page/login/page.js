@@ -148,11 +148,14 @@ export default function LoginPage() {
   return (
     <div className="user-profile py-30">
       <div className="container mx-auto">
-        <div className="mb-8 text-center">
+     
+
+        <div className="max-w-xl w-full mx-auto signup-wrapper">
+             <div className="mb-8 text-center">
           <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">
-            {mode === 'reset' ? 'Update your password' : mode === 'forgot' ? 'Reset your password' : mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
+            {mode === 'reset' ? 'Update your password' : mode === 'forgot' ? 'Reset your password' : mode === 'signup' ? 'Create your account' : 'Welcome back to MSAI Studio'}
           </h1>
-          <p className="text-xl mb-16">
+          <p className="text-xl mb-10">
             {mode === 'reset' ? (
               <>
                 Enter your new password below
@@ -196,11 +199,8 @@ export default function LoginPage() {
             )}
           </p>
         </div>
-
-        <div className="max-w-md w-full mx-auto">
-          <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
-
-            <div className="p-8">
+          <div className="rounded-lg shadow-lg overflow-hidden">
+            <div>
               <form className="space-y-6" onSubmit={handleAuth} suppressHydrationWarning={true}>
                 {mode === 'signup' ? (
                   <div className="space-y-4">
@@ -210,7 +210,7 @@ export default function LoginPage() {
                         type="text"
                         required
                         autoComplete="name"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Full Name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -224,7 +224,7 @@ export default function LoginPage() {
                         type="email"
                         required
                         autoComplete="email"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Email address"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -238,7 +238,7 @@ export default function LoginPage() {
                         type="password"
                         required
                         autoComplete="new-password"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -252,7 +252,7 @@ export default function LoginPage() {
                         type="password"
                         required
                         autoComplete="new-password"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -266,7 +266,7 @@ export default function LoginPage() {
                         type="tel"
                         required
                         autoComplete="tel"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Phone Number"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
@@ -282,7 +282,7 @@ export default function LoginPage() {
                         type="password"
                         required
                         autoComplete="new-password"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="New Password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
@@ -296,7 +296,7 @@ export default function LoginPage() {
                         type="password"
                         required
                         autoComplete="new-password"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Confirm New Password"
                         value={confirmNewPassword}
                         onChange={(e) => setConfirmNewPassword(e.target.value)}
@@ -312,7 +312,7 @@ export default function LoginPage() {
                         type="email"
                         required
                         autoComplete="email"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Email address"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -328,7 +328,7 @@ export default function LoginPage() {
                         type="email"
                         required
                         autoComplete="email"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Email address"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -342,7 +342,7 @@ export default function LoginPage() {
                         type="password"
                         required
                         autoComplete="current-password"
-                        className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                        className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -371,7 +371,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-4 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors disabled:opacity-50"
+                  className="primary-btn w-full"
                   suppressHydrationWarning={true}
                 >
                   {loading
