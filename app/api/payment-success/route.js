@@ -50,9 +50,9 @@ export async function POST(req) {
 
     if (userId) {
       let creditsToAdd = 0
-      if (amountTotal === 900) creditsToAdd = 100
-      if (amountTotal === 2500) creditsToAdd = 300
-      if (amountTotal === 7900) creditsToAdd = 1000
+      if (amountTotal === 9) creditsToAdd = 100
+      if (amountTotal === 25) creditsToAdd = 300
+      if (amountTotal === 79) creditsToAdd = 1000
 
       // -------------------------
       // ✅ YOUR ORIGINAL CREDIT LOGIC (UNCHANGED)
