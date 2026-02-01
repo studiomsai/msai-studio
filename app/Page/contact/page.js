@@ -79,10 +79,10 @@ export default function Contact() {
   }
 
   return (
-    <div className="container mx-auto py-30 px-5">
-      <div className="max-w-2xl mx-auto">
+    <div className="container mx-auto pt-50 pb-30 px-5">
+      <div className="max-w-2xl mx-auto glossy-box">
 
-        <div className="bg-[#121212] rounded-lg shadow-lg p-8">
+        <div className="rounded-lg shadow-lg">
           <form onSubmit={handleSubmit} className="space-y-6">
 
             <input
@@ -92,7 +92,7 @@ export default function Contact() {
               onChange={handleInputChange}
               placeholder="Name"
               required
-              className="w-full px-4 py-3 border border-gray-400 bg-transparent text-white rounded-lg"
+              className="w-full px-4 py-3 border border-[#3a3a3a] bg-transparent text-white rounded-lg"
             />
 
             <input
@@ -102,7 +102,7 @@ export default function Contact() {
               onChange={handleInputChange}
               placeholder="Email"
               required
-              className="w-full px-4 py-3 border border-gray-400 bg-transparent text-white rounded-lg"
+              className="w-full px-4 py-3 border border-[#3a3a3a] bg-transparent text-white rounded-lg"
             />
 
             <input
@@ -111,14 +111,14 @@ export default function Contact() {
               value={formData.phone}
               onChange={handleInputChange}
               placeholder="Phone Number"
-              className="w-full px-4 py-3 border border-gray-400 bg-transparent text-white rounded-lg"
+              className="w-full px-4 py-3 border border-[#3a3a3a] bg-transparent text-white rounded-lg"
             />
 
             <select
               name="country"
               value={formData.country}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-400 bg-transparent text-white rounded-lg"
+              className="w-full px-4 py-3 border border-[#3a3a3a] bg-transparent text-white rounded-lg"
             >
               <option value="">Select Country</option>
               <option value="IN">India</option>
@@ -132,7 +132,7 @@ export default function Contact() {
               placeholder="Comments"
               required
               rows={5}
-              className="w-full px-4 py-3 border border-gray-400 bg-transparent text-white rounded-lg"
+              className="w-full px-4 py-3 border border-[#3a3a3a] bg-transparent text-white rounded-lg"
             />
 
             {submitMessage && (

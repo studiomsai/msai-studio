@@ -23,9 +23,9 @@ export default function Shop() {
   }
 
   return (
-    <div className="container mx-auto py-30 px-5">
+    <div className="container mx-auto pt-50 pb-30 px-5">
       <h2 className="text-2xl md:text-4xl font-medium text-center mb-6 sub-title">Buy credits. Use them anytime.</h2>
-      <p className="text-center text-lg mb-16">Choose the credit pack that matches your workflow.</p>
+      <p className="text-center text-lg mb-10">Choose the credit pack that matches your workflow.</p>
       
       {!userId && (
         <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg text-center mb-10 border border-yellow-200">

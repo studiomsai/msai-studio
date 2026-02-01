@@ -1,14 +1,20 @@
+'use client'
+
 import './globals.css'
 import Image from 'next/image'
 import Navigation from './components/Navigation'
+import { usePathname } from 'next/navigation'
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname()
+  const isHomepage = pathname === '/'
+
   return (
     <html lang="en">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Martel+Sans:wght@200;300;400;600;700;800;900&family=TikTok+Sans:opsz,wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-slate-50 text-slate-900 font-sans">
+      <body className={`bg-slate-50 text-slate-900 font-sans ${isHomepage ? 'homepage' : ''}`}>
         <Navigation />
 
         {/* Main Content Area */}

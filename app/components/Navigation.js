@@ -72,7 +72,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className={`fixed w-full z-50 text-white p-4 flex justify-between items-center ${isSticky ? 'sticky-nav' : ''}`}>
+    <nav className={`fixed w-full z-50 text-white py-6 px-4 flex justify-between items-center ${isSticky ? 'sticky-nav' : ''}`}>
       <div className="container flex justify-between items-center mx-auto">
         <div className="text-xl font-bold tracking-tighter">
           <Link href="/" >

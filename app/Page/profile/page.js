@@ -208,7 +208,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="user-profile py-30">
+    <div className="user-profile pt-50 pb-30">
       <div className="container mx-auto">
         {/* Header */}
         <div className="mb-8 text-center ">
@@ -229,7 +229,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Main Profile Section */}
-        <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
+        <div className="rounded-lg shadow-lg overflow-hidden glossy-color">
           <div className="md:flex">
             {/* Left Column - Profile Image */}
             <div className="md:w-2/5 p-8 bg-black flex flex-col items-center">
@@ -252,7 +252,7 @@ export default function ProfilePage() {
               </div>
               <button
                 onClick={openEditModal}
-                className="px-6 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors"
+                className="primary-btn btn-small"
               >
                 Change Photo
               </button>
@@ -265,13 +265,13 @@ export default function ProfilePage() {
                 <div className="flex space-x-3">
                   <button
                     onClick={openEditModal}
-                    className="px-4 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors"
+                    className="primary-btn btn-small"
                   >
                     Edit Profile
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="danger-btn"
                   >
                     Logout
                   </button>
@@ -304,17 +304,17 @@ export default function ProfilePage() {
         </div>
 
         {/* Recent Work Section */}
-        <div className="bg-[#121212] rounded-lg shadow p-10 text-center">
+        <div className="rounded-lg shadow p-10 text-center mt-10 glossy-box">
           <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title inline-block mx-auto">Recent Work</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {recentWork.map((file) => (
-              <div key={file.id} className="recent-work-box border border-gray-400 rounded overflow-hidden relative">
+              <div key={file.id} className="recent-work-box border border-[#3a3a3a] rounded-[8px] overflow-hidden relative">
                 {file.type?.includes('video') ? (
-                  <video src={file.url} controls className="w-full h-32 object-cover" />
+                  <video src={file.url} controls className="w-full h-32 object-cover rounded-[8px]" />
                 ) : (
-                  <Image alt="file" src={file.url} width={300} height={200} className="w-full h-32 object-cover" />
+                  <Image alt="file" src={file.url} width={300} height={200} className="w-full h-32 object-cover rounded-[8px]" />
                 )}
-                <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn z-10" onClick={() => handleDownload(file.url, file.type?.includes('video') ? 'recent-video.mp4' : 'recent-image.jpg')}>
+                <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded-[8px] mr-1 download-btn z-10" onClick={() => handleDownload(file.url, file.type?.includes('video') ? 'recent-video.mp4' : 'recent-image.jpg')}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -332,7 +332,7 @@ export default function ProfilePage() {
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#121212] rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Edit Profile</h3>
+            <h3 className="text-xl font-bold mb-4">Edit Profile</h3>
 
             <div className="space-y-4">
               <div>
@@ -341,7 +341,7 @@ export default function ProfilePage() {
                   type="text"
                   value={editForm.full_name}
                   onChange={(e) => handleEditFormChange('full_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -351,7 +351,7 @@ export default function ProfilePage() {
                   type="email"
                   value={editForm.email}
                   onChange={(e) => handleEditFormChange('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -361,7 +361,7 @@ export default function ProfilePage() {
                   type="tel"
                   value={editForm.phone}
                   onChange={(e) => handleEditFormChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -372,7 +372,7 @@ export default function ProfilePage() {
                   value={editForm.password}
                   onChange={(e) => handleEditFormChange('password', e.target.value)}
                   placeholder="Leave blank to keep current password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -382,7 +382,7 @@ export default function ProfilePage() {
                   type="file"
                   accept="image/*"
                   onChange={handleProfileImageChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg"
                 />
                 {profileImagePreview && (
                   <div className="mt-2">
@@ -401,14 +401,14 @@ export default function ProfilePage() {
             <div className="flex space-x-3 mt-6">
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                className="danger-btn w-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveProfile}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors disabled:opacity-50"
+                className="flex-1 primary-btn btn-small disabled:opacity-50 w-50"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

@@ -1,16 +1,16 @@
 export default function Terms() {
   return (
-    <div className="container mx-auto py-30 px-5">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto pt-50 pb-30 px-5">
+      <div className="max-w-4xl mx-auto glossy-box">
         <h1 className="text-2xl md:text-4xl font-medium text-center mb-6 sub-title">
           Terms & Conditions
         </h1>
 
-        <p className="text-center text-lg mb-16">
+        <p className="text-center text-lg mb-10">
           Welcome to <strong>MSAI Studio.</strong> By creating an account or using our services, you agree to these Terms.
         </p>
 
-        <div className="bg-[#121212] rounded-lg shadow-lg p-8 text-white">
+        <div className="rounded-lg shadow-lg text-white">
           <h2 className="text-xl font-semibold mb-4">1. The Service</h2>
           <p className="mb-6">
             MSAI Studio is a pay-as-you-go AI creative platform. We provide a suite of applications that allow users to upload inputs (such as portrait images or short text descriptions) to generate media outputs, including photos, videos, and UGC-style commercials.

@@ -76,7 +76,7 @@ export default function SuperAdminPage() {
 
   if (!mounted) {
     return (
-      <div className="user-profile py-30">
+      <div className="user-profile pt-50 pb-30">
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
@@ -93,7 +93,7 @@ export default function SuperAdminPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="user-profile py-30">
+      <div className="user-profile pt-50 pb-30">
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
@@ -106,7 +106,7 @@ export default function SuperAdminPage() {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
                       required
                     />
                   </div>
@@ -116,14 +116,14 @@ export default function SuperAdminPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-400 bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
                       required
                     />
                   </div>
                   {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                   <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-[#00c0ff] text-black rounded-lg hover:bg-[#0e6c8b] transition-colors disabled:opacity-50"
+                    className="w-full primary-btn btn-small disabled:opacity-50"
                     disabled={loading}
                   >
                     {loading ? 'Logging in...' : 'Login'}
@@ -142,7 +142,7 @@ export default function SuperAdminPage() {
                   <h3 className="text-2xl font-semibold">Payment History for {selectedUser.full_name || selectedUser.email}</h3>
                   <button
                     onClick={closePaymentsModal}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="danger-btn"
                   >
                     Close
                   </button>
@@ -191,7 +191,7 @@ export default function SuperAdminPage() {
 }
 
   return (
-    <div className="user-profile py-30">
+    <div className="user-profile pt-50 pb-30">
       <div className="container mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Dashboard</h1>
@@ -203,7 +203,7 @@ export default function SuperAdminPage() {
               <h2 className="text-2xl font-semibold">All Users</h2>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="danger-btn"
               >
                 Logout
               </button>
@@ -254,7 +254,7 @@ export default function SuperAdminPage() {
                   <h3 className="text-2xl font-semibold">Payment History for {selectedUser.full_name || selectedUser.email}</h3>
                   <button
                     onClick={closePaymentsModal}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="danger-btn"
                   >
                     Close
                   </button>

@@ -1,16 +1,16 @@
 export default function Privacy() {
   return (
-    <div className="container mx-auto py-30 px-5">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto pt-50 pb-30 px-5">
+      <div className="max-w-4xl mx-auto glossy-box">
         <h1 className="text-2xl md:text-4xl font-medium text-center mb-6 sub-title">
           Privacy Policy
         </h1>
 
-        <p className="text-center text-lg mb-16">
+        <p className="text-center text-lg mb-10">
           <strong>MSAI Studio</strong> respects your privacy. This policy explains how we handle your data when you use our AI creative platform.
         </p>
 
-        <div className="bg-[#121212] rounded-lg shadow-lg p-8 text-white">
+        <div className="rounded-lg shadow-lg text-white">
           <h2 className="text-xl font-semibold mb-4">1. Information We Collect</h2>
           <ul className="pl-6 list-disc mb-6">
             <li className="mb-2">
