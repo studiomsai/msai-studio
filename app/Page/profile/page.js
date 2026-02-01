@@ -18,6 +18,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [recentWork, setRecentWork] = useState([]);
+  const [visibleItems, setVisibleItems] = useState(15);
   const [editForm, setEditForm] = useState({
     full_name: '',
     email: '',
@@ -188,6 +189,10 @@ export default function ProfilePage() {
     }
   };
 
+  const handleLoadMore = () => {
+    setVisibleItems(recentWork.length);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -307,15 +312,15 @@ export default function ProfilePage() {
         <div className="rounded-lg shadow p-10 text-center mt-10 glossy-box">
           <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title inline-block mx-auto">Recent Work</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {recentWork.map((file) => (
+            {recentWork.slice(0, visibleItems).map((file) => (
               <div key={file.id} className="recent-work-box border border-[#3a3a3a] rounded-[8px] overflow-hidden relative">
                 {file.type?.includes('video') ? (
                   <video src={file.url} controls className="w-full h-32 object-cover rounded-[8px]" />
                 ) : (
                   <Image alt="file" src={file.url} width={300} height={200} className="w-full h-32 object-cover rounded-[8px]" />
                 )}
-                <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded-[8px] mr-1 download-btn z-10" onClick={() => handleDownload(file.url, file.type?.includes('video') ? 'recent-video.mp4' : 'recent-image.jpg')}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div className="absolute top-2 right-2 cursor-pointer bg-black p-2 rounded-[8px] mr-1 download-btn z-10" onClick={() => handleDownload(file.url, file.type?.includes('video') ? 'recent-video.mp4' : 'recent-image.jpg')}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -324,6 +329,16 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
+          {recentWork.length > visibleItems && (
+            <div className="text-center mt-10">
+              <button
+                onClick={handleLoadMore}
+                className="primary-btn btn-small"
+              >
+                Load More
+              </button>
+            </div>
+          )}
         </div>
 
       </div>
@@ -341,7 +356,7 @@ export default function ProfilePage() {
                   type="text"
                   value={editForm.full_name}
                   onChange={(e) => handleEditFormChange('full_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                 />
               </div>
 
@@ -351,7 +366,7 @@ export default function ProfilePage() {
                   type="email"
                   value={editForm.email}
                   onChange={(e) => handleEditFormChange('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                 />
               </div>
 
@@ -361,7 +376,7 @@ export default function ProfilePage() {
                   type="tel"
                   value={editForm.phone}
                   onChange={(e) => handleEditFormChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                 />
               </div>
 
@@ -372,7 +387,7 @@ export default function ProfilePage() {
                   value={editForm.password}
                   onChange={(e) => handleEditFormChange('password', e.target.value)}
                   placeholder="Leave blank to keep current password"
-                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                 />
               </div>
 
@@ -382,7 +397,7 @@ export default function ProfilePage() {
                   type="file"
                   accept="image/*"
                   onChange={handleProfileImageChange}
-                  className="w-full px-3 py-2 border border-[#3a3a3a] rounded-lg"
+                  className="w-full px-3 py-3 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#3a3a3a] focus:border-[#3a3a3a]"
                 />
                 {profileImagePreview && (
                   <div className="mt-2">

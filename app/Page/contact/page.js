@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -80,9 +81,17 @@ export default function Contact() {
 
   return (
     <div className="container mx-auto pt-50 pb-30 px-5">
-      <div className="max-w-2xl mx-auto glossy-box">
-
-        <div className="rounded-lg shadow-lg">
+      <div className="max-w-5xl mx-auto glossy-box flex gap-10">
+        <div className="mb-10 w-1/2">
+            <h1 className="text-2xl md:text-4xl font-medium mb-8 sub-title left-title">Contact Us</h1>
+            <p className='text-justify'>msai.studio, anyone can create amazing AI-powered videos and images no coding, no setup, no experience needed. We make powerful creative tools simple, fun, and affordable for everyone. Each app on msai.studio runs advanced AI workflows in the background while you focus on the result from turning a selfie into cinematic motion to creating full story-based videos or photo shoots in seconds.</p>
+            <ul  className="my-4">
+              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/email.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] bg-[#0238b0] '  width={24} height={24}/> info@msai.com </a></li>
+              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/phone.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] bg-[#0238b0] ' width={24} height={24}/> +1 123123123</a></li>
+              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/map.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] bg-[#0238b0] ' width={24} height={24}/> Office no. 143, Alpha Bazaar, Venus Atlantis Corporate Park, Prahlad Nagar, Ahmedabad, Gujarat, 380015</a></li>
+            </ul>
+        </div>
+        <div className="rounded-lg shadow-lg w-1/2">
           <form onSubmit={handleSubmit} className="space-y-6">
 
             <input

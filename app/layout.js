@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Martel+Sans:wght@200;300;400;600;700;800;900&family=TikTok+Sans:opsz,wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Martel+Sans:wght@200;300;400;600;700;800;900&family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap" rel="stylesheet" />
       </head>
       <body className={`bg-slate-50 text-slate-900 font-sans ${isHomepage ? 'homepage' : ''}`}>
         <Navigation />

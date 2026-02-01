@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Martel+Sans:wght@200;300;400;600;700;800;900&family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap');
 
 :root {
   --background: #0F0F0F;
@@ -15,9 +16,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:"Martel Sans", sans-serif;
+  font-family: "Martel Sans", sans-serif;
   background-image: url("/image/background-pattern.png");
   background-size: 100%;
+
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -26,18 +28,26 @@ h1, h2, h3, h4, h5, h6 {
 input, textarea, button{
   outline: none;
   box-shadow: none;
+  line-height: 100%;
 }
+
+input[type="text"], input[type="email"], input[type="number"], input[type="file"], input[type="password"], input[type="tel"] {
+    height: 55px;
+}
+
 a {
   text-decoration: none;
   transition: 0.5s all ease;
-  display: inline-block;
+}
+ button{
+ cursor: pointer;
 }
 
 .primary-btn {
-  padding: 14px 30px;
-  background: linear-gradient(90deg, #155DFC 0%, #53EDEF 100%);
+  padding: 15px 30px;
+  background:  linear-gradient(90deg, #0238b0 0%, #37aeb0 100%);;
   border-radius: 60px;
-  color: #000;
+  color: #ffffff;
   font-family: "TikTok Sans", sans-serif;
   font-size: 18px;
   font-weight: 600;
@@ -50,27 +60,27 @@ a {
 }
 
 .primary-btn:after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #53EDEF 0%, #155DFC 100%);
-    border-radius:60px;
-    top: 0;
-    left:100%;
-    z-index: -1;
-    transition:0.5s all ease;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #37aeb0 0%, #0238b0 100%);
+  border-radius:60px;
+  top: 0;
+  left:100%;
+  z-index: -1;
+  transition:0.5s all ease;
 }
 .primary-btn:hover:after {
    left: 0;
 }
 .primary-btn.btn-small {
-  padding: 10px 24px;
+  padding: 15px 30px;
   font-size: 16px;
 }
 
 .danger-btn {
-  padding: 12px 24px;
+  padding: 15px 30px;
   background: linear-gradient(90deg, #ff0000 0%, #ff5454 100%);
   border-radius: 60px;
   color: #ffffff;
@@ -112,7 +122,33 @@ a {
   font-size: 16px;
   font-weight: 600;
   display: inline-block;
+  transition: 1s all ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  cursor: pointer;
 }
+.primary-outline-btn:hover{
+  color: #fff;
+  border-color: transparent;
+}
+.primary-outline-btn:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #37aeb0 0%, #0238b0 100%);
+    border-radius:60px;
+    top: 0;
+    left:100%;
+    z-index: -1;
+    transition:0.5s all ease;
+}
+.primary-outline-btn:hover:after {
+   left: 0;
+}
+
+
 img{
   display: inline-block;
   max-width: 100%;
@@ -144,15 +180,26 @@ nav{
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .homepage nav{
    background-color: transparent;
   backdrop-filter: unset;
   border-bottom: none;
 }
+
 nav.sticky-nav{
   backdrop-filter: blur(10px);
   background: rgba(0, 0, 0, 0.7);
   box-shadow: 0 -2px 20px #00c0ff38;
+}
+
+.homepage .credit-section{
+  padding-top:40px;
+}
+
+.profile-link{
+  display: flex;
+  align-items: center;
 }
 
 /* Dashboard Styles */
@@ -190,8 +237,14 @@ nav.sticky-nav{
   width: 20%;
   min-width: 100px;
   height: 2px;
-  background: linear-gradient(96.6deg, #155DFC 19.23%, #53EDEF 88.16%);
+  background: linear-gradient(96.6deg, #0238b0 19.23%, #37aeb0  88.16%);
 }
+
+.sub-title.left-title:after{
+  left: 0;
+  right: auto;
+}
+
 .main-banner{
   background: #0000007d;
 }
@@ -271,7 +324,7 @@ nav.sticky-nav{
 
 .download-button {
   padding: 14px 30px;
-  background: linear-gradient(90deg, #155DFC 0%, #53EDEF 100%);
+  background: linear-gradient(90deg, #0238b0 0%, #37aeb0 100%);
   border-radius: 60px;
   color: #000;
   font-family: "TikTok Sans", sans-serif;
@@ -948,6 +1001,13 @@ nav.sticky-nav{
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+.glossy-black {
+    background-color: #000000cf;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 @media  (max-width:767px) {
   .signup-wrapper,
   .glossy-box {
