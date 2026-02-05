@@ -167,7 +167,6 @@ img{
   border: 2px solid #00C0FF;
   border-left: none;
   border-radius: 50px;
-  display: flex;
   align-items: center;
   justify-content: center;
   padding: 0px 20px 0px 0px;
@@ -401,6 +400,34 @@ nav.sticky-nav{
   object-position: center;
 }
 
+@media  (max-width:992px) {
+  .service-box{
+    max-width: calc(49% - 20px);
+    flex: 0 0 calc(49% - 20px);
+  }
+}
+
+@media  (max-width:575px) {
+  .service-box{
+    max-width:100%;
+    flex: 0 0 100%;
+  }
+}
+.tracking-tighter{
+  position: relative;
+  z-index: 99;
+}
+.menu-btn{
+    background: linear-gradient(90deg, #0238b0 0%, #37aeb0 100%);
+    padding: 12px;
+    border-radius: 100%;
+}
+.mobile-menu {
+  height: 100vh;
+}
+.mobile-wrapper-link{
+       background: linear-gradient(200deg, #000000 49%, rgb(3 20 56) 100%);
+}
 /* Apps */
 .result-section{
   min-height: 80vh;

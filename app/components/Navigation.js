@@ -14,6 +14,7 @@ export default function Navigation() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
@@ -85,14 +86,14 @@ export default function Navigation() {
             />
           </Link>
         </div>
-        <div className="space-x-6 text-sm font-medium flex justify-center">
+        <div className="space-x-6 text-sm font-medium hidden lg:flex">
           <Link href="/" className="font-tiktok text-lg hover:text-blue-400 transition">Home</Link>
           <Link href="/Page/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Service</Link>
           <Link href="/Page/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credit</Link>
           <Link href="/Page/contact" className="font-tiktok text-lg hover:text-blue-400 transition">Contact</Link>
-          <Link href="/Service/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link>
+          {/* <Link href="/Service/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link> */}
         </div>
-        <div className="profile-btn">
+        <div className="profile-btn hidden lg:flex">
           <Image src="/image/user-icon.svg" alt="User Icon" className="w-10 h-10 inline-block mr-3"  width={40}
               height={40}/>
           {user ? (
@@ -135,7 +136,52 @@ export default function Navigation() {
             <Link href="/Page/login" className="font-tiktok text-lg hover:text-blue-400 transition">Login</Link>
           )}
         </div>
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="lg:hidden text-white focus:outline-none menu-btn"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
+      {isMenuOpen && (
+        <div className="mobile-menu fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMenuOpen(false)}></div>
+          <div className={`absolute top-0 left-0 w-full h-full mobile-wrapper-link shadow-lg transform transition-transform duration-300 ease-in-out ${isMenuOpen ? '' : 'translate-x-full'}`}>
+            <div className="flex justify-end py-6 px-4">
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="text-white focus:outline-none  menu-btn"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-4 py-2">
+              <Link href="/" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Home</Link>
+              <Link href="/Page/apps" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Our Service</Link>
+              <Link href="/Page/shop" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Purchase Credit</Link>
+              <Link href="/Page/contact" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+              <div className="border-t border-white-700 mt-4 pt-4">
+                {user ? (
+                  <>
+                    <div className="flex items-center py-2">
+                      <Image src="/image/user-icon.svg" alt="User Icon" className="w-8 h-8 mr-3" width={32} height={32} />
+                      <span className="text-white">{userName || 'Profile'}</span>
+                    </div>
+                    <Link href="/Page/profile" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Profile</Link>
+                    <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="block py-2 text-white hover:text-blue-400 transition w-full text-left">Logout</button>
+                  </>
+                ) : (
+                  <Link href="/Page/login" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Login</Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

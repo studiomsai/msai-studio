@@ -23,12 +23,12 @@ export default function RootLayout({ children }) {
         {/* Footer */}
         <footer className="bg-black  py-20 px-5">
           <div className="container mx-auto">
-            <div className="footer-top flex justify-between mb-6 gap-15">
-              <div className="w-1/3">
+            <div className="footer-top flex flex-wrap justify-between mb-6 gap-15">
+              <div className="w-full md:w-1/5 lg:w-1/3">
                 <Image src="/image/msai-studio.svg" alt="Site Logo" className='mb-4'  width={175} height={24}/>
                 <p>At msai.studio, anyone can create amazing AI-powered videos and images no coding, no setup, no experience needed. We make powerful creative tools simple, fun, and affordable for everyone. Each app on msai.studio runs advanced AI workflows in the background while you focus on the result from turning a selfie into cinematic motion to creating full story-based videos or photo shoots in seconds.Our goal is to make professional AI creation effortless and accessible so you can bring your ideas to life, anytime, anywhere.</p>
               </div>
-              <div className="w-auto ml-auto mr-0">
+              <div className="w-auto md:ml-auto mr-0">
                 <h3 className="text-xl font-semibold mb-3">Quick link</h3>
                 <ul>
                   <li><a href="/about" className="mb-2 text-lg hover:text-[#00C0FF]">About</a></li>

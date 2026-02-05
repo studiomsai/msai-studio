@@ -1,20 +1,12 @@
-# TODO: Add Google Sign-Up Functionality
+# TODO: Make Navigation Responsive with Hamburger Menu
 
-- [x] Create new API endpoint `/api/oauth-signup/route.js` for handling OAuth user profile creation
-- [x] Update `/Page/login/page.js` to add "Sign in with Google" button for login and signup modes
-- [x] Implement OAuth flow using Supabase's `signInWithOAuth` method in login page
-- [x] Add auth state change handling to detect successful Google sign-in and redirect users
-- [x] Implement `handleGoogleSignIn` function
-- [x] Update TODO.md to reflect completed tasks
-- [x] Add `handleGoogleSignIn` function implementation
-- [x] Implement the `handleGoogleSignIn` function
-- [x] Add the `handleGoogleSignIn` function to the component
-- [x] Add the `handleGoogleSignIn` function implementation
-- [x] Add the `handleGoogleSignIn` function to the component
-- [x] Implement the `handleGoogleSignIn` function in the component
-- [x] Add the `handleGoogleSignIn` function implementation to the component
-- [x] Implement the `handleGoogleSignIn` function
-- [x] Add the `handleGoogleSignIn` function to the component
-- [ ] Test the Google sign-in flow to ensure user profiles are created correctly
-- [ ] Configure Google OAuth in Supabase dashboard (manual step)
-- [ ] Set necessary environment variables for Google OAuth (manual step)
+- [x] Add new state `isMenuOpen` to toggle the mobile menu
+- [x] Add hamburger button visible only on small screens (sm and below)
+- [x] Hide navigation links on small screens and show them only on medium+ screens
+- [x] Implement mobile menu overlay with slide-in animation and backdrop
+- [x] Include navigation links in the mobile menu
+- [x] Integrate profile/login section into the mobile menu
+- [x] Ensure profile dropdown functionality works within mobile menu
+- [x] Add close functionality when menu item is clicked or backdrop is tapped
+- [ ] Test responsive behavior on different screen sizes
+- [ ] Verify no conflicts with existing styles or sticky behavior
