@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [preview1, setPreview1] = useState(null);
+  const [preview2, setPreview2] = useState(null);
 
   // Function to handle direct download
  const handleDownload = async (url, filename = "dual-selfie.jpg") => {
@@ -230,43 +232,93 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-container container mx-auto">
-      <h1 className="text-2xl md:text-4xl font-medium text-center mb-8 sub-title w-full mt-20">
-        Dual Selfie
-      </h1>
 
       <div className="dashboard-card">
+      <h1 className="text-2xl md:text-4xl font-medium mb-8 sub-title left-title w-full">
+        Dual Selfie
+      </h1>
         <p className="credits-text">
           <strong>Available Credits:</strong><span className="text-green-500"> {credit} </span> 
         </p>
         <p className="credits-text"><strong>Note:</strong> Minimum  <span className="text-green-500">2 credits </span>require</p>
 
         <div className="file-input-container">
-         <p>Person 1 Image</p>
-          <div className="file-input-wrapper">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFile1(e.target.files[0])}
-              className="file-input" id="person1"
-              />
-              <label htmlFor="person1">Choose Person Image</label>
+          <div className="flex-out-wrapper flex-1">
+            <p>Person 1 Image</p>
+            <div className="file-input-wrapper mt-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setFile1(file);
+                  if (file) {
+                    setPreview1(URL.createObjectURL(file));
+                  } else {
+                    setPreview1(null);
+                  }
+                }}
+                className="file-input" id="person1"
+                />
+                {!preview1 && <label htmlFor="person1">Choose Person Image</label>}
+                {preview1 && (
+                  <div className="relative inline-block mt-2">
+                    <Image src={preview1} alt="Person 1 Preview" width={200} height={200} className="rounded w-full" unoptimized={true} />
+                    <button
+                      onClick={() => {
+                        URL.revokeObjectURL(preview1);
+                        setPreview1(null);
+                        setFile1(null);
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+            </div>
           </div>
-          <p>Person 2 Image</p>
-          <div className="file-input-wrapper">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFile2(e.target.files[0])}
-              className="file-input" id="person2"
-            />
-            <label htmlFor="person2">Choose Person Image</label>
+          <div className="flex-out-wrapper flex-1">
+            <p>Person 2 Image</p>
+            <div className="file-input-wrapper mt-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setFile2(file);
+                  if (file) {
+                    setPreview2(URL.createObjectURL(file));
+                  } else {
+                    setPreview2(null);
+                  }
+                }}
+                className="file-input" id="person2"
+              />
+              {!preview2 && <label htmlFor="person2">Choose Person Image</label>}
+              {preview2 && (
+                <div className="relative inline-block mt-2">
+                  <Image src={preview2} alt="Person 2 Preview" width={200} height={200} className="rounded w-full" unoptimized={true} />
+                  <button
+                    onClick={() => {
+                      URL.revokeObjectURL(preview2);
+                      setPreview2(null);
+                      setFile2(null);
+                    }}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         <button
           onClick={handleGenerate}
           disabled={loading || credit < 2}
-          className="primary-btn generate-button"
+          className="primary-btn generate-button w-full"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>
