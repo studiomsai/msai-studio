@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import Shop from './Page/shop/page'
+import App from './Page/apps/page'
 
 export default function Home() {
   return (
     <main>
       {/* Hero Section */}
-      <div className="main-banner relative h-screen flex items-center justify-center text-center text-white overflow-hidden bg-black bg-opacity-25">
+      <div className="main-banner relative h-[650px] md:h-screen flex items-center justify-center text-center text-white overflow-hidden bg-black bg-opacity-25">
         {/* Background Video */}
         <video 
           autoPlay 
@@ -39,66 +40,7 @@ export default function Home() {
       </div>
 
       {/* Apps Preview Section */}
-      <div className="container mx-auto py-20 px-5">
-        <h2 className="text-2xl md:text-4xl font-medium text-center mb-16 sub-title">Next-Gen AI Videos for Every Need</h2>
-        <div className="flex flex-wrap justify-center gap-8">
-          {/* App 1 */}
-          <div className="service-box">
-            <Image src="/icon/smile.svg" alt="Mood Animation Icon" width={48} height={48} className="w-12 h-12 mb-4"/>
-            <h3 className="service-title">Your Mood Today</h3>
-            <p className="service-details mb-4">Turn your selfie into a mood animation. Upload a portrait and let AI animate your emotions.</p>
-            <a href="/Service/mood-today" className="primary-outline-btn">Run App</a>
-          </div>
-          
-          {/* App 2 */}
-          <div className="service-box">
-            <Image src="/icon/photo.svg" alt="Mood Animation Icon" width={48} height={48} className="w-12 h-12 mb-4"/>
-            <h3 className="service-title">10 expression</h3>
-            <p className="service-details mb-4">Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.</p>
-             <a href="/Service/10expression" className="primary-outline-btn">Run App</a>
-          </div>
-
-          {/* App 3 */}
-          <div className="service-box">
-            <Image src="/icon/video.svg" alt="Mood Animation Icon" width={48} height={48} className="w-12 h-12 mb-4"/>
-            <h3 className="service-title">Caricature Video</h3>
-            <p className="service-details mb-4">Turn text into cinematic video. Write a script and watch it come to life in seconds.</p>
-             <a href="/Service/caricature-video" className="primary-outline-btn">Run App</a>
-          </div>
-
-          {/* App 4 */}
-          <div className="service-box">
-           <Image src="/icon/smile.svg" alt="Mood Animation Icon" width={48} height={48} className="w-12 h-12 mb-4"/>
-            <h3 className="service-title">Expression Video</h3>
-            <p className="service-details mb-4">Turn text into cinematic video.</p>
-             <a href="/Service/expression-video" className="primary-outline-btn">Run App</a>
-          </div>
-
-          {/* App 5 */}
-          <div className="service-box">
-           <Image src="/icon/smile.svg" alt="Mood Animation Icon" width={48} height={48} className="w-12 h-12 mb-4"/>
-            <h3 className="service-title">Expression 5 Image 20 seconds video </h3>
-            <p className="service-details mb-4">Turn text into cinematic video.</p>
-            <a href="/Service/expressions-5-images-20sec-video" className="primary-outline-btn">Run App</a>
-          </div>
-
-            {/* App 6 */}
-          <div className="service-box">
-            <Image src="/icon/smile.svg" alt="Mood Animation Icon" width={48} height={48}  className="w-12 h-12 mb-4"/>
-            <h3 className="service-title">Dual Selfie</h3>
-            <p className="service-details mb-4">Turn text into cinematic video.</p>
-             <a href="/Service/dual-selfie" className="primary-outline-btn">Run App</a>
-          </div>
-
-             {/* App 7 */}
-          <div className="service-box">
-            <Image src="/icon/smile.svg" alt="Mood Animation Icon" width={48} height={48} className="w-12 h-12 mb-4"/>
-            <h3 className="service-title">Popcorn on Steroids</h3>
-            <p className="service-details mb-4">Turn text into cinematic video.</p>
-             <a href="/Service/popcorn-on-steroids" className="primary-outline-btn">Run App</a>
-          </div>
-        </div>
-      </div>
+      <App />
 
       {/* Shop Section */}
       <Shop />

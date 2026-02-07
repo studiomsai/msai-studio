@@ -213,7 +213,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="user-profile pt-50 pb-30">
+    <div className="user-profile pt-50 pb-30 px-5">
       <div className="container mx-auto">
         {/* Header */}
         <div className="mb-8 text-center ">
@@ -224,11 +224,11 @@ export default function ProfilePage() {
         {/* Credit Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="credit-box">
-            <h3 className="text-3xl font-semibold mb-2">Available Credits</h3>
+            <h3 className="text-xl md:text-3xl font-semibold mb-2">Available Credits</h3>
             <p className="text-3xl font-bold text-green-600">{userData.available_credit || 0}</p>
           </div>
           <div className="credit-box">
-            <h3 className="text-3xl font-semibold mb-2">Total Credits</h3>
+            <h3 className="text-xl md:text-3xl font-semibold mb-2">Total Credits</h3>
             <p className="text-3xl font-bold text-[#00C0FF]">{userData.total_credit + userData.available_credit|| 0} </p>
           </div>
         </div>
@@ -265,8 +265,8 @@ export default function ProfilePage() {
 
             {/* Right Column - User Information */}
             <div className="md:w-3/5 p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-semibold">Personal Information</h2>
+              <div className="flex flex-wrap gap-3 justify-between items-center mb-6">
+                <h2 className="text-xl md:text-3xl font-semibold">Personal Information</h2>
                 <div className="flex space-x-3">
                   <button
                     onClick={openEditModal}
@@ -311,7 +311,7 @@ export default function ProfilePage() {
         {/* Recent Work Section */}
         <div className="rounded-lg shadow p-10 text-center mt-10 glossy-box">
           <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title inline-block mx-auto">Recent Work</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {recentWork.slice(0, visibleItems).map((file) => (
               <div key={file.id} className="recent-work-box border border-[#3a3a3a] rounded-[8px] overflow-hidden relative">
                 {file.type?.includes('video') ? (
@@ -413,17 +413,17 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex space-x-3 mt-6">
+            <div className="flex flex-wrap space-x-3 mt-6">
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="danger-btn w-50"
+                className="flex-1 danger-btn"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveProfile}
                 disabled={saving}
-                className="flex-1 primary-btn btn-small disabled:opacity-50 w-50"
+                className="flex-1 primary-btn btn-small disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

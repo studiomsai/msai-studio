@@ -259,7 +259,10 @@ nav.sticky-nav{
 }
 
 .dashboard-card {
-  background: #181818;
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   padding: 30px;
   box-shadow: 10px 10px 0px rgb(0 0 0);
@@ -355,6 +358,11 @@ nav.sticky-nav{
   .title:after{
     background-size:150px;
   }
+  body {
+    background-size: cover;
+        background-position: center right;
+
+  }
 }
 
 
@@ -412,6 +420,10 @@ nav.sticky-nav{
     max-width:100%;
     flex: 0 0 100%;
   }
+  .recent-work-box > img,
+    .recent-work-box > video{
+      height: 300px;
+    }
 }
 .tracking-tighter{
   position: relative;
@@ -431,8 +443,10 @@ nav.sticky-nav{
 /* Apps */
 .result-section{
   min-height: 80vh;
-  background: #181818;
-  box-shadow: 10px 10px 0px rgb(0 0 0);
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .loader-wrapper {

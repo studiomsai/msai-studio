@@ -76,7 +76,7 @@ export default function SuperAdminPage() {
 
   if (!mounted) {
     return (
-      <div className="user-profile pt-50 pb-30">
+      <div className="user-profile pt-50 pb-30 px-5">
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
@@ -93,7 +93,7 @@ export default function SuperAdminPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="user-profile pt-50 pb-30">
+      <div className="user-profile pt-50 pb-30 px-5">
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
@@ -191,7 +191,7 @@ export default function SuperAdminPage() {
 }
 
   return (
-    <div className="user-profile pt-50 pb-30">
+    <div className="user-profile pt-50 pb-30 px-5">
       <div className="container mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Dashboard</h1>

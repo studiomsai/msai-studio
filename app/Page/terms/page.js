@@ -1,6 +1,6 @@
 export default function Terms() {
   return (
-    <div className="container mx-auto pt-50 pb-30 px-5">
+    <div className="container mx-auto pt-50 pb-30 px-5 px-5">
       <div className="max-w-4xl mx-auto glossy-box">
         <h1 className="text-2xl md:text-4xl font-medium text-center mb-6 sub-title">
           Terms & Conditions

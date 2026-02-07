@@ -80,7 +80,7 @@ export default function Contact() {
   }
 
   return (
-    <div className="container mx-auto pt-50 pb-30 px-5">
+    <div className="container mx-auto pt-50 pb-30 px-5 px-5">
       <div className="max-w-5xl mx-auto glossy-box flex gap-10">
         <div className="mb-10 w-1/2">
             <h1 className="text-2xl md:text-4xl font-medium mb-8 sub-title left-title">Contact Us</h1>

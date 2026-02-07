@@ -13,7 +13,7 @@ export default function Apps() {
   ]
 
   return (
-    <div className="container mx-auto pt-50 pb-30">
+    <div className="container mx-auto pt-50 pb-30 px-5">
       <h1 className="text-2xl md:text-4xl font-medium text-center mb-6 sub-title">AI Applications</h1>
       <div className="flex flex-wrap justify-center gap-8">
         {apps.map(app => (
