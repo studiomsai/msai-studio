@@ -86,9 +86,9 @@ export default function Contact() {
             <h1 className="text-2xl md:text-4xl font-medium mb-8 sub-title left-title">Contact Us</h1>
             <p className='text-justify'>msai.studio, anyone can create amazing AI-powered videos and images no coding, no setup, no experience needed. We make powerful creative tools simple, fun, and affordable for everyone. Each app on msai.studio runs advanced AI workflows in the background while you focus on the result from turning a selfie into cinematic motion to creating full story-based videos or photo shoots in seconds.</p>
             <ul  className="my-4">
-              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/email.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] bg-[#0238b0] '  width={24} height={24}/> info@msai.com </a></li>
-              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/phone.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] bg-[#0238b0] ' width={24} height={24}/> +1 123123123</a></li>
-              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/map.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] bg-[#0238b0] ' width={24} height={24}/> Office no. 143, Alpha Bazaar, Venus Atlantis Corporate Park, Prahlad Nagar, Ahmedabad, Gujarat, 380015</a></li>
+              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/email.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] contact-icon'  width={24} height={24}/> info@msai.com </a></li>
+              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/phone.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] contact-icon' width={24} height={24}/> +1 123123123</a></li>
+              <li className="mb-4"><a href="#" className="flex gap-4 items-center"><Image src="/icon/map.svg" alt="Contact Icon" className='mr-2 w-[40px] h-[40px] p-2 rounded-[100%] contact-icon' width={24} height={24}/> Office no. 143, Alpha Bazaar, Venus Atlantis Corporate Park, Prahlad Nagar, Ahmedabad, Gujarat, 380015</a></li>
             </ul>
         </div>
         <div className="rounded-lg shadow-lg w-1/2">

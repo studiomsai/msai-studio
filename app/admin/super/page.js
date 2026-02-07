@@ -79,8 +79,8 @@ export default function SuperAdminPage() {
       <div className="user-profile pt-50 pb-30 px-5">
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
-            <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
-              <div className="p-8">
+            <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden "> 
+              <div className="signup-wrapper">
                 <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Login</h1>
                 <p>Loading...</p>
               </div>
@@ -97,7 +97,7 @@ export default function SuperAdminPage() {
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
-              <div className="p-8">
+              <div className="signup-wrapper">
                 <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Login</h1>
                 <form className="space-y-6" onSubmit={handleLogin}>
                   <div>
@@ -106,7 +106,7 @@ export default function SuperAdminPage() {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-[#3a3a3a] bg-transparent text-white rounded-lg"
                       required
                     />
                   </div>
@@ -116,7 +116,7 @@ export default function SuperAdminPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#3a3a3a] bg-transparent text-white rounded focus:ring-2 focus:ring-[#00c0ff] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-[#3a3a3a] bg-transparent text-white rounded-lg"
                       required
                     />
                   </div>
@@ -137,7 +137,7 @@ export default function SuperAdminPage() {
         {selectedUser && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-              <div className="p-8">
+              <div className="signup-wrapper">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-semibold">Payment History for {selectedUser.full_name || selectedUser.email}</h3>
                   <button
@@ -193,12 +193,13 @@ export default function SuperAdminPage() {
   return (
     <div className="user-profile pt-50 pb-30 px-5">
       <div className="container mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Dashboard</h1>
-          <p className="text-xl mb-16">Manage all users and system settings.</p>
-        </div>
+       
         <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
-          <div className="p-8">
+          <div className="signup-wrapper">
+             <div className="mb-8 text-center">
+              <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Dashboard</h1>
+              <p className="text-xl mb-16">Manage all users and system settings.</p>
+            </div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">All Users</h2>
               <button
@@ -218,6 +219,7 @@ export default function SuperAdminPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Available Credit</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Credit</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Created At</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-600">
@@ -232,7 +234,7 @@ export default function SuperAdminPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                         <button
                           onClick={() => handleViewPayments(user)}
-                          className="px-3 py-1 bg-[#00c0ff] text-black rounded hover:bg-[#0e6c8b] transition-colors"
+                          className="primary-btn btn-small"
                         >
                           View Payments
                         </button>
@@ -249,7 +251,7 @@ export default function SuperAdminPage() {
         {selectedUser && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-              <div className="p-8">
+              <div className="signup-wrapper">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-semibold">Payment History for {selectedUser.full_name || selectedUser.email}</h3>
                   <button
@@ -270,7 +272,6 @@ export default function SuperAdminPage() {
                     <table className="w-full text-white">
                       <thead className="bg-gray-700">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Stripe Session ID</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Currency</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Credits Added</th>
@@ -281,7 +282,6 @@ export default function SuperAdminPage() {
                       <tbody className="divide-y divide-gray-600">
                         {userPayments.map((payment) => (
                           <tr key={payment.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{payment.stripe_session_id}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-white">${(payment.amount / 100).toFixed(2)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{payment.currency.toUpperCase()}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{payment.credits_added}</td>

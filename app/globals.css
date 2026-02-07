@@ -269,7 +269,6 @@ nav.sticky-nav{
   max-width: calc(40%  - 20px);
   flex: 0 0 calc(40%  - 20px);
   width: 100%;
-  
 }
 
 .credits-text {
@@ -410,7 +409,7 @@ nav.sticky-nav{
   object-position: center;
 }
 
-@media  (max-width:992px) {
+@media  (max-width:991px) {
   .service-box{
     max-width: calc(49% - 20px);
     flex: 0 0 calc(49% - 20px);
@@ -914,7 +913,7 @@ nav.sticky-nav{
 
 .generating-work .setting-image{
   animation-name: spinRotation;
-  animation-duration: 3s;
+  animation-duration: 2s;
   animation-iteration-count: infinite;
   animation-timing-function: linear;
 }
@@ -996,13 +995,6 @@ nav.sticky-nav{
   background: #181818;
 }
 
-.generating-work  .result-section .loader-wrapper {
-      background-image: url("/image/LCPT.gif");
-    background-repeat: no-repeat;
-    background-size: cover;
-    mix-blend-mode: lighten;
-}
-
 .loading-page {
     padding: 30px;
     position: relative;
@@ -1056,6 +1048,10 @@ nav.sticky-nav{
     border-radius: 24px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
+.contact-icon{
+   background: linear-gradient(90deg, #0238b0 0%, #37aeb0 100%);
+}
+
 @media  (max-width:767px) {
   .signup-wrapper,
   .glossy-box {
@@ -1067,4 +1063,13 @@ nav.sticky-nav{
     height: 200px;
   }
 
+  .dashboard-container{
+    padding: 140px 20px 60px;
+  }
+
+  .dashboard-card,
+  .result-section {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
 }

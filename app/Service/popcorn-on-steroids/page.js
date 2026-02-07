@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [preview1, setPreview] = useState(null);
 
   // Function to handle direct download
    const handleDownload = async (url, filename = "dual-selfie.jpg") => {
@@ -237,11 +238,11 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-container container mx-auto">
-      <h1 className="text-2xl md:text-4xl font-medium text-center mb-8 sub-title w-full mt-20">
-        Popcorn on Steroids
-      </h1>
 
       <div className="dashboard-card">
+      <h1 className="text-2xl md:text-4xl font-medium mb-8 sub-title left-title w-full">
+        Popcorn on Steroids
+      </h1>
         <p className="credits-text">
           <strong>Available Credits:</strong><span className="text-green-500"> {credit} </span>
         </p>
@@ -253,10 +254,33 @@ export default function DashboardPage() {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setFile(e.target.files[0])}
+             onChange={(e) => {
+              const file = e.target.files[0];
+              setFile(file);
+              if (file) {
+                setPreview(URL.createObjectURL(file));
+              } else {
+                setPreview(null);
+              }
+            }}
             className="file-input" id="popcorn"
           />
-          <label htmlFor="popcorn">Choose Image</label>
+             {!preview1 && <label htmlFor="popcorn">Choose Person Image</label>}
+            {preview1 && (
+              <div className="relative inline-block mt-2">
+                <Image src={preview1} alt="Person 1 Preview" width={200} height={200} className="rounded w-full" unoptimized={true} />
+                <button
+                  onClick={() => {
+                    URL.revokeObjectURL(preview1);
+                    setPreview(null);
+                    setFile(null);
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -275,7 +299,7 @@ export default function DashboardPage() {
         <button
           onClick={handleGenerate}
           disabled={loading || credit < 100}
-          className="primary-btn generate-button"
+          className="primary-btn generate-button w-full"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>

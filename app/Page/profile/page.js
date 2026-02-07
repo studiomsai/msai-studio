@@ -309,6 +309,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Recent Work Section */}
+        {recentWork.length > 0 && (
         <div className="rounded-lg shadow p-10 text-center mt-10 glossy-box">
           <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title inline-block mx-auto">Recent Work</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -340,7 +341,7 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
-
+        )}
       </div>
 
       {/* Edit Modal */}

@@ -1,12 +1,12 @@
-# TODO: Make Navigation Responsive with Hamburger Menu
-
-- [x] Add new state `isMenuOpen` to toggle the mobile menu
-- [x] Add hamburger button visible only on small screens (sm and below)
-- [x] Hide navigation links on small screens and show them only on medium+ screens
-- [x] Implement mobile menu overlay with slide-in animation and backdrop
-- [x] Include navigation links in the mobile menu
-- [x] Integrate profile/login section into the mobile menu
-- [x] Ensure profile dropdown functionality works within mobile menu
-- [x] Add close functionality when menu item is clicked or backdrop is tapped
-- [ ] Test responsive behavior on different screen sizes
-- [ ] Verify no conflicts with existing styles or sticky behavior
+- [x] Read caricature-video/page.js to understand current upload design
+- [x] Read expression-video/page.js to understand current upload design
+- [x] Read expressions-5-images-20sec-video/page.js to understand current upload design
+- [ ] Read mood-today/page.js to understand current upload design
+- [ ] Read popcorn-on-steroids/page.js to understand current upload design
+- [x] Update 10expression/page.js: Add preview state and modify file input to show image preview with remove button
+- [x] Update caricature-video/page.js: Add preview state and modify file input to show image preview with remove button
+- [x] Update expression-video/page.js: Add preview state and modify file input to show image preview with remove button
+- [x] Update expressions-5-images-20sec-video/page.js: Add preview state and modify file input to show image preview with remove button
+- [x] Update mood-today/page.js: Add preview state and modify file input to show image preview with remove button
+- [x] Update popcorn-on-steroids/page.js: Add preview state and modify file input to show image preview with remove button
+- [x] Test the changes to ensure previews work and functionality is intact
