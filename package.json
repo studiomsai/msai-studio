@@ -12,6 +12,7 @@
     "@fal-ai/client": "^1.7.2",
     "@fal-ai/server-proxy": "^1.1.1",
     "@supabase/supabase-js": "^2.46.1",
+    "lucide-react": "^0.563.0",
     "next": "^15.0.5",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
