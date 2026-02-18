@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Shop from './Page/shop/page'
 import App from './Page/apps/page'
+import Portfolio from './components/Portfolio'
 
 export default function Home() {
   return (
@@ -44,6 +45,9 @@ export default function Home() {
 
       {/* Shop Section */}
       <Shop />
+
+       {/* Portfolio Showcase Section */}
+      <Portfolio />
     </main>
   )
 }

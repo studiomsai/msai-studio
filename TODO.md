@@ -1,12 +1,18 @@
-- [x] Read caricature-video/page.js to understand current upload design
-- [x] Read expression-video/page.js to understand current upload design
-- [x] Read expressions-5-images-20sec-video/page.js to understand current upload design
-- [ ] Read mood-today/page.js to understand current upload design
-- [ ] Read popcorn-on-steroids/page.js to understand current upload design
-- [x] Update 10expression/page.js: Add preview state and modify file input to show image preview with remove button
-- [x] Update caricature-video/page.js: Add preview state and modify file input to show image preview with remove button
-- [x] Update expression-video/page.js: Add preview state and modify file input to show image preview with remove button
-- [x] Update expressions-5-images-20sec-video/page.js: Add preview state and modify file input to show image preview with remove button
-- [x] Update mood-today/page.js: Add preview state and modify file input to show image preview with remove button
-- [x] Update popcorn-on-steroids/page.js: Add preview state and modify file input to show image preview with remove button
-- [x] Test the changes to ensure previews work and functionality is intact
+# Portfolio Page Enhancement - TODO List
+
+## Task: Add paragraph and ul li in portfolio page with better design
+
+### Plan:
+1. [ ] Update data structure in Portfolio.js to support both text and list formats
+2. [ ] Create styled list component with icons and proper spacing
+3. [ ] Update rendering logic to display either paragraph or list based on details type
+4. [ ] Add custom CSS in globals.css for stylish list items
+5. [ ] Apply to Dual Selfie item with the new list format
+
+### Details:
+- Current: Simple `<p>` tag with text content
+- Target: Beautiful `<ul>` and `<li>` elements with:
+  - Custom bullet points with gradient colors
+  - Better spacing and typography
+  - Hover effects
+  - Responsive design
