@@ -6,6 +6,7 @@ export default function Portfolio() {
     {
       id: 1,
       title: "Dual Selfie",
+      link: '/Service/dual-selfie',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/dual-selfie/elon_musk_portrait.jpg" },
         { label: "Person 2", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" },
@@ -27,6 +28,7 @@ export default function Portfolio() {
    {
       id: 2,
       title: "Your Mood Today",
+      link: '/Service/your-mood-today',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" }
       ],
@@ -48,6 +50,7 @@ export default function Portfolio() {
     {
       id: 3,
       title: "10 Expression Images",
+      link: '/Service/10-expression-images',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" }
       ],
@@ -76,6 +79,7 @@ export default function Portfolio() {
     {
       id: 4,
       title: "Caricature Video",
+      link: '/Service/caricature-video',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" }
       ],
@@ -96,6 +100,7 @@ export default function Portfolio() {
     {
       id: 5,
       title: "Expression Video",
+      link: '/Service/expression-video',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" }
       ],
@@ -115,6 +120,7 @@ export default function Portfolio() {
      {
       id: 6,
       title: "Expression Images & Video",
+      link: '/Service/expression-images-video',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/msai_female.png" }
       ],
@@ -139,6 +145,7 @@ export default function Portfolio() {
     {
       id: 7,
       title: "Popcorn on Steroids",
+      link: '/Service/popcorn-on-steroids',
       inputs: [
          { label: "Person 1", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" }
       ],
@@ -195,14 +202,16 @@ export default function Portfolio() {
       <div>
         {portfolioItems.map((item) => (
           <div key={item.id}
-            className="flex flex-wrap justify-between lg:flex-nowrap gap-10 glossy-box mb-10 portfolio-item"
+            className="flex flex-wrap justify-between lg:flex-nowrap gap-10 glossy-box mb-30 portfolio-item"
           >
             {/* LEFT */}
-            <div  className="w-full xl:w-[40%]">
-              <h3 className="text-3xl font-medium mb-5 sub-title left-title">
-                {item.title}
-              </h3>
-
+            <div  className="w-full xl:w-[45%]">
+              <div className="flex justify-between items-center">
+                <h3 className="text-3xl font-medium mb-5 sub-title left-title">
+                  {item.title}
+                </h3>
+                <a href={item.link} className="primary-btn btn-extra-small text-center mb-5">Explore now</a>
+              </div>
               <p className="mb-3">
                 Uploaded Image
               </p>
