@@ -45,7 +45,7 @@ a {
 
 .primary-btn {
   padding: 15px 30px;
-  background:  linear-gradient(90deg, #0238b0 0%, #37aeb0 100%);;
+  background:  linear-gradient(90deg, #0238b0 0%, #37aeb0 100%);
   border-radius: 60px;
   color: #ffffff;
   font-family: "TikTok Sans", sans-serif;
@@ -1159,4 +1159,26 @@ nav.sticky-nav{
     top: 120px;
     background-color: #151515d9;
   }
+}
+
+
+.custom-prev,
+.custom-next {
+  width: 40px;
+  height: 40px;
+  background:  linear-gradient(90deg, #0238b0 0%, #37aeb0 100%);
+  color: #fff;
+  font-size: 24px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-prev:hover,
+.custom-next:hover {
+  transform: scale(1.1);
+  background:  linear-gradient(90deg, #0238b0 0%, #37aeb0 100%)
 }
