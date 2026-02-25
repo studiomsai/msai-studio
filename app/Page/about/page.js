@@ -32,7 +32,7 @@ export default function AboutPage() {
                 no complex setup, no prior experience required.
               </p>
               <p className="text-lg text-slate-300 leading-relaxed mb-4">
-                We believe powerful creative technology shouldn't be complicated. That's why we've
+                We believe powerful creative technology shouldn&apos;t be complicated. That&apos;s why we&apos;ve
                 built a platform where advanced AI workflows run seamlessly in the background —
                 while you stay focused on what truly matters: your ideas.
               </p>
@@ -78,7 +78,7 @@ export default function AboutPage() {
                 Every app on msai.studio is powered by professional-grade AI systems.
               </p>
               <p className="text-lg text-slate-300 leading-relaxed mb-4">
-                But you don't need to understand the technology behind it.
+                But you don&apos;t need to understand the technology behind it.
               </p>
               <p className="text-lg text-slate-300 leading-relaxed">
                 You simply choose, upload, click — and create.
