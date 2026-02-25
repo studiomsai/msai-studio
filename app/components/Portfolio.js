@@ -194,29 +194,31 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="container mx-auto px-6 py-20">
+    <div className="container mx-auto pt-50 pb-30 px-5 credit-section">
       <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title">
-        Portfolio Showcase
+        Our Portfolio 
       </h2>
 
       <div>
         {portfolioItems.map((item) => (
           <div key={item.id}
-            className="flex flex-wrap justify-between lg:flex-nowrap gap-10 glossy-box mb-30 portfolio-item"
+            className="flex flex-wrap justify-between xl:flex-nowrap gap-10 glossy-box mb-10 md:mb-40 last:mb-0 portfolio-item xl:min-h-[85vh]"
           >
             {/* LEFT */}
             <div  className="w-full xl:w-[45%]">
-              <div className="flex justify-between items-center">
+              <div className="block md:flex justify-between items-center">
                 <h3 className="text-3xl font-medium mb-5 sub-title left-title">
                   {item.title}
                 </h3>
-                <a href={item.link} className="primary-btn btn-extra-small text-center mb-5">Explore now</a>
+                <div className="hidden md:block">
+                  <a href={item.link} className="primary-btn btn-extra-small text-center mb-5 ">Explore now</a>
+                </div>
               </div>
               <p className="mb-3">
                 Uploaded Image
               </p>
 
-              <div className="flex flex-wrap gap-6 mb-6 right-arrow">
+              <div className="flex  gap-6 mb-6 right-arrow">
                 {item.inputs.map((input, index) => (
                   <div key={index}>
                     <p className="mb-2 text-[#aeaeae]">
@@ -234,7 +236,8 @@ export default function Portfolio() {
                     </div>
                   </div>
                 ))}
-
+              </div>
+              <div className="hidden md:block">
                 {renderDetails(item.details)}
               </div>
             </div>
@@ -246,6 +249,10 @@ export default function Portfolio() {
               <div className="relative  rounded-xl result-slider">
                 <ResultSlider results={item.results} />
               </div>
+               <div className="block md:hidden">
+                  {renderDetails(item.details)}
+                   <a href={item.link} className="primary-btn btn-extra-small text-center mb-5 ">Explore now</a>
+                </div>
             </div>
           </div>
         ))}

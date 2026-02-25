@@ -1,13 +1,15 @@
 "use client";
 
+import { useId } from 'react';
 import Image from "next/image";
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 
 export default function ResultSlider({ results }) {
+  const uniqueId = useId();
+  
   if (!results || results.length === 0) {
     return null;
   }
@@ -28,7 +30,10 @@ export default function ResultSlider({ results }) {
         {results[0].type === "video" && (
           <video
             src={results[0].src}
-            controls
+            autoPlay
+            loop
+            muted
+            playsInline
             className="w-full portfolio-generate-image object-cover rounded-xl"
           />
         )}
@@ -36,26 +41,29 @@ export default function ResultSlider({ results }) {
     );
   }
 
+  // Create unique class names for this slider instance
+  const prevButtonClass = `custom-prev-${uniqueId.replace(/:/g, '')}`;
+  const nextButtonClass = `custom-next-${uniqueId.replace(/:/g, '')}`;
+
  return (
     <>
 
-      {/* Custom Buttons */}
-      <button className="custom-prev absolute right-[50px] top-0 -translate-y-[50px] z-10">
+      {/* Custom Buttons - Unique per slider */}
+      <button className={`${prevButtonClass} custom-prev absolute right-[50px] top-0 -translate-y-[50px] z-10`}>
         ‹
       </button>
 
-      <button className="custom-next absolute right-0 top-0 -translate-y-[50px] z-10">
+      <button className={`${nextButtonClass} custom-next absolute right-0 top-0 -translate-y-[50px] z-10`}>
         ›
       </button>
       <Swiper
-        modules={[Navigation, Pagination]}
+        modules={[Navigation]}
         spaceBetween={16}
         slidesPerView={1}
         navigation={{
-          prevEl: ".custom-prev",
-          nextEl: ".custom-next",
+          prevEl: `.${prevButtonClass}`,
+          nextEl: `.${nextButtonClass}`,
         }}
-        pagination={{ clickable: true }}
         className="result-swiper"
       >
         {results.map((result, index) => (
@@ -75,7 +83,10 @@ export default function ResultSlider({ results }) {
               {result.type === "video" && (
                 <video
                   src={result.src}
-                  controls
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   className="w-full portfolio-generate-image object-cover rounded-xl"
                 />
               )}
