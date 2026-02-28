@@ -34,7 +34,10 @@ input, textarea, button{
 input[type="text"], input[type="email"], input[type="number"], input[type="file"], input[type="password"], input[type="tel"] {
     height: 55px;
 }
-
+select option {
+  background: #000;
+  color: #fff;
+}
 a {
   text-decoration: none;
   transition: 0.5s all ease;
@@ -298,23 +301,34 @@ nav.sticky-nav{
   font-weight: 700;
 }
 
-.media-grid {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
 .media-item {
-  flex: 1;
-  min-width: 300px;
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+      gap: 0px 16px;
 }
-
+.media-item .group{
+  flex: 0 0 30%;
+  flex-grow: 1;
+}
 .media-heading {
   margin-bottom: 10px;
+  width:100%;
+  max-width:100%;
+  text-align: left;
 }
-
+.media-item.video-item .group{
+  flex: 0 0 50%;
+}
+@media  (max-width:767px) {
+  .media-item .group {
+    flex: 0 0 48%;
+    flex-grow: 1;
+}
+  .media-item.video-item .group{
+  flex: 0 0 100%;
+  flex-grow: 1;
+}
+}
 .generated-image {
   max-width: 100%;
   border-radius: 8px;
@@ -1076,6 +1090,10 @@ nav.sticky-nav{
     max-width: 100%;
     flex: 0 0 100%;
   }
+  .expression-group > .group{
+    max-width: 48%;
+    flex: 0 0 48%;
+  }
 }
 
 .homepage .app-section {
@@ -1145,7 +1163,7 @@ nav.sticky-nav{
     background-size: contain;
     background-repeat: no-repeat;
     position: absolute;
-    top: 46%;
+    top: 80%;
     right: -18%;
     z-index: 99;
     transform: translateY(-50%);
@@ -1180,6 +1198,10 @@ nav.sticky-nav{
     object-position: center;
     width: 180px;
     height: 180px;
+  }
+
+  .homepage .app-section {
+      padding: 40px 20px;
   }
 }
 

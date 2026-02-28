@@ -318,12 +318,30 @@ export default function DashboardPage() {
           )}
         {result && (
           <div className="results-container">
-
                     <div className="media-grid">
+                       {result.output?.video?.url && (
+                        <div className="media-item video-item">
+                          <h4 className="media-heading">Generated Video</h4>
+                          <div className="relative group mb-4">
+                            <video
+                              controls
+                              src={result.output.video.url}
+                              className="generated-video"
+                            />
+                            <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn z-10" onClick={() => handleDownload(result.output.video.url, 'expression-video.mp4')}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       {result.output?.images?.[0]?.url && (
                         <div className="media-item">
                           <h4 className="media-heading">Generated Images</h4>
-                          <div className="relative group">
+                          <div className="relative group mb-4">
                             <Image
                               src={result.output.images[0].url}
                               alt="Generated Image"
@@ -342,7 +360,7 @@ export default function DashboardPage() {
                               </svg>
                             </div>
                           </div>
-                            <div className="relative group">
+                          <div className="relative group mb-4">
                               <Image
                               src={result.output.images_2[0].url}
                               alt="Generated Image"
@@ -361,7 +379,7 @@ export default function DashboardPage() {
                               </svg>
                             </div>
                           </div>
-                             <div className="relative group">
+                          <div className="relative group mb-4">
                                <Image
                               src={result.output.images_3[0].url}
                               alt="Generated Image"
@@ -380,7 +398,7 @@ export default function DashboardPage() {
                               </svg>
                             </div>
                           </div>
-                             <div className="relative group">
+                          <div className="relative group mb-4">
                                <Image
                               src={result.output.images_4[0].url}
                               alt="Generated Image"
@@ -399,7 +417,7 @@ export default function DashboardPage() {
                               </svg>
                             </div>
                           </div>
-                           <div className="relative group">
+                           <div className="relative group mb-4">
                              <Image
                               src={result.output.images_5[0].url}
                               alt="Generated Image"
@@ -420,25 +438,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       )}
-                      {result.output?.video?.url && (
-                        <div className="media-item">
-                          <h4 className="media-heading">Generated Video</h4>
-                          <div className="relative group">
-                            <video
-                              controls
-                              src={result.output.video.url}
-                              className="generated-video"
-                            />
-                            <div className="absolute top-2 right-2 cursor-pointer bg-black p-3 rounded mr-1 download-btn z-10" onClick={() => handleDownload(result.output.video.url, 'expression-video.mp4')}>
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M7 10L12 15L17 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                     
                     </div>
                     {(!result.output?.images?.[0]?.url && !result.output?.video?.url) && (
                       <pre className="json-fallback">

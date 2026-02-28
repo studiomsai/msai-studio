@@ -194,7 +194,7 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="container mx-auto pt-50 pb-30 px-5 credit-section">
+    <div className="container mx-auto pt-30 md:pt-50 pb-10 md:pb-30 px-5 credit-section">
       <h2 className="text-2xl md:text-4xl font-medium text-center mb-10 sub-title">
         Our Portfolio 
       </h2>
@@ -202,7 +202,7 @@ export default function Portfolio() {
       <div>
         {portfolioItems.map((item) => (
           <div key={item.id}
-            className="flex flex-wrap justify-between xl:flex-nowrap gap-10 glossy-box mb-10 md:mb-40 last:mb-0 portfolio-item xl:min-h-[85vh]"
+            className="flex flex-wrap justify-between xl:flex-nowrap gap-5 md:gap-10 glossy-box mb-10 md:mb-40 last:mb-0 portfolio-item xl:min-h-[85vh]"
           >
             {/* LEFT */}
             <div  className="w-full xl:w-[45%]">

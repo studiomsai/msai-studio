@@ -14,14 +14,14 @@ export default function RootLayout({ children }) {
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Martel+Sans:wght@200;300;400;600;700;800;900&family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap" rel="stylesheet" />
       </head>
-      <body className={`bg-slate-50 text-slate-900 font-sans ${isHomepage ? 'homepage' : ''}`}>
+      <body className={`bg-slate-50 text-slate-900 font-sans ${isHomepage ? 'homepage' : ''}`}  data-testim-main-word-scripts-loaded="true">
         <Navigation />
 
         {/* Main Content Area */}
         {children}
 
         {/* Footer */}
-        <footer className="bg-black  py-20 px-5">
+        <footer className="bg-black py-10 md:py-20 px-5">
           <div className="container mx-auto">
             <div className="footer-top flex flex-wrap justify-between mb-6 gap-15">
               <div className="w-full md:w-1/5 lg:w-1/3">

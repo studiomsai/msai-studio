@@ -11,7 +11,7 @@ export default function AboutPage() {
     <main className="min-h-screen pt-32 pb-20 px-5">
       <div className="container mx-auto">
         {/* Hero Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10  md:mb-16">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 title inline-block">
             About MSAI Studio
           </h1>
@@ -21,7 +21,7 @@ export default function AboutPage() {
         </div>
 
         {/* Introduction Section */}
-        <div className="glossy-box mb-12">
+        <div className="glossy-box mb-8 md:mb-12">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className='order-2 lg:order-1 w-full lg:w-1/2'>
               <h2 className="text-2xl md:text-3xl font-semibold mb-6 sub-title inline-block left-title">
@@ -57,7 +57,7 @@ export default function AboutPage() {
         </div>
 
         {/* Technology Section */}
-        <div className="glossy-box mb-12">
+        <div className="glossy-box mb-8 md:mb-12">
            <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="w-full lg:w-1/2 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-[#0238b0]/20 to-[#37aeb0]/20 blur-3xl rounded-full"></div>
@@ -91,7 +91,7 @@ export default function AboutPage() {
     
 
         {/* Pricing Section */}
-        <div className="glossy-box mb-12">
+        <div className="glossy-box mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-semibold mb-6 sub-title inline-block left-title">
             No Subscriptions. No Commitment.
           </h2>
@@ -118,7 +118,7 @@ export default function AboutPage() {
         </div>
 
         {/* Built for Creators Section */}
-        <div className="glossy-box mb-12">
+        <div className="glossy-box mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-semibold mb-6 sub-title inline-block left-title">
             Built for Creators — Everywhere
           </h2>
@@ -150,7 +150,7 @@ export default function AboutPage() {
         </div>
 
         {/* Ownership & Background Section */}
-        <div className="glossy-box mb-12">
+        <div className="glossy-box mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-semibold mb-6 sub-title inline-block left-title">
             Ownership & Background
           </h2>
@@ -183,7 +183,7 @@ export default function AboutPage() {
         </div>
 
         {/* Vision Section */}
-        <div className="glossy-box mb-12">
+        <div className="glossy-box mb-8 md:mb-12">
             <div className="flex flex-col lg:flex-row items-center gap-8 mb-5">
                 <div className="order-2 lg:order-1 w-full lg:w-1/2">
                     <h2 className="text-2xl md:text-3xl font-semibold mb-6 sub-title inline-block left-title">
