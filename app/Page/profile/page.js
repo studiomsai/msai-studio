@@ -205,7 +205,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
           <p>Please log in to view your profile.</p>
         </div>
       </div>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="user-profile pt-50 pb-30 px-5">
+    <div className="user-profile pt-30 md:pt-50 pb-10 md:pb-30 px-5">
       <div className="container mx-auto">
         {/* Header */}
         <div className="mb-8 text-center ">

@@ -146,7 +146,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="user-profile pt-50 pb-30 px-5">
+    <div className="user-profile pt-30 md:pt-50 pb-10 md:pb-30 px-5">
       <div className="container mx-auto">
      
 

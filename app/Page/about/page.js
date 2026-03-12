@@ -8,11 +8,11 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen pt-32 pb-20 px-5">
+    <main className="min-h-screen pt-30 md:pt-50 pb-10 md:pb-30 px-5">
       <div className="container mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-10  md:mb-16">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 title inline-block">
+          <h1 className="text-2xl md:text-4xl font-medium text-center mb-6 sub-title">
             About MSAI Studio
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto">

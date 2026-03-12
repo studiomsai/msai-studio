@@ -28,8 +28,8 @@ export default function Shop() {
       <p className="text-center text-lg mb-10">Choose the credit pack that matches your workflow.</p>
       
       {!userId && (
-        <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg text-center mb-10 border border-yellow-200">
-          Please <strong>Log In</strong> via the Dashboard before purchasing credits.
+        <div className="glossy-box text-center mb-10">
+          Please <a href="/Page/login" className="text-[#00C0FF]">Log In</a> via the Dashboard before purchasing credits.
         </div>
       )}
       

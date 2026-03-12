@@ -76,12 +76,12 @@ export default function SuperAdminPage() {
 
   if (!mounted) {
     return (
-      <div className="user-profile pt-50 pb-30 px-5">
+      <div className="user-profile pt-30 md:pt-50 pb-10 md:pb-30 px-5">
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden "> 
               <div className="signup-wrapper">
-                <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Login</h1>
+                <h2 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Login</h2>
                 <p>Loading...</p>
               </div>
             </div>
@@ -93,7 +93,7 @@ export default function SuperAdminPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="user-profile pt-50 pb-30 px-5">
+      <div className="user-profile pt-30 md:pt-50 pb-10 md:pb-30 px-5">
         <div className="container mx-auto">
           <div className="max-w-md w-full mx-auto">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
@@ -138,7 +138,7 @@ export default function SuperAdminPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
               <div className="signup-wrapper">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-6 gap-3 flex-wrap">
                   <h3 className="text-2xl font-semibold">Payment History for {selectedUser.full_name || selectedUser.email}</h3>
                   <button
                     onClick={closePaymentsModal}
@@ -191,16 +191,16 @@ export default function SuperAdminPage() {
 }
 
   return (
-    <div className="user-profile pt-50 pb-30 px-5">
+    <div className="user-profile pt-30 md:pt-50 pb-10 md:pb-30 px-5">
       <div className="container mx-auto">
        
         <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden">
           <div className="signup-wrapper">
              <div className="mb-8 text-center">
-              <h1 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Dashboard</h1>
+              <h2 className="text-2xl md:text-4xl font-medium text-center mb-5 sub-title inline-block">Super Admin Dashboard</h2>
               <p className="text-xl mb-16">Manage all users and system settings.</p>
             </div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 gap-3 flex-wrap">
               <h2 className="text-2xl font-semibold">All Users</h2>
               <button
                 onClick={handleLogout}
@@ -252,7 +252,7 @@ export default function SuperAdminPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[#121212] rounded-lg shadow-lg overflow-hidden max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
               <div className="signup-wrapper">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-6 gap-3 flex-wrap">
                   <h3 className="text-2xl font-semibold">Payment History for {selectedUser.full_name || selectedUser.email}</h3>
                   <button
                     onClick={closePaymentsModal}
