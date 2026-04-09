@@ -90,7 +90,7 @@ export default function Navigation() {
           <Link href="/" className="font-tiktok text-lg hover:text-blue-400 transition">Home</Link>
           <Link href="/Page/about" className="font-tiktok text-lg hover:text-blue-400 transition">About</Link>
           <Link href="/Page/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Service</Link>
-          <Link href="/Page/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credit</Link>
+          <Link href="/Page/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credits</Link>
           <Link href="/Page/contact" className="font-tiktok text-lg hover:text-blue-400 transition">Contact</Link>
           {/* <Link href="/Service/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link> */}
         </div>
@@ -164,7 +164,7 @@ export default function Navigation() {
               <Link href="/" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Home</Link>
               <Link href="/Page/about" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>About</Link>
               <Link href="/Page/apps" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Our Service</Link>
-              <Link href="/Page/shop" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Purchase Credit</Link>
+              <Link href="/Page/shop" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Purchase Credits</Link>
               <Link href="/Page/contact" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Contact</Link>
               <div className="border-t border-white-700 mt-4 pt-4">
                 {user ? (
