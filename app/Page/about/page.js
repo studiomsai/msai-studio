@@ -231,7 +231,7 @@ export default function AboutPage() {
         {/* CTA Section */}
         <div className="text-center pt-8">
           <Link href="/Page/apps" className="primary-btn">
-            Explore Our Services
+            Explore Our Apps
           </Link>
         </div>
       </div>

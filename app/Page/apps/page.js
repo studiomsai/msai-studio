@@ -5,7 +5,7 @@ export default function Apps() {
   const apps = [
     {id: 'Mood', name: 'Your Mood Today', cost: 30, img: '/icon/your-mood-today-update.svg', desc: 'Turn your selfie into a mood animation. Upload a portrait and let AI animate your emotions.', link: '/Service/mood-today' },
     {id: 'Photo', name: '10 expression', cost: 20, img: '/icon/10-expression-update.svg', desc: 'Complete AI fashion photography studio. Generate professional headshots and full-body fashion looks.',link: '/Service/10expression'},
-    {id: 'Video', name: 'Caricature Video', cost: 15, img: '/icon/caricature-video-update.svg', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/Service/caricature-video'},
+    {id: 'Video', name: 'Caricature Video', cost: 20, img: '/icon/caricature-video-update.svg', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/Service/caricature-video'},
     {id: 'Story', name: 'Expression Video', cost: 50, img: '/icon/expression-video-update.svg', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/Service/expression-video'},
     {id: 'Selfie', name: 'Dual Selfie', cost: 2, img: '/icon/dual-selfie-update.svg', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/Service/dual-selfie'},
     {id: 'Imgvideo', name: 'Expression Images & Video', cost: 70, img: '/icon/expression-video-update.svg', desc: 'Turn text into cinematic video. Write a script and watch it come to life in seconds.', link: '/Service/expressions-5-images-20sec-video'},

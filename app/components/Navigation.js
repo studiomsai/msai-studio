@@ -89,7 +89,7 @@ export default function Navigation() {
         <div className="space-x-6 text-sm font-medium hidden lg:flex">
           <Link href="/" className="font-tiktok text-lg hover:text-blue-400 transition">Home</Link>
           <Link href="/Page/about" className="font-tiktok text-lg hover:text-blue-400 transition">About</Link>
-          <Link href="/Page/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Service</Link>
+          <Link href="/Page/apps" className="font-tiktok text-lg hover:text-blue-400 transition">Our Apps</Link>
           <Link href="/Page/shop" className="font-tiktok text-lg hover:text-blue-400 transition">Purchase Credits</Link>
           <Link href="/Page/contact" className="font-tiktok text-lg hover:text-blue-400 transition">Contact</Link>
           {/* <Link href="/Service/mood-today" className="font-tiktok text-lg hover:text-blue-400 transition">Dashboard</Link> */}
@@ -163,7 +163,7 @@ export default function Navigation() {
             <div className="px-4 py-2">
               <Link href="/" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Home</Link>
               <Link href="/Page/about" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>About</Link>
-              <Link href="/Page/apps" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Our Service</Link>
+              <Link href="/Page/apps" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Our Apps</Link>
               <Link href="/Page/shop" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Purchase Credits</Link>
               <Link href="/Page/contact" className="block py-2 text-white hover:text-blue-400 transition" onClick={() => setIsMenuOpen(false)}>Contact</Link>
               <div className="border-t border-white-700 mt-4 pt-4">
