@@ -35,7 +35,7 @@ export async function POST(request) {
         phone: phone,
         profile_image: null,
         available_credit: 20,
-        total_credit: 20
+        total_credit: 0
       });
 
     if (insertError) {

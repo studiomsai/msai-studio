@@ -39,7 +39,7 @@ export default function Shop() {
           <h3 className="font-tiktok text-lg md:text-xl mb-10">Starter Pack</h3>
           <p className="text-3xl md:text-5xl lg:text-6xl font-bold mb-2">100<span className="text-3xl font-normal ml-2">Credits</span></p>
           <div className="text-2xl font-semibold mt-4 mb-6">$9.00</div>
-          <a href={getLink("https://buy.stripe.com/test_fZu7sNaZ74RB0oz86OgYU00")} className="primary-btn w-full text-center">Buy Now</a>
+          <a href={getLink("https://buy.stripe.com/00wcN70ktbfZ1sD2MugYU07")} className="primary-btn w-full text-center">Buy Now</a>
           <p className="text-xs mt-4 text-slate-300 text-center">*Use credits for any app. No subscriptions or hidden costs.*</p>
         </div>
 
