@@ -134,7 +134,7 @@ export default function LoginPage() {
         setError(error.message);
         setLoading(false);
       } else {
-        router.push('/Service/mood-today');
+        router.push('/Page/apps');
       }
     }
   };

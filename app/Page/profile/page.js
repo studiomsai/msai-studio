@@ -55,7 +55,7 @@ export default function ProfilePage() {
             password: '', // Will be handled separately
             profile_image: null,
             available_credit: 20,
-            total_credit: 20
+            total_credit: 0
           };
           const { data: newProfile, error: insertError } = await supabase
             .from('users')
@@ -229,7 +229,7 @@ export default function ProfilePage() {
           </div>
           <div className="credit-box">
             <h3 className="text-xl md:text-3xl font-semibold mb-2">Total Credits</h3>
-            <p className="text-3xl font-bold text-[#00C0FF]">{userData.total_credit + userData.available_credit|| 0} </p>
+            <p className="text-3xl font-bold text-[#00C0FF]">{userData.total_credit + userData.available_credit || 0} </p>
           </div>
         </div>
 
