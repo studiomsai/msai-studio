@@ -243,7 +243,7 @@ export default function DashboardPage() {
         <p className="credits-text">
           <strong>Available Credits:</strong><span className="text-green-500"> {credit} </span>
         </p>
-        <p className="credits-text"><strong>Note:</strong> Minimum  <span className="text-green-500">50 credits </span>requireed</p>
+        <p className="credits-text"><strong>Note:</strong> Minimum  <span className="text-green-500">50 credits </span>required</p>
 
         <div className="file-input-container">
             <p>Please upload the Image here:</p>
