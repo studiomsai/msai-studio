@@ -81,7 +81,7 @@ export default function DashboardPage() {
   const handleGenerate = async () => {
     if (!user) return alert("Please login");
     if (!file1 || !file2) return alert("Please select both images");
-    if (credit < 2) return alert("Insufficient credits");
+    if (credit < 20) return alert("Insufficient credits");
 
     setLoading(true);
     setResult(null);
@@ -175,7 +175,7 @@ export default function DashboardPage() {
       }
 
       setResult(json.result);
-      setCredit((c) => c - 2);
+      setCredit((c) => c - 20);
 
       // Upload result image to user folder
       if (json.result && json.result.output && json.result.output.images && json.result.output.images[0]) {
@@ -240,7 +240,7 @@ export default function DashboardPage() {
         <p className="credits-text">
           <strong>Available Credits:</strong><span className="text-green-500"> {credit} </span> 
         </p>
-        <p className="credits-text"><strong>Note:</strong> Minimum  <span className="text-green-500">2 credits </span>require</p>
+        <p className="credits-text"><strong>Note:</strong> Minimum  <span className="text-green-500">20 credits </span>require</p>
 
         <div className="file-input-container">
           <div className="flex-out-wrapper flex-1">
@@ -317,13 +317,13 @@ export default function DashboardPage() {
 
         <button
           onClick={handleGenerate}
-          disabled={loading || credit < 2}
+          disabled={loading || credit < 20}
           className="primary-btn generate-button w-full"
         >
           {loading ? "Generating…" : "Upload & Generate"}
         </button>
 
-        {credit < 2 && (
+        {credit < 20 && (
           <p className="insufficient-credits">
             Insufficient credits 
           </p>
