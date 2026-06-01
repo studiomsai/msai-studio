@@ -28,7 +28,7 @@ export default function Portfolio() {
    {
       id: 2,
       title: "Your Mood Today",
-      link: '/Service/your-mood-today',
+      link: '/Service/mood-today',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" }
       ],
@@ -50,7 +50,7 @@ export default function Portfolio() {
     {
       id: 3,
       title: "10 Expression Images",
-      link: '/Service/10-expression-images',
+      link: '/Service/10expression',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/MSAI-Studio-Female-Model-Black-BG-small.png" }
       ],
@@ -120,7 +120,7 @@ export default function Portfolio() {
      {
       id: 6,
       title: "Expression Images & Video",
-      link: '/Service/expression-images-video',
+      link: '/Service/expressions-5-images-20sec-video',
       inputs: [
         { label: "Person 1", src: "/image/portfolio/msai_female.png" }
       ],
