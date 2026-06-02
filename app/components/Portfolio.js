@@ -41,8 +41,7 @@ export default function Portfolio() {
         content: "Your Mood Today allows users to upload a single image and generate a mood-based styled version of it.",
         items: [
           "Upload a clear photo of a person",
-          "System validates image quality and detects faces",
-          "Both images are merged into one natural-looking selfie",
+          "AI analyzes facial features and expressions",
           "Preview, download, or regenerate the final image"
         ]
       },
@@ -70,9 +69,9 @@ export default function Portfolio() {
         type: "list",
         content: "10 Expression Images allows users to upload a single image and generate 10 different expression styles of that image.",
         items: [
-          "Upload a clear photo of a person",
+          "Upload one clear portrait",
           "System generates 10 different expression styles",
-          "Preview, download, or regenerate any of the generated images"
+          "Preview and Download any of the generated images"
         ]
       },
     },
@@ -92,8 +91,9 @@ export default function Portfolio() {
         content: "caricature video allows users to upload a single image and generate a caricature video and image based on that image.",
         items: [
           "Upload a clear photo of a person",
-          "System generates 10 different expression styles",
-          "Preview, download, or regenerate any of the generated images"
+          "Generate animated caricature video",
+          "Receive both image and video outputs",
+          "Preview and Download any of the generated images"
         ]
       },
     }, 
@@ -112,8 +112,9 @@ export default function Portfolio() {
         content: "Expression video allows users to upload a single image and generate an expression video based on that image.",
         items: [
           "Upload a clear photo of a person",
-          "System generates 10 different expression styles",
-          "Preview, download, or regenerate any of the generated images"
+          "AI animates facial expressions",
+          "Smooth and realistic movements",
+          "Download ready-to-share videos"
         ]
       },
     }, 
@@ -136,9 +137,10 @@ export default function Portfolio() {
         type: "list",
         content: "Expression images & video allows users to upload a single image and generate both expression images and an expression video based on that image.",
         items: [
-          "Upload a clear photo of a person",
-          "System generates 10 different expression styles",
-          "Preview, download, or regenerate any of the generated images"
+          "Upload one portrait image",
+          "Generate 5 expressive images",
+          "Create a High-resolution animated video",
+          "Preview and Download any of the generated images"
         ]
       },
     }, 
@@ -162,8 +164,9 @@ export default function Portfolio() {
         content: "Popcorn on Steroids allows users to upload a single image and generate a Popcorn on Steroids video and images based on that image.",
         items: [
           "Upload a clear photo of a person",
-          "System generates 10 different expression styles",
-          "Preview, download, or regenerate any of the generated images"
+          "Create an engaging animated video",
+          "Cinematic reaction-style effects",
+          "Preview and Download any of the generated images"
         ]
       },
     },
